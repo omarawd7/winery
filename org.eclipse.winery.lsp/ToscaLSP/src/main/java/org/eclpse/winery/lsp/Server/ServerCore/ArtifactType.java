@@ -63,3 +63,4 @@ public class ArtifactType {
             '}';
     }
 }
+//Todo cover all the Profile artifact type (have a list of artifact types) 
