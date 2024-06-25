@@ -61,7 +61,7 @@ public class ArtifactTypeParser {
 
          ErrorMessage = String.format("YAML Parsing error at line %d, column %d: %s. Context: %s",
             ErrorLine, ErrorColumn, ErrorProblem, ErrorContext);
-// diagnose detected.
+         // diagnose detected.
             return;
         
     } catch (Exception e) {
