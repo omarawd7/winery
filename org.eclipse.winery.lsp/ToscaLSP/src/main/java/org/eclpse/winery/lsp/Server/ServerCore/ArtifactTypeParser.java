@@ -63,13 +63,10 @@ public class ArtifactTypeParser {
             ErrorLine, ErrorColumn, ErrorProblem, ErrorContext);
          // diagnose detected.
             return;
-        
     } catch (Exception e) {
         throw new RuntimeException("Unexpected error occurred while parsing YAML: " + e.getMessage(), e);
     }
     }
-    
-    
    public static void main(String[] args) {
        ArtifactTypeParser parser = new ArtifactTypeParser();
         Path AtifactTypeFilePath=Path.of("C:/Users/LAPTOP/Documents/GitHub/winery/org.eclipse.winery.lsp/ToscaLSP/src/test/resources/testArtifactType");

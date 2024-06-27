@@ -15,6 +15,8 @@ public class DiagnosticsPublisher {
     private final LanguageClient client;
     private Map<String, List<Diagnostic>> previousDiagnostics = new ConcurrentHashMap<>();
     private static final LSContext.Key<DiagnosticsPublisher> DIAGNOSTICS_PUBLISHER_KEY = new LSContext.Key<>();
+    
+    
     public static DiagnosticsPublisher getInstance(LSContext serverContext) {
         DiagnosticsPublisher diagnosticsPublisher = serverContext.get(DIAGNOSTICS_PUBLISHER_KEY);
         if (diagnosticsPublisher == null) {
