@@ -69,7 +69,7 @@ public class ArtifactTypeParser {
     }
    public static void main(String[] args) {
        ArtifactTypeParser parser = new ArtifactTypeParser();
-        Path AtifactTypeFilePath=Path.of("C:/Users/LAPTOP/Documents/GitHub/winery/org.eclipse.winery.lsp/ToscaLSP/src/test/resources/testArtifactType");
+        Path AtifactTypeFilePath=Path.of("C:/Users/LAPTOP/Documents/GitHub/winery/org.eclipse.winery.lsp/src/test/resources/testArtifactType");
        parser.parseYAMLFile(AtifactTypeFilePath);
         System.out.println("Artifact type:  "+parser.getArtifacttype());
        System.out.println("Artifact type:  "+parser.getErrorProblem());

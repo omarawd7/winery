@@ -50,7 +50,7 @@ public class ToscaTextDocService implements TextDocumentService {
         }
     }
 
-    @Override
+    @Override   
     public void didClose(DidCloseTextDocumentParams params) {
         
     }
