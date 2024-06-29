@@ -2,6 +2,7 @@ package org.eclpse.winery.lsp.Server.ServerCore;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.*;
+import org.eclpse.winery.lsp.Server.ServerCore.Utils.ServerInitUtils;
 
 import java.util.concurrent.CompletableFuture;
 
@@ -18,28 +19,51 @@ public class ToscaLangaugeServer implements LanguageClientAware, LanguageServer 
         this.serverContext = serverContext;
     }
 
+    public ToscaLangaugeServer() {
+
+        workspaceService = null;
+        textDocumentService = null;
+        serverContext = null;
+    }
+
     @Override
     public void connect(LanguageClient client) {
         this.client = client;
+        this.serverContext.setClient(this.client);
     }
 
     @Override
     public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
-        InitializeResult result = new InitializeResult(new ServerCapabilities());
-        return CompletableFuture.completedFuture(result);
+        //setting the client capabilities
+        return CompletableFuture.supplyAsync(() -> {
+            serverContext.setClientCapabilities(params.
+                getCapabilities());
+            ServerCapabilities sCapabilities = new
+                ServerCapabilities();
+            TextDocumentSyncOptions documentSyncOption =
+                ServerInitUtils.getDocumentSyncOption();
+            CompletionOptions completionOptions =
+                ServerInitUtils.getCompletionOptions();
+            sCapabilities.setTextDocumentSync(documentSyncOption);
+            sCapabilities.setCompletionProvider(completionOptions);
+            return new InitializeResult(sCapabilities);
+        });
+        
     }
 
     @Override
     public void initialized(InitializedParams params) {
         MessageParams messageParams = new MessageParams();
         messageParams.setMessage("Tosca Language Server Initiated!");
+        messageParams.setType(MessageType.Info);
+        this.client.logMessage(messageParams);
         // No additional initialization needed
     }
 
     @Override
     public CompletableFuture<Object> shutdown() {
         this.shutdownInitiated = true;
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.supplyAsync(Object::new);
     }
 
     @Override

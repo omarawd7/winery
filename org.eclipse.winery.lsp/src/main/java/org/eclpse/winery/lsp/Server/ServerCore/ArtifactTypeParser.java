@@ -72,6 +72,6 @@ public class ArtifactTypeParser {
         Path AtifactTypeFilePath=Path.of("C:/Users/LAPTOP/Documents/GitHub/winery/org.eclipse.winery.lsp/src/test/resources/testArtifactType");
        parser.parseYAMLFile(AtifactTypeFilePath);
         System.out.println("Artifact type:  "+parser.getArtifacttype());
-       System.out.println("Artifact type:  "+parser.getErrorProblem());
+       System.out.println("error: "+parser.getErrorProblem());
     }
 }
