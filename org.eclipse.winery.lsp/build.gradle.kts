@@ -1,9 +1,11 @@
 plugins {
-    id("java")
+    java
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "org.eclpse.winery.lsp"
+group = "org.eclipse.winery.lsp"
 version = "1.0-SNAPSHOT"
+
 repositories {
     mavenCentral()
 }
@@ -18,4 +20,19 @@ dependencies {
 
 tasks.test {
     useJUnitPlatform()
+}
+
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = "org.eclipse.winery.lsp.Launcher.StdioLauncher"  // Replace with your main class
+    }
+}
+
+tasks.withType<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar> {
+    archiveClassifier.set("")
+    mergeServiceFiles()
+}
+
+tasks.build {
+    dependsOn(tasks.shadowJar)
 }

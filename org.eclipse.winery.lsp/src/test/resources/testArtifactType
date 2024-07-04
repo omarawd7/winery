@@ -1,6 +1,0 @@
-Implementation.Python:
-    description: >
-      Artifact for the interpreted Python language.
-    derived_from: Implementation
-    mime_typee: application/x-python
-    file_ext: [ py ]
