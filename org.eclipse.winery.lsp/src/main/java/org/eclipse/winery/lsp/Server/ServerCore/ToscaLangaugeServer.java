@@ -56,7 +56,7 @@ public class ToscaLangaugeServer implements LanguageClientAware, LanguageServer 
     @Override
     public void initialized(InitializedParams params) {
         MessageParams messageParams = new MessageParams();
-        messageParams.setMessage("Hi Tosca Language Server Initiated!");
+        messageParams.setMessage("OASIS TOSCA Language Server initiated.");
         messageParams.setType(MessageType.Info);
         this.serverContext.getClient().logMessage(messageParams);
     // No additional initialization needed
