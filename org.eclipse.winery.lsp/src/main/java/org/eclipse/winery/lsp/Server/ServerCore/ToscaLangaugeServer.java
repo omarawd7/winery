@@ -22,9 +22,9 @@ public class ToscaLangaugeServer implements LanguageClientAware, LanguageServer 
 
     public ToscaLangaugeServer() {
 
-        workspaceService = null;
-        textDocumentService = null;
-        serverContext = new ToscaLSContentImpl();
+        this.workspaceService = null;
+        this.serverContext = new ToscaLSContentImpl();
+        this.textDocumentService = new ToscaTextDocService(this.serverContext);
     }
 
     @Override
@@ -59,7 +59,7 @@ public class ToscaLangaugeServer implements LanguageClientAware, LanguageServer 
         messageParams.setMessage("Hi Tosca Language Server Initiated!");
         messageParams.setType(MessageType.Info);
         this.serverContext.getClient().logMessage(messageParams);
-        // No additional initialization needed
+    // No additional initialization needed
     }
 
     @Override

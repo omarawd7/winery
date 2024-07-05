@@ -24,7 +24,7 @@ tasks.test {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "org.eclipse.winery.lsp.Launcher.StdioLauncher"  // Replace with your main class
+        attributes["Main-Class"] = "org.eclipse.winery.lsp.Launcher.StdioLauncher"
     }
 }
 
