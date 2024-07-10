@@ -14,8 +14,10 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore;
 
+
 import java.nio.file.Path;
 
 public interface Parser {
-    public Object ParseTOSCAFile(Path path);    
+    public Object ParseTOSCAFile(Path path);
+    public Object ParseTOSCAFile(String content);
 }

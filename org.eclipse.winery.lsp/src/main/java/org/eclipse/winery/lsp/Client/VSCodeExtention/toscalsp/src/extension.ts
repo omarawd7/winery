@@ -14,7 +14,7 @@ export function activate(context: vscode.ExtensionContext) {
         logChannel.appendLine(`Java Executable: ${executable}`);
         logChannel.appendLine(`Classpath: ${classPath}`);
         logChannel.appendLine(`Args: ${args.join(' ')}`);
-
+        
         const serverOptions: ServerOptions = {
             command: executable,
             args,

@@ -39,6 +39,16 @@ public class DiagnosticsPublisher {
         List<Diagnostic> diagnostics = SetDiagnostics(toscaFileParser.diagnostics);
         previousDiagnostics.put(path.toString(), diagnostics);
         client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
+        
+    }
+  
+    public void publishDiagnostics(BaseOperationContext context, Path path, String content) {
+        TOSCAFileParser toscaFileParser = new TOSCAFileParser();
+        toscaFileParser.ParseTOSCAFile(content);
+        List<Diagnostic> diagnostics = SetDiagnostics(toscaFileParser.diagnostics);
+        previousDiagnostics.put(path.toString(), diagnostics);
+        client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
+        
     }
     
     public List<Diagnostic> SetDiagnostics(ArrayList<TOSCAFileDiagnostics> diagnostics) {
@@ -48,9 +58,10 @@ public class DiagnosticsPublisher {
             diag.setSeverity(DiagnosticSeverity.Error);
             diag.setMessage(diagnostic.getErrorMessage());
             diag.setRange(new Range(
-                new Position(diagnostic.getErrorLine() - 1, diagnostic.getErrorColumn() - 1),
-                new Position(diagnostic.getErrorLine() - 1, diagnostic.getErrorColumn() + 5 )
-            ));
+                    new Position(diagnostic.getErrorLine() - 1, diagnostic.getErrorColumn() - 1),
+                    new Position(diagnostic.getErrorLine() - 1, diagnostic.getErrorColumn() + 5 )
+                ));                
+            
             OutputDiagnostics.add(diag);
         }
         return OutputDiagnostics;

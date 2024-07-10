@@ -8,6 +8,7 @@ import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 
 import java.nio.file.Path;
+import java.util.List;
 
 public class ToscaTextDocService implements TextDocumentService {
     private final LSContext serverContext;
@@ -15,6 +16,7 @@ public class ToscaTextDocService implements TextDocumentService {
     public ToscaTextDocService(LSContext serverContext) {
         this.serverContext = serverContext;
     }
+
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
         MessageParams messageParams = new MessageParams();
@@ -23,11 +25,10 @@ public class ToscaTextDocService implements TextDocumentService {
         this.serverContext.getClient().logMessage(messageParams);
         Path uriPath = CommonUtils.uriToPath(params.getTextDocument().getUri());
         BaseOperationContext context = ContextBuilder.baseContext(this.serverContext);
-        if (uriPath.toString().endsWith(".yaml") || uriPath.toString().endsWith(".yml") || uriPath.toString().endsWith(".tosca ")) {
-            // Here we notify that we have opened a .yaml or .yml or .tosca document.
+        if (isToscaFile(uriPath)) {
             context.clientLogManager().showInfoMessage("TOSCA file opened");
             DiagnosticsPublisher diagnosticspublisher = DiagnosticsPublisher.getInstance(serverContext);
-            diagnosticspublisher.publishDiagnostics(context,uriPath);
+            diagnosticspublisher.publishDiagnostics(context, uriPath);
         }
     }
 
@@ -35,20 +36,28 @@ public class ToscaTextDocService implements TextDocumentService {
     public void didChange(DidChangeTextDocumentParams params) {
         Path uriPath = CommonUtils.uriToPath(params.getTextDocument().getUri());
         BaseOperationContext context = ContextBuilder.baseContext(this.serverContext);
-        if (uriPath.toString().endsWith(".yaml") || uriPath.toString().endsWith(".yml") || uriPath.toString().endsWith(".tosca ")) {
-            // Here we notify that we have opened a .yaml or .yml or .tosca document.
-            context.clientLogManager().showInfoMessage("TOSCA file opened");
+        if (isToscaFile(uriPath)) {
             DiagnosticsPublisher diagnosticspublisher = DiagnosticsPublisher.getInstance(serverContext);
-            diagnosticspublisher.publishDiagnostics(context,uriPath);
+            List<TextDocumentContentChangeEvent> changes = params.getContentChanges();
+            if (!changes.isEmpty()) {
+                String content = changes.get(0).getText(); 
+                diagnosticspublisher.publishDiagnostics(context, uriPath, content);
+            }
         }
     }
 
-    @Override   
+    @Override
     public void didClose(DidCloseTextDocumentParams params) {
-        
+        // Currently no Implementation needed
     }
 
     @Override
     public void didSave(DidSaveTextDocumentParams params) {
+        // Currently no Implementation needed
+    }
+
+    private boolean isToscaFile(Path path) {
+        String fileName = path.toString();
+        return fileName.endsWith(".yaml") || fileName.endsWith(".yml") || fileName.endsWith(".tosca");
     }
 }
