@@ -26,6 +26,5 @@ public class BaseOperationContextImpl implements BaseOperationContext{
     public LanguageClient getClient() {
         return this.serverContext.getClient();
     }
-
     
 }

@@ -2,7 +2,7 @@ package org.eclipse.winery.lsp.Launcher;
 import org.eclipse.lsp4j.jsonrpc.Launcher;
 import org.eclipse.lsp4j.launch.LSPLauncher;
 import org.eclipse.lsp4j.services.LanguageClient;
-import org.eclipse.winery.lsp.Server.ServerCore.ToscaLangaugeServer;
+import org.eclipse.winery.lsp.Server.ServerCore.ToscaLanguageServer;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutionException;
@@ -13,12 +13,13 @@ import java.util.logging.Logger;
 public class StdioLauncher {
     public static void startServer(InputStream in, OutputStream out)
         throws InterruptedException, ExecutionException {
-        ToscaLangaugeServer server = new ToscaLangaugeServer();
+        ToscaLanguageServer server = new ToscaLanguageServer();
         Launcher<LanguageClient> launcher = LSPLauncher.createServerLauncher(server, in, out);
         server.connect(launcher.getRemoteProxy());
         Future<?> startListening = launcher.startListening();
         startListening.get();
     }
+    
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         LogManager.getLogManager().reset();
         Logger globalLogger = Logger.getLogger(java.util.logging.Logger.GLOBAL_LOGGER_NAME);

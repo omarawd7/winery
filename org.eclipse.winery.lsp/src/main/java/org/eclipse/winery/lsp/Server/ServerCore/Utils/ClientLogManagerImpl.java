@@ -7,6 +7,7 @@ import org.eclipse.winery.lsp.Server.ServerAPI.API.ClientLogManager;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 
 public class ClientLogManagerImpl implements ClientLogManager {
+    
     private static final LSContext.Key<ClientLogManager> CLIENT_LOG_MANAGER_KEY = new LSContext.Key<>();
 
     private final LanguageClient client;

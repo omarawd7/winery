@@ -2,25 +2,24 @@ package org.eclipse.winery.lsp.Server.ServerCore;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.*;
-import org.eclipse.winery.lsp.Server.ServerCore.ToscaLSContentImpl;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.ServerInitUtils;
 
 import java.util.concurrent.CompletableFuture;
 
-public class ToscaLangaugeServer implements LanguageClientAware, LanguageServer {
+public class ToscaLanguageServer implements LanguageClientAware, LanguageServer {
     private final TextDocumentService textDocumentService;
     private final WorkspaceService workspaceService;
     private final ToscaLSContentImpl serverContext;
     private LanguageClient client;
     private boolean shutdownInitiated = false;
 
-    public ToscaLangaugeServer(TextDocumentService textDocumentService, WorkspaceService workspaceService, ToscaLSContentImpl serverContext) {
+    public ToscaLanguageServer(TextDocumentService textDocumentService, WorkspaceService workspaceService, ToscaLSContentImpl serverContext) {
         this.textDocumentService = textDocumentService;
         this.workspaceService = workspaceService;
         this.serverContext = serverContext;
     }
 
-    public ToscaLangaugeServer() {
+    public ToscaLanguageServer() {
 
         this.workspaceService = null;
         this.serverContext = new ToscaLSContentImpl();
@@ -56,10 +55,9 @@ public class ToscaLangaugeServer implements LanguageClientAware, LanguageServer 
     @Override
     public void initialized(InitializedParams params) {
         MessageParams messageParams = new MessageParams();
-        messageParams.setMessage("OASIS TOSCA Language Server initiated.");
+        messageParams.setMessage("Tosca Language Server Initiated");
         messageParams.setType(MessageType.Info);
         this.serverContext.getClient().logMessage(messageParams);
-    // No additional initialization needed
     }
 
     @Override

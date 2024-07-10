@@ -4,7 +4,7 @@ import { execSync } from 'child_process';
 import { LanguageClient, LanguageClientOptions, ServerOptions } from 'vscode-languageclient/node';
 export function activate(context: vscode.ExtensionContext) {
     const logChannel = vscode.window.createOutputChannel("TOSCA_LSP");
-    logChannel.appendLine("Starting the TOSCA Language Server Extension!");
+    logChannel.appendLine("Starting the TOSCA Language Server Extension.");
     getJavaHome().then(javaHome => {
         const executable = path.join(javaHome, 'bin', 'java');
 

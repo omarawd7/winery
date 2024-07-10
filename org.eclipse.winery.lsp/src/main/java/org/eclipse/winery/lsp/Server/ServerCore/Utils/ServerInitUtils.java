@@ -4,8 +4,6 @@ import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.SaveOptions;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.TextDocumentSyncOptions;
-
-import java.util.Arrays;
 import java.util.List;
 
 public class ServerInitUtils {
@@ -25,11 +23,11 @@ public class ServerInitUtils {
 
         return syncOptions;
     }
+    
     public static CompletionOptions getCompletionOptions() {
         CompletionOptions completionOptions = new CompletionOptions();
 
-        // List of trigger characters.
-        List<String> triggerCharacters = Arrays.asList(".", ">");
+        List<String> triggerCharacters = List.of(".", ">");
 
         completionOptions.setResolveProvider(true);
         completionOptions.setTriggerCharacters(triggerCharacters);

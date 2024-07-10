@@ -18,20 +18,15 @@ public class ToscaTextDocService implements TextDocumentService {
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
         MessageParams messageParams = new MessageParams();
-        messageParams.setMessage("A file was opened!");
+        messageParams.setMessage("A file was opened");
         messageParams.setType(MessageType.Info);
         this.serverContext.getClient().logMessage(messageParams);
-        
         Path uriPath = CommonUtils.uriToPath(params.getTextDocument().getUri());
         BaseOperationContext context = ContextBuilder.baseContext(this.serverContext);
-        if (uriPath.toFile().getName().endsWith(".txt")) {
-            // Here we notify that we have opened a .txt document.
-            context.clientLogManager().showInfoMessage("Document opened with `.txt` extension");
-            return;
-        }else if (uriPath.toFile().getName().endsWith(".yaml")) {
-            // Here we notify that we have opened a .txt document.
-            context.clientLogManager().showInfoMessage("Document opened with `.yaml` extension");
-            DiagnosticsPublisher diagnosticspublisher =DiagnosticsPublisher.getInstance(serverContext);
+        if (uriPath.toString().endsWith(".yaml") || uriPath.toString().endsWith(".yml") || uriPath.toString().endsWith(".tosca ")) {
+            // Here we notify that we have opened a .yaml or .yml or .tosca document.
+            context.clientLogManager().showInfoMessage("TOSCA file opened");
+            DiagnosticsPublisher diagnosticspublisher = DiagnosticsPublisher.getInstance(serverContext);
             diagnosticspublisher.publishDiagnostics(context,uriPath);
         }
     }
@@ -40,14 +35,10 @@ public class ToscaTextDocService implements TextDocumentService {
     public void didChange(DidChangeTextDocumentParams params) {
         Path uriPath = CommonUtils.uriToPath(params.getTextDocument().getUri());
         BaseOperationContext context = ContextBuilder.baseContext(this.serverContext);
-        if (uriPath.toFile().getName().endsWith(".txt")) {
-            // Here we notify that we have opened a .txt document.
-            context.clientLogManager().showInfoMessage("Document opened with `.txt` extension");
-            return;
-        }else if (uriPath.toFile().getName().endsWith(".yaml")) {
-            // Here we notify that we have opened a .txt document.
-            context.clientLogManager().showInfoMessage("Document opened with `.yaml` extension");
-            DiagnosticsPublisher diagnosticspublisher =DiagnosticsPublisher.getInstance(serverContext);
+        if (uriPath.toString().endsWith(".yaml") || uriPath.toString().endsWith(".yml") || uriPath.toString().endsWith(".tosca ")) {
+            // Here we notify that we have opened a .yaml or .yml or .tosca document.
+            context.clientLogManager().showInfoMessage("TOSCA file opened");
+            DiagnosticsPublisher diagnosticspublisher = DiagnosticsPublisher.getInstance(serverContext);
             diagnosticspublisher.publishDiagnostics(context,uriPath);
         }
     }
