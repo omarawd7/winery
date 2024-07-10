@@ -35,6 +35,6 @@ public record ArtifactType (
 ) {
 }
 
-record PropertyDefinition (){
+record PropertyDefinition () {
 //TODO properties for the PropertyDefinition record
 }

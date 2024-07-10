@@ -31,7 +31,7 @@ public class ToscaTextDocService implements TextDocumentService {
             diagnosticspublisher.publishDiagnostics(context, uriPath);
         }
     }
-
+   
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
         Path uriPath = CommonUtils.uriToPath(params.getTextDocument().getUri());

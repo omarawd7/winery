@@ -5,7 +5,7 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.ClientLogManager;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.ClientLogManagerImpl;
 
-public class BaseOperationContextImpl implements BaseOperationContext{
+public class BaseOperationContextImpl implements BaseOperationContext {
     private final LSContext serverContext;
 
     public BaseOperationContextImpl(LSContext serverContext) {

@@ -19,7 +19,6 @@ public class TOSCAFileParser implements Parser {
     public TOSCAFile ParseTOSCAFile(Path path) {
         try {
             String yamlContent = Files.readString(path);
-            LoaderOptions options = new LoaderOptions();
             ToscaFileConstructor constructor = new ToscaFileConstructor();
             Yaml yaml = new Yaml(constructor);
             Map<String, Object> yamlMap = yaml.load(yamlContent);
@@ -49,7 +48,7 @@ public class TOSCAFileParser implements Parser {
             validateRequiredKeys(yamlMap, content);
             // Validate keywords and capture their positions
             validateKeywords(yamlMap, constructor.getPositions());
-            return yaml.loadAs(content, TOSCAFile.class);
+            yaml.loadAs(content, TOSCAFile.class);
         } catch (YAMLException e) {
             handleDiagnosticsError("Failed to parse TOSCA file: " + e.getMessage(), content);
         } catch (IllegalArgumentException e) {

@@ -32,6 +32,7 @@ public class ToscaLSContentImpl implements LSContext {
     public <V> V get(Class<V> clazz) {
         return (V) objects.get(clazz);
     }
+    
     @Override
     public void setClient(LanguageClient client) {
         this.languageClient = client;

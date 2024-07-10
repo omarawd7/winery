@@ -14,10 +14,12 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore;
 
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 
 import java.nio.file.Path;
 
 public interface Parser {
-    public Object ParseTOSCAFile(Path path);
-    public Object ParseTOSCAFile(String content);
+    public TOSCAFile ParseTOSCAFile(Path path);
+    
+    public TOSCAFile ParseTOSCAFile(String content);
 }

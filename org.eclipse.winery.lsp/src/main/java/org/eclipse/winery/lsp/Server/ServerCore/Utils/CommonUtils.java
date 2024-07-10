@@ -1,8 +1,5 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Utils;
 
-import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DiagnosticSeverity;
-
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -23,5 +20,4 @@ public class CommonUtils {
         return name.equals("int") || name.equals("string");
     }
     
-
 }
