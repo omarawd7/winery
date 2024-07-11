@@ -38,7 +38,7 @@ public class TOSCAFileValidator {
         }
     }
 
-    public void validateKeywords(Map<String, Object> yamlMap, Map<String, Mark> positions) {
+    public void validateKeywords(Map<String, Object> yamlMap, Map<String, Mark> positions, String YamlContent) {
         Set<String> validKeywords = Set.of(
             "tosca_definitions_version", "description", "metadata", "dsl_definitions",
             "artifact_types", "data_types", "capability_types", "interface_types",
@@ -50,17 +50,28 @@ public class TOSCAFileValidator {
                 Mark mark = positions.get(key);
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
-                handleNotValidKeywords("Invalid keyword: " + key + " at line " + line + ", column " + column, line, column);
+                int endColumn = -1;
+
+                if (line != -1 && column != -1) {
+                    // Split the content into lines
+                    String[] lines = YamlContent.split("\n");
+                    if (line - 1 < lines.length) {
+                        String lineContent = lines[line - 1];
+                        // Find the colon after the column index
+                        endColumn = lineContent.indexOf(":", column) - 1;
+                    }
+                }
+                handleNotValidKeywords("Invalid keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
             } else if (key.equals("artifact_types")) {
                 Object artifactTypes = yamlMap.get(key);
                 if (artifactTypes instanceof Map) {
-                    validateArtifactTypes((Map<String, Object>) artifactTypes, positions);
+                    validateArtifactTypes((Map<String, Object>) artifactTypes, positions, YamlContent);
                 }
             }
         }
     }
 
-    public void validateArtifactTypes(Map<String, Object> artifactTypesMap, Map<String, Mark> positions) {
+    public void validateArtifactTypes(Map<String, Object> artifactTypesMap, Map<String, Mark> positions, String YamlContent) {
         Set<String> validArtifactTypeKeywords = Set.of(
             "derived_from", "version", "metadata", "description", "mime_type", "file_ext", "properties"
         );
@@ -72,18 +83,30 @@ public class TOSCAFileValidator {
                         Mark mark = positions.get(key);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
-                        handleNotValidKeywords("Invalid artifact type keyword: " + key + " at line " + line + ", column " + column, line, column);
+                        int endColumn = -1;
+
+                        if (line != -1 && column != -1) {
+                            // Split the content into lines
+                            String[] lines = YamlContent.split("\n");
+                            if (line - 1 < lines.length) {
+                                String lineContent = lines[line - 1];
+                                // Find the colon after the column index
+                                endColumn = lineContent.indexOf(":", column) - 1;
+                            }
+                        }
+                        handleNotValidKeywords("Invalid artifact type keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
                     }
                 }
             }
         }
     }
 
-    public void handleNotValidKeywords(String message, int line, int column) {
+    public void handleNotValidKeywords(String message, int line, int column, int endColumn) {
         TOSCAFileDiagnostics toscaFileDiagnostic = new TOSCAFileDiagnostics();
         toscaFileDiagnostic.setErrorMessage(message);
         toscaFileDiagnostic.setErrorContext("Not Valid Keywords");
         toscaFileDiagnostic.setErrorColumn(column);
+        toscaFileDiagnostic.setErrorEndColumn(endColumn);
         toscaFileDiagnostic.setErrorLine(line);
         diagnostics.add(toscaFileDiagnostic);
     }

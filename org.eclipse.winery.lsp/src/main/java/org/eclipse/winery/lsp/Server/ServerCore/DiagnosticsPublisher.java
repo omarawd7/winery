@@ -57,7 +57,7 @@ public class DiagnosticsPublisher {
             // Validate required keywords
             toscaFileValidator.validateRequiredKeys(yamlMap, path);
             // Validate keywords and capture their positions
-            toscaFileValidator.validateKeywords(yamlMap,toscaFileParser.getConstructorPositions() );
+            toscaFileValidator.validateKeywords(yamlMap,toscaFileParser.getConstructorPositions(), toscaFileParser.getYamlContent());
 
             List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
@@ -92,7 +92,7 @@ public class DiagnosticsPublisher {
             // Validate required keywords
             toscaFileValidator.validateRequiredKeys(yamlMap, content);
             // Validate keywords and capture their positions
-            toscaFileValidator.validateKeywords(yamlMap,toscaFileParser.getConstructorPositions() );
+            toscaFileValidator.validateKeywords(yamlMap,toscaFileParser.getConstructorPositions(), content);
             List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
@@ -120,7 +120,7 @@ public class DiagnosticsPublisher {
             diag.setMessage(diagnostic.getErrorMessage());
             diag.setRange(new Range(
                     new Position(diagnostic.getErrorLine() - 1, diagnostic.getErrorColumn() - 1),
-                    new Position(diagnostic.getErrorLine() - 1, diagnostic.getErrorColumn() + 5 )
+                    new Position(diagnostic.getErrorLine() - 1, diagnostic.getErrorEndColumn() + 1 )
                 ));                
             
             OutputDiagnostics.add(diag);

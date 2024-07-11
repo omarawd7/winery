@@ -19,7 +19,8 @@ import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 public class TOSCAFileDiagnostics {
     TOSCAFile toscafile;
     private int ErrorLine;
-    private int ErrorColumn;
+    private int ErrorColumn = 0;
+    private int ErrorEndColumn = 1;
     private String ErrorMessage;
     private String ErrorProblem;
     private String ErrorContext;
@@ -30,6 +31,14 @@ public class TOSCAFileDiagnostics {
 
     public void setToscafile(TOSCAFile toscafile) {
         this.toscafile = toscafile;
+    }
+
+    public int getErrorEndColumn() {
+        return ErrorEndColumn;
+    }
+
+    public void setErrorEndColumn(int errorEndColumn) {
+        ErrorEndColumn = errorEndColumn;
     }
 
     public int getErrorLine() {

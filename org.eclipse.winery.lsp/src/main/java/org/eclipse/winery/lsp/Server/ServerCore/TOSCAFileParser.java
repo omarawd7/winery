@@ -27,6 +27,11 @@ public class TOSCAFileParser implements Parser {
     
     private Map<String, Mark>  ConstructorPositions;
     private TOSCAFile toscaFile;
+    private String yamlContent;
+
+    public String getYamlContent() {
+        return yamlContent;
+    }
 
     public Map<String, Mark> getConstructorPositions() {
         return ConstructorPositions;
