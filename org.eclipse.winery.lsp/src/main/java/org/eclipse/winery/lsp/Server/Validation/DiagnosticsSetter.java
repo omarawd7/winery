@@ -12,11 +12,11 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 
-package org.eclipse.winery.lsp.Server.ServerCore;
+package org.eclipse.winery.lsp.Server.Validation;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 
-public class TOSCAFileDiagnostics {
+public class DiagnosticsSetter {
     TOSCAFile toscafile;
     private int ErrorLine;
     private int ErrorColumn = 0;

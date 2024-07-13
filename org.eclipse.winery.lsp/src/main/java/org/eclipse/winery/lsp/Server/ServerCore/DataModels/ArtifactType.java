@@ -16,8 +16,8 @@
  * Artifact Type Record
  *
  * For more details on the TOSCA specification, visit:
- * https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#121-artifact-type
- */
+ * https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#6431-artifact-types
+ */ 
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import java.util.List;
@@ -25,12 +25,12 @@ import java.util.Map;
 import java.util.Optional;
 
 public record ArtifactType (
-    Optional<String> derived_from,
+    Optional<ArtifactType> derivedFrom,
     Optional<String> version,
     Optional<Map<String, String>> metadata,
     Optional<String> description,
-    Optional<String> mime_type,
-    Optional<List<String>> file_ext,
+    Optional<String> mimeType,
+    Optional<List<String>> fileExt,
     Optional<Map<String, PropertyDefinition>> properties
 ) {
 }

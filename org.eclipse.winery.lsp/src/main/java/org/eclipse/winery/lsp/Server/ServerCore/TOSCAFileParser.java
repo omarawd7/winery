@@ -62,9 +62,4 @@ public class TOSCAFileParser implements Parser {
             toscaFile = yaml.loadAs(content, TOSCAFile.class);
             return yamlMap;
     }
-    
-    public static void main(String[] args) {
-
-    }
 }
-

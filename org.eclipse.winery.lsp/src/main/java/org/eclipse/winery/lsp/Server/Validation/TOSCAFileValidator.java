@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 
-package org.eclipse.winery.lsp.Server.ServerCore;
+package org.eclipse.winery.lsp.Server.Validation;
 
 import org.yaml.snakeyaml.error.Mark;
 
@@ -23,8 +23,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-public class TOSCAFileValidator {
-    public ArrayList<TOSCAFileDiagnostics> diagnostics = new ArrayList<>();
+public class TOSCAFileValidator implements DiagnosesHandler {
+    public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
 
     public void validateRequiredKeys(Map<String, Object> yamlMap, Path path) {
         if (!yamlMap.containsKey("tosca_definitions_version")) {
@@ -45,6 +45,8 @@ public class TOSCAFileValidator {
             "relationship_types", "node_types", "group_types", "policy_types",
             "repositories", "functions", "profile", "imports", "service_template"
         );
+        // Split the content into lines
+        String[] lines = YamlContent.split("\n");
         for (String key : yamlMap.keySet()) {
             if (!validKeywords.contains(key)) {
                 Mark mark = positions.get(key);
@@ -53,8 +55,6 @@ public class TOSCAFileValidator {
                 int endColumn = -1;
 
                 if (line != -1 && column != -1) {
-                    // Split the content into lines
-                    String[] lines = YamlContent.split("\n");
                     if (line - 1 < lines.length) {
                         String lineContent = lines[line - 1];
                         // Find the colon after the column index
@@ -65,44 +65,18 @@ public class TOSCAFileValidator {
             } else if (key.equals("artifact_types")) {
                 Object artifactTypes = yamlMap.get(key);
                 if (artifactTypes instanceof Map) {
-                    validateArtifactTypes((Map<String, Object>) artifactTypes, positions, YamlContent);
+                    ArtifactTypeValidator artifactTypeValidator = new ArtifactTypeValidator();
+                    ArrayList<DiagnosticsSetter> ArtifactTypeDiagnostics = artifactTypeValidator.validateArtifactTypes((Map<String, Object>) artifactTypes, positions, YamlContent, lines);
+                    diagnostics.addAll(ArtifactTypeDiagnostics);
                 }
             }
         }
+        
     }
 
-    public void validateArtifactTypes(Map<String, Object> artifactTypesMap, Map<String, Mark> positions, String YamlContent) {
-        Set<String> validArtifactTypeKeywords = Set.of(
-            "derived_from", "version", "metadata", "description", "mime_type", "file_ext", "properties"
-        );
-        for (String artifactTypeKey : artifactTypesMap.keySet()) {
-            Object artifactType = artifactTypesMap.get(artifactTypeKey);
-            if (artifactType instanceof Map) {
-                for (String key : ((Map<String, Object>) artifactType).keySet()) {
-                    if (!validArtifactTypeKeywords.contains(key)) {
-                        Mark mark = positions.get(key);
-                        int line = mark != null ? mark.getLine() + 1 : -1;
-                        int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = -1;
-
-                        if (line != -1 && column != -1) {
-                            // Split the content into lines
-                            String[] lines = YamlContent.split("\n");
-                            if (line - 1 < lines.length) {
-                                String lineContent = lines[line - 1];
-                                // Find the colon after the column index
-                                endColumn = lineContent.indexOf(":", column) - 1;
-                            }
-                        }
-                        handleNotValidKeywords("Invalid artifact type keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
-                    }
-                }
-            }
-        }
-    }
-
+    @Override
     public void handleNotValidKeywords(String message, int line, int column, int endColumn) {
-        TOSCAFileDiagnostics toscaFileDiagnostic = new TOSCAFileDiagnostics();
+        DiagnosticsSetter toscaFileDiagnostic = new DiagnosticsSetter();
         toscaFileDiagnostic.setErrorMessage(message);
         toscaFileDiagnostic.setErrorContext("Not Valid Keywords");
         toscaFileDiagnostic.setErrorColumn(column);
@@ -110,9 +84,10 @@ public class TOSCAFileValidator {
         toscaFileDiagnostic.setErrorLine(line);
         diagnostics.add(toscaFileDiagnostic);
     }
-
+    
+    @Override
     public void handleDiagnosticsError(String message, Path path) {
-        TOSCAFileDiagnostics toscaFileDiagnostic = new TOSCAFileDiagnostics();
+        DiagnosticsSetter toscaFileDiagnostic = new DiagnosticsSetter();
         toscaFileDiagnostic.setErrorMessage(message);
         toscaFileDiagnostic.setErrorContext("Parsing Error");
         try {
@@ -124,9 +99,10 @@ public class TOSCAFileValidator {
         toscaFileDiagnostic.setErrorColumn(1);
         diagnostics.add(toscaFileDiagnostic);
     }
-
+    
+    @Override
     public void handleDiagnosticsError(String message, String content) {
-        TOSCAFileDiagnostics toscaFileDiagnostic = new TOSCAFileDiagnostics();
+        DiagnosticsSetter toscaFileDiagnostic = new DiagnosticsSetter();
         toscaFileDiagnostic.setErrorMessage(message);
         toscaFileDiagnostic.setErrorContext("Parsing Error");
         toscaFileDiagnostic.setErrorLine(countLines(content));

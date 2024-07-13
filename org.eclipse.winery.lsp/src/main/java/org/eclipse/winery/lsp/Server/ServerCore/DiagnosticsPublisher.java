@@ -18,6 +18,8 @@ import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.BaseOperationContext;
+import org.eclipse.winery.lsp.Server.Validation.DiagnosticsSetter;
+import org.eclipse.winery.lsp.Server.Validation.TOSCAFileValidator;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.IOException;
@@ -59,25 +61,25 @@ public class DiagnosticsPublisher {
             // Validate keywords and capture their positions
             toscaFileValidator.validateKeywords(yamlMap,toscaFileParser.getConstructorPositions(), toscaFileParser.getYamlContent());
 
-            List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
+            List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
         catch (IOException e) {
             toscaFileValidator.handleDiagnosticsError("Failed to read TOSCA file: " + e.getMessage(), path);
-            List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
+            List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         } 
         catch (YAMLException e) {
             toscaFileValidator.handleDiagnosticsError("Failed to parse TOSCA file: " + e.getMessage(), path); 
-            List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
+            List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
         catch (IllegalArgumentException e) {
             toscaFileValidator.handleDiagnosticsError("Validation failed: " + e.getMessage(), path);
-            List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
+            List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
@@ -93,28 +95,28 @@ public class DiagnosticsPublisher {
             toscaFileValidator.validateRequiredKeys(yamlMap, content);
             // Validate keywords and capture their positions
             toscaFileValidator.validateKeywords(yamlMap,toscaFileParser.getConstructorPositions(), content);
-            List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
+            List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
         catch (YAMLException e) {
             toscaFileValidator.handleDiagnosticsError("Failed to parse TOSCA file: " + e.getMessage(), path);
-            List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
+            List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
         catch (IllegalArgumentException e) {
             toscaFileValidator.handleDiagnosticsError("Validation failed: " + e.getMessage(), path);
-            List<Diagnostic> diagnostics = SetDiagnostics(toscaFileValidator.diagnostics);
+            List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             previousDiagnostics.put(path.toString(), diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
         
     }
     
-    public List<Diagnostic> SetDiagnostics(ArrayList<TOSCAFileDiagnostics> diagnostics) {
+    public List<Diagnostic> setDiagnostics(ArrayList<DiagnosticsSetter> diagnostics) {
         List<Diagnostic> OutputDiagnostics = new ArrayList<>();
-        for (TOSCAFileDiagnostics diagnostic : diagnostics) {
+        for (DiagnosticsSetter diagnostic : diagnostics) {
             Diagnostic diag = new Diagnostic();
             diag.setSeverity(DiagnosticSeverity.Error);
             diag.setMessage(diagnostic.getErrorMessage());
