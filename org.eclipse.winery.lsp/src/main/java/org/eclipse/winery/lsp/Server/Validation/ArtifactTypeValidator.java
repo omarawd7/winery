@@ -58,9 +58,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
         }
         return diagnostics;
     }
-
     
-
     @Override
     public void handleNotValidKeywords(String message, int line, int column, int endColumn) {
         DiagnosticsSetter ArtifactTypeDiagnostic = new DiagnosticsSetter();
