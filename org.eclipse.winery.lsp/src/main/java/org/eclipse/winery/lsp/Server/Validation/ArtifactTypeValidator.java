@@ -14,6 +14,7 @@
 
 package org.eclipse.winery.lsp.Server.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 
 import java.io.IOException;
@@ -34,12 +35,23 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
             Object artifactType = artifactTypesMap.get(artifactTypeKey);
             if (artifactType instanceof Map) {
                 for (String key : ((Map<String, Object>) artifactType).keySet()) {
+                    
                     if (!validArtifactTypeKeywords.contains(key)) {
-                       Mark mark = positions.get(key);
+                        Mark mark = positions.get(key);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = getEndColumn(YamlContent, line, column, lines);
+                        int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
+
                         handleNotValidKeywords("Invalid artifact type keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
+                    }
+                    //Check if the derived_from keyword exists, that it contains a valid Artifact type parent
+                    else if (key.equals("derived_from") && !artifactTypesMap.containsKey(((Map<?, ?>) artifactType).get(key))) {
+                        Mark mark = positions.get(((Map<?, ?>) artifactType).get(key));
+                        int line = mark != null ? mark.getLine() + 1 : -1;
+                        int column = mark != null ? mark.getColumn() + 1 : -1;
+                        int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+
+                        handleNotValidKeywords("Invalid derived_from value " + key + " at line " + line + ", column " + column, line, column,endColumn);
                     }
                 }
             }
@@ -47,18 +59,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
         return diagnostics;
     }
 
-    private static int getEndColumn(String YamlContent, int line, int column, String[] lines) {
-        int endColumn = -1;
-
-        if (line != -1 && column != -1) {
-            if (line - 1 < lines.length) {
-                String lineContent = lines[line - 1];
-                // Find the colon after the column index
-                endColumn = lineContent.indexOf(":", column) - 1;
-            }
-        }
-        return endColumn;
-    }
+    
 
     @Override
     public void handleNotValidKeywords(String message, int line, int column, int endColumn) {

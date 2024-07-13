@@ -20,4 +20,23 @@ public class CommonUtils {
         return name.equals("int") || name.equals("string");
     }
     
+    public static int getEndColumn(String YamlContent, int line, int column, String[] lines) {
+        int endColumn = -1;
+
+        if (line != -1 && column != -1) {
+            if (line - 1 < lines.length) {
+                String lineContent = lines[line - 1];
+                // Find the colon after the column index
+                endColumn = lineContent.indexOf(":", column) - 1;
+            }
+        }
+        return endColumn;
+    }
+  
+    public static int getEndColumnForValueError(String YamlContent, int line, int column, String[] lines) {
+        if (line < 0 || line >= lines.length) {
+            return column;
+        }
+        return lines[line - 1].length();
+    }
 }

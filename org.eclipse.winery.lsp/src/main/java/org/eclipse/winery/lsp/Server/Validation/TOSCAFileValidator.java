@@ -14,6 +14,7 @@
 
 package org.eclipse.winery.lsp.Server.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 
 import java.io.IOException;
@@ -52,15 +53,7 @@ public class TOSCAFileValidator implements DiagnosesHandler {
                 Mark mark = positions.get(key);
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
-                int endColumn = -1;
-
-                if (line != -1 && column != -1) {
-                    if (line - 1 < lines.length) {
-                        String lineContent = lines[line - 1];
-                        // Find the colon after the column index
-                        endColumn = lineContent.indexOf(":", column) - 1;
-                    }
-                }
+                int endColumn = CommonUtils.getEndColumn("", line, column, lines);
                 handleNotValidKeywords("Invalid keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
             } else if (key.equals("artifact_types")) {
                 Object artifactTypes = yamlMap.get(key);
