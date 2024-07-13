@@ -14,7 +14,6 @@
 
 /**
  * TOSCA File Record
- *
  * For more details on the TOSCA specification, visit:
  * https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#61-keynames
  */
@@ -44,4 +43,4 @@ public record TOSCAFile(
     Optional<Map<String, Object>> functions,
     Optional<String> profile,
     Optional<List<Object>> imports,
-    Optional<Object> service_template) { } 
+    Optional<Object> serviceTemplate) { } 

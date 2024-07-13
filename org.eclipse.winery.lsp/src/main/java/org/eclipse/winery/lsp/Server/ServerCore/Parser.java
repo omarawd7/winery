@@ -19,7 +19,22 @@ import java.nio.file.Path;
 import java.util.Map;
 
 public interface Parser {
+    /**
+     * Parses a TOSCA file from the specified path.
+     *
+     * @param path the path to the TOSCA file
+     * @return a map where the keys are strings representing different Keywords of the TOSCA file,
+     *         and the values are objects corresponding to the parsed values of these components
+     * @throws IOException if an I/O error occurs reading from the file or a malformed or unmappable byte sequence is read
+     */
     public Map<String, Object> ParseTOSCAFile(Path path) throws IOException;
     
+    /**
+     * Parses a TOSCA file from the given content string.
+     *
+     * @param content the content of the TOSCA file as a string
+     * @return a map where the keys are strings representing different components of the TOSCA file,
+     *         and the values are objects corresponding to the parsed values of these components
+     */
     public Map<String, Object>  ParseTOSCAFile(String content);
 }

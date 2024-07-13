@@ -12,27 +12,20 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 
+/**
+ * The DiagnosticsSetter class represents a diagnostic message with details about an error
+ * such as its line and column positions, the message, the problem description, and the context.
+ */
 package org.eclipse.winery.lsp.Server.Validation;
 
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
-
 public class DiagnosticsSetter {
-    TOSCAFile toscafile;
     private int ErrorLine;
     private int ErrorColumn = 0;
     private int ErrorEndColumn = 1;
     private String ErrorMessage;
     private String ErrorProblem;
     private String ErrorContext;
-
-    public TOSCAFile getToscafile() {
-        return toscafile;
-    }
-
-    public void setToscafile(TOSCAFile toscafile) {
-        this.toscafile = toscafile;
-    }
-
+    
     public int getErrorEndColumn() {
         return ErrorEndColumn;
     }
