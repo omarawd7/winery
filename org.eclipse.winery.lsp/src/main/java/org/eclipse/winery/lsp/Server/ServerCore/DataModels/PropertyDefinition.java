@@ -13,24 +13,23 @@
  *******************************************************************************/
 
 /**
- * Artifact Type
+ * Property Definition
  * For more details on the TOSCA specification, visit:
- * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#6431-artifact-types">Artifact Types</a>
- */ 
+ * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#93-property-definition">Property Definition</a>
+ */
+
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record ArtifactType (
-    Optional<ArtifactType> derivedFrom,
-    Optional<String> version,
-    Optional<Map<String, String>> metadata,
-    Optional<String> description,
-    Optional<String> mimeType,
-    Optional<List<String>> fileExt,
-    Optional<Map<String, PropertyDefinition>> properties
-) {
-}
-
+public record PropertyDefinition<T>(    String type,
+                                     Optional<String> description,
+                                     Optional<Map<String, Object>> metadata,
+                                     Optional<Boolean> required,
+                                     Optional<T> Default , //must match property type
+                                     Optional<Object> value,
+                                     Optional<Object> validationClause, 
+                                     Optional<Object> keySchema,
+                                     Optional<Object> entrySchema) 
+{  }

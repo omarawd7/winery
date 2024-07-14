@@ -13,9 +13,9 @@
  *******************************************************************************/
 
 /**
- * TOSCA File Record
+ * TOSCA File
  * For more details on the TOSCA specification, visit:
- * https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#61-keynames
+ *<a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#61-keynames">TOSCA file Keynames</a>
  */
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
