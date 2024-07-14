@@ -72,27 +72,27 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
 
     @Override
     public void handleDiagnosticsError(String message, Path path) {
-        DiagnosticsSetter toscaFileDiagnostic = new DiagnosticsSetter();
-        toscaFileDiagnostic.setErrorMessage(message);
-        toscaFileDiagnostic.setErrorContext("Parsing Error");
+        DiagnosticsSetter ArtifactTypeDiagnostic = new DiagnosticsSetter();
+        ArtifactTypeDiagnostic.setErrorMessage(message);
+        ArtifactTypeDiagnostic.setErrorContext("Parsing Error");
         try {
             long lineCount = Files.lines(path).count();
-            toscaFileDiagnostic.setErrorLine((int) lineCount);
+            ArtifactTypeDiagnostic.setErrorLine((int) lineCount);
         } catch (IOException e) {
-            toscaFileDiagnostic.setErrorLine(-1);
+            ArtifactTypeDiagnostic.setErrorLine(-1);
         }
-        toscaFileDiagnostic.setErrorColumn(1);
-        diagnostics.add(toscaFileDiagnostic);
+        ArtifactTypeDiagnostic.setErrorColumn(1);
+        diagnostics.add(ArtifactTypeDiagnostic);
     }
 
     @Override
     public void handleDiagnosticsError(String message, String content) {
-        DiagnosticsSetter toscaFileDiagnostic = new DiagnosticsSetter();
-        toscaFileDiagnostic.setErrorMessage(message);
-        toscaFileDiagnostic.setErrorContext("Parsing Error");
-        toscaFileDiagnostic.setErrorLine(countLines(content));
-        toscaFileDiagnostic.setErrorColumn(1);
-        diagnostics.add(toscaFileDiagnostic);
+        DiagnosticsSetter ArtifactTypeDiagnostic = new DiagnosticsSetter();
+        ArtifactTypeDiagnostic.setErrorMessage(message);
+        ArtifactTypeDiagnostic.setErrorContext("Parsing Error");
+        ArtifactTypeDiagnostic.setErrorLine(countLines(content));
+        ArtifactTypeDiagnostic.setErrorColumn(1);
+        diagnostics.add(ArtifactTypeDiagnostic);
     }
     
     private int countLines(String content) {
