@@ -51,7 +51,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
 
-                        handleNotValidKeywords("Invalid derived_from value " + key + " at line " + line + ", column " + column, line, column,endColumn);
+                        handleNotValidKeywords("Invalid derived_from value, \"" + ((Map<?, ?>) artifactType).get(key) + "\" is not a parent type ", line, column,endColumn);
                     }
                 }
             }
