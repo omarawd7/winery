@@ -39,4 +39,14 @@ public class CommonUtils {
         }
         return lines[line - 1].length();
     }
+
+    public static boolean isTypeMatch(String type, Object value) {
+        return switch (type) {
+            case "string" -> value instanceof String;
+            case "integer" -> value instanceof Integer;
+            case "float" -> value instanceof Float;
+            case "boolean" -> value instanceof Boolean;
+            default -> false;
+        };
+    }
 }

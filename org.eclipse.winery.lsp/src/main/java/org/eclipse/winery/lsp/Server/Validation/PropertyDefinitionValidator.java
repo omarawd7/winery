@@ -27,12 +27,12 @@ import java.util.Set;
 public class PropertyDefinitionValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
     
-    public ArrayList<DiagnosticsSetter> validatePropertyDefinition(Map<String, Object> PropertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
+    public ArrayList<DiagnosticsSetter> validatePropertyDefinition(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
             "description", "metadata", "required", "Default", "value", "validationClause", "keySchema", "entrySchema"
         );
-        for (String PropertyDefinitionKey : PropertyDefinitionsMap.keySet()) {
-            Object propertyDefinition = PropertyDefinitionsMap.get(PropertyDefinitionKey);
+        for (String PropertyDefinitionKey : propertyDefinitionsMap.keySet()) {
+            Object propertyDefinition = propertyDefinitionsMap.get(PropertyDefinitionKey);
             if (propertyDefinition instanceof Map) {
                 for (String key : ((Map<String, Object>) propertyDefinition).keySet()) {
                     if (!validPropertyDefinitionKeywords.contains(key)) {
@@ -42,6 +42,19 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
 
                         handleNotValidKeywords("Invalid property definition keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
+                    }
+                    
+                    if (key.equals("Default")) {
+                        String type = (String) propertyDefinitionsMap.get("type");
+                        Object defaultValue = propertyDefinitionsMap.get("Default");
+                        if (defaultValue != null && !CommonUtils.isTypeMatch(type, defaultValue)) {
+                            Mark mark = positions.get(((Map<?, ?>) propertyDefinition).get(key));
+                            int line = mark != null ? mark.getLine() + 1 : -1;
+                            int column = mark != null ? mark.getColumn() + 1 : -1;
+                            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+
+                            handleNotValidKeywords("Default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
+                        }
                     }
                 }
             }
