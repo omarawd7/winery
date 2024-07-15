@@ -43,9 +43,10 @@ public class CommonUtils {
     public static boolean isTypeMatch(String type, Object value) {
         return switch (type) {
             case "string" -> value instanceof String;
-            case "integer" -> value instanceof Integer;
+            case "int", "integer" -> value instanceof Integer;
             case "float" -> value instanceof Float;
             case "boolean" -> value instanceof Boolean;
+            //TODO support more types
             default -> false;
         };
     }

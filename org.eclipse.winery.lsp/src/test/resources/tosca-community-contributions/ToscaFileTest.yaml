@@ -1,7 +1,8 @@
-##########################################################################
-# This file contains TOSCA Simple Profile artifact type
-# definitions.
-##########################################################################
+  ##########################################################################
+  # <a href="https://github.com/oasis-open/tosca-community-contributions/blob/master/profiles/org.oasis-open/simple/2.0/artifact_types.yaml">https://github.com/oasis-open/tosca-community-contributions/blob/master/profiles/org.oasis-open/simple/2.0/artifact_types.yaml</a>
+  # This file contains TOSCA Simple Profile artifact type
+  # definitions.
+  ##########################################################################
 
 tosca_definitions_version: tosca_2_0
 

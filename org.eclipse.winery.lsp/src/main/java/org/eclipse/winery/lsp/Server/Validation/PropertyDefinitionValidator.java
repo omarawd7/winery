@@ -16,7 +16,6 @@ package org.eclipse.winery.lsp.Server.Validation;
 
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,35 +26,35 @@ import java.util.Set;
 public class PropertyDefinitionValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
     
-    public ArrayList<DiagnosticsSetter> validatePropertyDefinition(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
+    public ArrayList<DiagnosticsSetter> validatePropertyDefinitions(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
-            "description", "metadata", "required", "Default", "value", "validationClause", "keySchema", "entrySchema"
+            "type", "description", "metadata", "required", "default", "value", "key_schema", "entry_schema"
         );
         for (String PropertyDefinitionKey : propertyDefinitionsMap.keySet()) {
             Object propertyDefinition = propertyDefinitionsMap.get(PropertyDefinitionKey);
             if (propertyDefinition instanceof Map) {
+                validateRequiredKeys((Map<String, Object>) propertyDefinition,YamlContent);
                 for (String key : ((Map<String, Object>) propertyDefinition).keySet()) {
                     if (!validPropertyDefinitionKeywords.contains(key)) {
                         Mark mark = positions.get(key);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
-
                         handleNotValidKeywords("Invalid property definition keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
-                    }
-                    
-                    if (key.equals("Default")) {
-                        String type = (String) propertyDefinitionsMap.get("type");
-                        Object defaultValue = propertyDefinitionsMap.get("Default");
-                        if (defaultValue != null && !CommonUtils.isTypeMatch(type, defaultValue)) {
+                    } 
+                    if (key.equals("default")) {
+                        String type = (String) ((Map<?, ?>) propertyDefinition).get("type");
+                        Object defaultValue = ((Map<?, ?>) propertyDefinition).get(key);
+                        if (!CommonUtils.isTypeMatch(type, defaultValue)) {
                             Mark mark = positions.get(((Map<?, ?>) propertyDefinition).get(key));
                             int line = mark != null ? mark.getLine() + 1 : -1;
                             int column = mark != null ? mark.getColumn() + 1 : -1;
                             int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
 
-                            handleNotValidKeywords("Default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
+                            handleNotValidKeywords("default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
                         }
                     }
+                    
                 }
             }
         }
@@ -96,6 +95,12 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         PropertyDefinitionDiagnostic.setErrorLine(countLines(content));
         PropertyDefinitionDiagnostic.setErrorColumn(1);
         diagnostics.add(PropertyDefinitionDiagnostic);
+    }
+
+    public void validateRequiredKeys(Map<String, Object> yamlMap, String content) {
+        if (!yamlMap.containsKey("type")) {
+            handleDiagnosticsError("Property Definition Missing required key: type", content);
+        }
     }
     
     private int countLines(String content) {

@@ -16,7 +16,6 @@ package org.eclipse.winery.lsp.Server.Validation;
 
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -28,6 +27,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
 
     public ArrayList<DiagnosticsSetter> validateArtifactTypes(Map<String, Object> artifactTypesMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
+
         Set<String> validArtifactTypeKeywords = Set.of(
             "derived_from", "version", "metadata", "description", "mime_type", "file_ext", "properties"
         );
@@ -35,7 +35,6 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
             Object artifactType = artifactTypesMap.get(artifactTypeKey);
             if (artifactType instanceof Map) {
                 for (String key : ((Map<String, Object>) artifactType).keySet()) {
-                    
                     if (!validArtifactTypeKeywords.contains(key)) {
                         Mark mark = positions.get(key);
                         int line = mark != null ? mark.getLine() + 1 : -1;
@@ -52,6 +51,13 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                         int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
 
                         handleNotValidKeywords("Invalid derived_from value, \"" + ((Map<?, ?>) artifactType).get(key) + "\" is not a parent type ", line, column,endColumn);
+                    } else if (key.equals("properties")) {
+                        Object PropertyDefinitions = ((Map<?, ?>) artifactType).get(key);
+                        if (PropertyDefinitions instanceof Map) {
+                            PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator();
+                            ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines);
+                            diagnostics.addAll(PropertyDefinitionDiagnostics);
+                        }
                     }
                 }
             }
