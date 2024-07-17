@@ -76,7 +76,11 @@ public class ToscaTextDocService implements TextDocumentService {
         List<CompletionItem> completionItems = List.of();
         if (line.contains("derived_from:")) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
-            completionItems = completionItemGetter.getArtifactTypes();
+            completionItems = completionItemGetter.getAvailableArtifactTypes();
+        }
+        if (line.trim().isEmpty()) { // auto complete the TOSCAFile Keywords when press space 
+            CompletionItemGetter completionItemGetter = new CompletionItemGetter();
+            completionItems = completionItemGetter.getTOSCAFileKeywords(position);
         }
 
         return CompletableFuture.completedFuture(Either.forLeft(completionItems));

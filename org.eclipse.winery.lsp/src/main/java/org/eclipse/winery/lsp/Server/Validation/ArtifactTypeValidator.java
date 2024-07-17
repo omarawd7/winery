@@ -29,7 +29,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> validateArtifactTypes(Map<String, Object> artifactTypesMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
 
         Set<String> validArtifactTypeKeywords = Set.of(
-            "derived_from", "version", "metadata", "description", "mime_type", "file_ext", "properties"
+                "derived_from", "version", "metadata", "description", "mime_type", "file_ext", "properties"
         );
         for (String artifactTypeKey : artifactTypesMap.keySet()) {
             Object artifactType = artifactTypesMap.get(artifactTypeKey);
