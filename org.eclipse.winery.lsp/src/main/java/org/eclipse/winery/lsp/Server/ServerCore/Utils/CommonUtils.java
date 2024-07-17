@@ -50,4 +50,9 @@ public class CommonUtils {
             default -> false;
         };
     }
+
+    public static boolean isToscaFile(Path path) {
+        String fileName = path.toString();
+        return fileName.endsWith(".yaml") || fileName.endsWith(".yml") || fileName.endsWith(".tosca");
+    }
 }

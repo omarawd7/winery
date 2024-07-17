@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public class ToscaLSContentImpl implements LSContext {
-
+    private final Map<String, String> fileContents = new HashMap<>();
     private Map<LSContext.Key<?>, Object> props = new HashMap<>();
     private Map<Class<?>, Object> objects = new HashMap<>();
     private LanguageClient languageClient;
@@ -51,5 +51,13 @@ public class ToscaLSContentImpl implements LSContext {
     @Override
     public Optional<ClientCapabilities> getClientCapabilities() {
         return Optional.ofNullable(this.clientCapabilities);
+    }
+    
+    public void setFileContent(String uri, String content) {
+        fileContents.put(uri, content);
+    }
+
+    public String getFileContent(String uri) {
+        return fileContents.getOrDefault(uri, "");
     }
 }

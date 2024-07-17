@@ -49,7 +49,6 @@ public class ToscaLanguageServer implements LanguageClientAware, LanguageServer 
             sCapabilities.setCompletionProvider(completionOptions);
             return new InitializeResult(sCapabilities);
         });
-        
     }
 
     @Override

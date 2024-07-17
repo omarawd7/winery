@@ -37,7 +37,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 }
 
-export function deactivate() {}
+export function deactivate() {} 
 
 function getJavaHome(): Promise<string> {
     const cmd = process.platform === 'win32' ?

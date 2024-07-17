@@ -27,9 +27,9 @@ public class ServerInitUtils {
     public static CompletionOptions getCompletionOptions() {
         CompletionOptions completionOptions = new CompletionOptions();
 
-        List<String> triggerCharacters = List.of(".", ">");
+        List<String> triggerCharacters = List.of(":");
 
-        completionOptions.setResolveProvider(true);
+        completionOptions.setResolveProvider(false);
         completionOptions.setTriggerCharacters(triggerCharacters);
         completionOptions.setWorkDoneProgress(true);
 
