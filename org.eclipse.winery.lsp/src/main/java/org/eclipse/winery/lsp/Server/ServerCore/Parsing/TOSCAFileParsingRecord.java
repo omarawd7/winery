@@ -11,26 +11,36 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
+
 /**
- * Property Definition
+ * TOSCA File
  * For more details on the TOSCA specification, visit:
- * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#93-property-definition">Property Definition</a>
+ *<a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#61-keynames">TOSCA file Keynames</a>
  */
-package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
+package org.eclipse.winery.lsp.Server.ServerCore.Parsing;
 
 import io.soabase.recordbuilder.core.RecordBuilder;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @RecordBuilder
-public record PropertyDefinition<T>(
-    T type,
+public record TOSCAFileParsingRecord(
+    String toscaDefinitionsVersion,
     Optional<String> description,
     Optional<Map<String, Object>> metadata,
-    Optional<Boolean> required, // TODO make this variable default value true.
-    Optional<T> Default ,
-    Optional<Object> value,//TODO Replace the objects with the real object representation
-    Optional<Object> validation,
-    Optional<Object> keySchema,
-    Optional<Object> entrySchema) {  }
+    Optional<Object> dslDefinitions,
+    Optional<Map<String, Object>> artifactTypes,
+    Optional<Map<String, Object>> dataTypes,
+    Optional<Map<String, Object>> capabilityTypes,
+    Optional<Map<String, Object>> interfaceTypes,
+    Optional<Map<String, Object>> relationshipTypes,
+    Optional<Map<String, Object>> nodeTypes,
+    Optional<Map<String, Object>> groupTypes,
+    Optional<Map<String, Object>> policyTypes,
+    Optional<Map<String, Object>> repositories,
+    Optional<Map<String, Object>> functions,
+    Optional<String> profile,
+    Optional<List<Object>> imports,
+    Optional<Object> serviceTemplate) { } 

@@ -12,10 +12,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 
-package org.eclipse.winery.lsp.Server.ServerCore;
+package org.eclipse.winery.lsp.Server.ServerCore.Parsing;
 
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.error.Mark;
@@ -29,12 +27,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.List;
 
-public class ToscaFileConstructor extends Constructor {
+public class ToscaFileParsingConstructor extends Constructor {
     private final Map<String, Mark> positions = new HashMap<>();
 
-    public ToscaFileConstructor() {
+    public ToscaFileParsingConstructor() {
         super(new LoaderOptions());
-        this.yamlConstructors.put(new Tag(TOSCAFile.class), new ConstructToscaFile());
+        this.yamlConstructors.put(new Tag(TOSCAFileParsingRecord.class), new ConstructToscaFile());
     }
     
     @Override
@@ -54,12 +52,12 @@ public class ToscaFileConstructor extends Constructor {
         @Override
         public Object construct(Node node) {
             Map<Object, Object> map = constructMapping((MappingNode) node);
-            return new TOSCAFile(
+            return new TOSCAFileParsingRecord(
                 (String) map.get("tosca_definitions_version"),
                 Optional.ofNullable((String) map.get("description")),
                 Optional.ofNullable((Map<String, Object>) map.get("metadata")),
                 Optional.ofNullable(map.get("dsl_definitions")),
-                Optional.ofNullable((Map<String, ArtifactType>) map.get("artifact_types")),
+                Optional.ofNullable((Map<String, Object>) map.get("artifact_types")),
                 Optional.ofNullable((Map<String, Object>) map.get("data_types")),
                 Optional.ofNullable((Map<String, Object>) map.get("capability_types")),
                 Optional.ofNullable((Map<String, Object>) map.get("interface_types")),

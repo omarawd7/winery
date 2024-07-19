@@ -11,19 +11,21 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-
 /**
  * Artifact Type
  * For more details on the TOSCA specification, visit:
  * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#6431-artifact-types">Artifact Types</a>
- */ 
+ */
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
+
+import io.soabase.recordbuilder.core.RecordBuilder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public record ArtifactType (
+@RecordBuilder
+public record ArtifactType(
     Optional<ArtifactType> derivedFrom,
     Optional<String> version,
     Optional<Map<String, String>> metadata,
@@ -31,6 +33,5 @@ public record ArtifactType (
     Optional<String> mimeType,
     Optional<List<String>> fileExt,
     Optional<Map<String, PropertyDefinition>> properties
-) {
-}
+) { }
 

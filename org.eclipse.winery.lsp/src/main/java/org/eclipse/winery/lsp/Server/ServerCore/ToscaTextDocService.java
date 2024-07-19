@@ -6,9 +6,9 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.BaseOperationContext;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.ContextBuilder;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
-import org.eclipse.winery.lsp.Server.ServerCore.Completion.CompletionItemGetter;
+import org.eclipse.winery.lsp.Server.ServerCore.Completion.AutoCompletionHandler;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
-
+import org.eclipse.winery.lsp.Server.Validation.DiagnosticsPublisher;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -34,7 +34,7 @@ public class ToscaTextDocService implements TextDocumentService {
         if (CommonUtils.isToscaFile(uriPath)) {
             context.clientLogManager().showInfoMessage("TOSCA file opened");
             DiagnosticsPublisher diagnosticspublisher = DiagnosticsPublisher.getInstance(serverContext);
-            diagnosticspublisher.publishDiagnostics(context, uriPath);
+            diagnosticspublisher.publishDiagnostics(serverContext, uriPath);
         }
     }
 
@@ -49,7 +49,7 @@ public class ToscaTextDocService implements TextDocumentService {
             List<TextDocumentContentChangeEvent> changes = params.getContentChanges();
             if (!changes.isEmpty()) {
                 String content = changes.get(0).getText();
-                diagnosticspublisher.publishDiagnostics(context, uriPath, content);
+                diagnosticspublisher.publishDiagnostics(serverContext, uriPath, content);
                 serverContext.setFileContent(uri, content);
             }
         }
@@ -72,17 +72,7 @@ public class ToscaTextDocService implements TextDocumentService {
         Position position = params.getPosition();
         String content = serverContext.getFileContent(uri);
         String line = content.split("\n")[position.getLine()];
-
-        List<CompletionItem> completionItems = List.of();
-        if (line.contains("derived_from:")) {
-            CompletionItemGetter completionItemGetter = new CompletionItemGetter();
-            completionItems = completionItemGetter.getAvailableArtifactTypes();
-        }
-        if (line.trim().isEmpty()) { // auto complete the TOSCAFile Keywords when press space 
-            CompletionItemGetter completionItemGetter = new CompletionItemGetter();
-            completionItems = completionItemGetter.getTOSCAFileKeywords(position);
-        }
-
+        List<CompletionItem> completionItems = AutoCompletionHandler.handel(line,position);
         return CompletableFuture.completedFuture(Either.forLeft(completionItems));
     }
 

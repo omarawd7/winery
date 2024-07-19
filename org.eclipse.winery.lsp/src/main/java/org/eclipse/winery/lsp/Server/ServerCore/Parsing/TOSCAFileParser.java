@@ -11,10 +11,8 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-
-package org.eclipse.winery.lsp.Server.ServerCore;
+package org.eclipse.winery.lsp.Server.ServerCore.Parsing;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
-import org.yaml.snakeyaml.LoaderOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 
@@ -26,7 +24,7 @@ import java.util.Map;
 public class TOSCAFileParser implements Parser {
     
     private Map<String, Mark>  ConstructorPositions;
-    private TOSCAFile toscaFile;
+    private TOSCAFile ToscaFile;
     private String yamlContent;
 
     public String getYamlContent() {
@@ -38,28 +36,29 @@ public class TOSCAFileParser implements Parser {
     }
 
     public TOSCAFile getToscaFile() {
-        return toscaFile;
+        return ToscaFile;
     }
 
     @Override
     public Map<String, Object>  ParseTOSCAFile(Path path) throws IOException {
-            String yamlContent = Files.readString(path);
-            ToscaFileConstructor constructor = new ToscaFileConstructor();
-            Yaml yaml = new Yaml(constructor);
-            Map<String, Object> yamlMap = yaml.load(yamlContent);
-            ConstructorPositions = constructor.getPositions();
-            toscaFile = yaml.loadAs(yamlContent, TOSCAFile.class);
-            return yamlMap;
+            this.yamlContent = Files.readString(path);
+        return getStringObjectMap(yamlContent);
     }
 
     @Override
     public Map<String, Object> ParseTOSCAFile(String content) {
-            LoaderOptions options = new LoaderOptions();
-            ToscaFileConstructor constructor = new ToscaFileConstructor();
-            Yaml yaml = new Yaml(constructor);
-            Map<String, Object> yamlMap = yaml.load(content);
-            ConstructorPositions = constructor.getPositions();
-            toscaFile = yaml.loadAs(content, TOSCAFile.class);
-            return yamlMap;
+        return getStringObjectMap(content);
     }
+
+    public Map<String, Object> getStringObjectMap(String yamlContent) {
+        ToscaFileParsingConstructor constructor = new ToscaFileParsingConstructor();
+        Yaml yaml = new Yaml(constructor);
+        Map<String, Object> yamlMap = yaml.load(yamlContent);
+        ToscaFile = ToscaFileConstructor.ConstructToscaFile(yamlMap) ; //TODO Constructing need a fix
+        ConstructorPositions = constructor.getPositions();
+        //parsingToscaFile = yaml.loadAs(yamlContent, ParsingTOSCAFile.class);
+        return yamlMap;
+    }
+
+
 }

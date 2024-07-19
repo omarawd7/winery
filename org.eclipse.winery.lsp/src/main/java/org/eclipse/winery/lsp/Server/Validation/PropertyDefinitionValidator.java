@@ -28,7 +28,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     
     public ArrayList<DiagnosticsSetter> validatePropertyDefinitions(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
-            "type", "description", "metadata", "required", "default", "value", "key_schema", "entry_schema"
+            "type", "description", "metadata", "required", "default", "value","validation", "key_schema", "entry_schema"
         );
         for (String PropertyDefinitionKey : propertyDefinitionsMap.keySet()) {
             Object propertyDefinition = propertyDefinitionsMap.get(PropertyDefinitionKey);

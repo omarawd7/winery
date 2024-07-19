@@ -11,7 +11,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-
 /**
  * TOSCA File
  * For more details on the TOSCA specification, visit:
@@ -26,21 +25,20 @@ import java.util.Map;
 import java.util.Optional;
 
 @RecordBuilder
-public record TOSCAFile(
-    String toscaDefinitionsVersion,
-    Optional<String> description,
-    Optional<Map<String, Object>> metadata,
-    Optional<Object> dslDefinitions,
-    Optional<Map<String, ArtifactType>> artifactTypes,
-    Optional<Map<String, Object>> dataTypes,
-    Optional<Map<String, Object>> capabilityTypes,
-    Optional<Map<String, Object>> interfaceTypes,
-    Optional<Map<String, Object>> relationshipTypes,
-    Optional<Map<String, Object>> nodeTypes,
-    Optional<Map<String, Object>> groupTypes,
-    Optional<Map<String, Object>> policyTypes,
-    Optional<Map<String, Object>> repositories,
-    Optional<Map<String, Object>> functions,
-    Optional<String> profile,
-    Optional<List<Object>> imports,
-    Optional<Object> serviceTemplate) { } 
+public record TOSCAFile(String toscaDefinitionsVersion, 
+                        Optional<String> description,
+                        Optional<Map<String, Object>> metadata,
+                        Optional<Object> dslDefinitions,
+                        Optional<Map<String, ArtifactType>> artifactTypes,
+                        Optional<Map<String, Object>> dataTypes,//TODO Replace the objects with the real object representation
+                        Optional<Map<String, Object>> capabilityTypes,
+                        Optional<Map<String, Object>> interfaceTypes,
+                        Optional<Map<String, Object>> relationshipTypes,
+                        Optional<Map<String, Object>> nodeTypes,
+                        Optional<Map<String, Object>> groupTypes,
+                        Optional<Map<String, Object>> policyTypes,
+                        Optional<Map<String, Object>> repositories,
+                        Optional<Map<String, Object>> functions,
+                        Optional<String> profile,
+                        Optional<List<Object>> imports,
+                        Optional<Object> serviceTemplate) { } 

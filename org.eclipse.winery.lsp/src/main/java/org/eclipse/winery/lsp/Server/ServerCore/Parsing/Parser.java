@@ -12,7 +12,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 
-package org.eclipse.winery.lsp.Server.ServerCore;
+package org.eclipse.winery.lsp.Server.ServerCore.Parsing;
 
 import java.io.IOException;
 import java.nio.file.Path;
