@@ -3,7 +3,7 @@ package org.eclipse.winery.lsp.Server.ServerCore;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
-import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParsingRecord;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,7 +15,7 @@ public class ToscaLSContentImpl implements LSContext {
     private Map<Class<?>, Object> objects = new HashMap<>();
     private LanguageClient languageClient;
     private ClientCapabilities clientCapabilities;
-    private TOSCAFileParsingRecord toscaFileParsingRecord;
+    private TOSCAFile toscaFile;
     
     public <V> void put(LSContext.Key<V> key, V value) {
         props.put(key, value);
@@ -62,13 +62,13 @@ public class ToscaLSContentImpl implements LSContext {
     public String getFileContent(String uri) {
         return fileContents.getOrDefault(uri, "");
     }
-    
-    public TOSCAFileParsingRecord getToscaFile() {
-        return toscaFileParsingRecord;
+
+    @Override
+    public TOSCAFile getToscaFile() {
+        return toscaFile;
     }
 
-    public void setToscaFile(TOSCAFileParsingRecord toscaFileParsingRecord) {
-        this.toscaFileParsingRecord = toscaFileParsingRecord;
+    public void setToscaFile(TOSCAFile toscaFile) {
+        this.toscaFile = toscaFile;
     }
-    
 }

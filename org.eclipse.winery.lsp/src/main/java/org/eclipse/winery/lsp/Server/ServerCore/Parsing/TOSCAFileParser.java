@@ -12,6 +12,8 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Parsing;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
@@ -40,25 +42,29 @@ public class TOSCAFileParser implements Parser {
     }
 
     @Override
-    public Map<String, Object>  ParseTOSCAFile(Path path) throws IOException {
+    public Map<String, Object>  ParseTOSCAFile(Path path, LanguageClient client) throws IOException {
             this.yamlContent = Files.readString(path);
-        return getStringObjectMap(yamlContent);
+        return getStringObjectMap(yamlContent, client);
     }
 
     @Override
-    public Map<String, Object> ParseTOSCAFile(String content) {
-        return getStringObjectMap(content);
+    public Map<String, Object> ParseTOSCAFile(String content, LanguageClient client) {
+        return getStringObjectMap(content,client);
     }
 
-    public Map<String, Object> getStringObjectMap(String yamlContent) {
+    public Map<String, Object> getStringObjectMap(String yamlContent, LanguageClient client) {
         ToscaFileParsingConstructor constructor = new ToscaFileParsingConstructor();
         Yaml yaml = new Yaml(constructor);
         Map<String, Object> yamlMap = yaml.load(yamlContent);
-        ToscaFile = ToscaFileConstructor.ConstructToscaFile(yamlMap) ; //TODO Constructing need a fix
+        try {
+            ToscaFile = ToscaFileConstructor.ConstructToscaFile(yamlMap) ;
+        } catch (Exception e) {
+            MessageParams messageParams = new MessageParams();
+            messageParams.setMessage(e.getMessage());
+            client.logMessage(messageParams);
+        }
+        
         ConstructorPositions = constructor.getPositions();
-        //parsingToscaFile = yaml.loadAs(yamlContent, ParsingTOSCAFile.class);
         return yamlMap;
     }
-
-
 }

@@ -14,6 +14,8 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Parsing;
 
+import org.eclipse.lsp4j.services.LanguageClient;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Map;
@@ -27,7 +29,7 @@ public interface Parser {
      *         and the values are objects corresponding to the parsed values of these components
      * @throws IOException if an I/O error occurs reading from the file or a malformed or unmappable byte sequence is read
      */
-    public Map<String, Object> ParseTOSCAFile(Path path) throws IOException;
+    public Map<String, Object> ParseTOSCAFile(Path path, LanguageClient client) throws IOException;
     
     /**
      * Parses a TOSCA file from the given content string.
@@ -36,5 +38,5 @@ public interface Parser {
      * @return a map where the keys are strings representing different components of the TOSCA file,
      *         and the values are objects corresponding to the parsed values of these components
      */
-    public Map<String, Object>  ParseTOSCAFile(String content);
+    public Map<String, Object>  ParseTOSCAFile(String content,LanguageClient client);
 }

@@ -2,8 +2,7 @@ package org.eclipse.winery.lsp.Server.ServerAPI.API.context;
 
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
-import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParsingRecord;
-
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import java.util.Optional;
 /**
  * This class is designed to carry information between method calls.
@@ -38,9 +37,9 @@ public interface LSContext {
     
     void setFileContent(String uri, String content);
 
-    public TOSCAFileParsingRecord getToscaFile();
+    public TOSCAFile getToscaFile();
     
-    public void setToscaFile(TOSCAFileParsingRecord toscaFileParsingRecord);    
+    public void setToscaFile(TOSCAFile toscaFile);    
     
     class Key<K> {
     }

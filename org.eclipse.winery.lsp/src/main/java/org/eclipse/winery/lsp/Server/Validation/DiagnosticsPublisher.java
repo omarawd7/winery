@@ -50,12 +50,12 @@ public class DiagnosticsPublisher {
         TOSCAFileParser toscaFileParser = new TOSCAFileParser();
         TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();
         try {
-            Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(path);
+            Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(path,client);
             // Validate required keywords
             toscaFileValidator.validateRequiredKeys(yamlMap, path);
             // Validate keywords and capture their positions
             toscaFileValidator.validateKeywords(yamlMap, toscaFileParser.getConstructorPositions(), toscaFileParser.getYamlContent());
-            //context.setToscaFile(toscaFileParser.getToscaFile());
+            context.setToscaFile(toscaFileParser.getToscaFile());
             List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
@@ -81,7 +81,7 @@ public class DiagnosticsPublisher {
         TOSCAFileParser toscaFileParser = new TOSCAFileParser();
         TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();
         try {
-            Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(content);
+            Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(content , client);
             // Validate required keywords
             toscaFileValidator.validateRequiredKeys(yamlMap, content);
             // Validate keywords and capture their positions
@@ -100,7 +100,6 @@ public class DiagnosticsPublisher {
             List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
-        
     }
     
     public List<Diagnostic> setDiagnostics(ArrayList<DiagnosticsSetter> diagnostics) {

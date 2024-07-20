@@ -17,18 +17,19 @@ import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class ToscaFileConstructor {
+    private static final Map<String, ArtifactType> artifactTypesNamesMap = new HashMap<>();
     public static TOSCAFile ConstructToscaFile(Map<String, Object> yamlMap) {
         String toscaDefinitionsVersion = (String) yamlMap.get("tosca_definitions_version");
         Optional<String> description = Optional.ofNullable((String) yamlMap.get("description"));
         Optional<Map<String, Object>> metadata = Optional.ofNullable((Map<String, Object>) yamlMap.get("metadata"));
         Optional<Object> dslDefinitions = Optional.ofNullable(yamlMap.get("dsl_definitions"));
+
         Optional<Map<String, ArtifactType>> artifactTypes = Optional.ofNullable(parseArtifactTypes((Map<String, Object>) yamlMap.get("artifact_types")));
+
         Optional<Map<String, Object>> dataTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("data_types"));
         Optional<Map<String, Object>> capabilityTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("capability_types"));
         Optional<Map<String, Object>> interfaceTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("interface_types"));
@@ -65,18 +66,31 @@ public class ToscaFileConstructor {
 
     private static Map<String, ArtifactType> parseArtifactTypes(Map<String, Object> artifactTypesMap) {
         if (artifactTypesMap == null) {
-            return null;
+            return Collections.emptyMap();
         }
-
         return artifactTypesMap.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
-                e -> parseArtifactType((Map<String, Object>) e.getValue())
+                e -> {
+                    ArtifactType artifactType = parseArtifactType((Map<String, Object>) e.getValue());
+                    artifactTypesNamesMap.put(e.getKey(), artifactType);
+                    return artifactType;
+                } 
             ));
     }
 
     private static ArtifactType parseArtifactType(Map<String, Object> artifactTypeMap) {
-        Optional<ArtifactType> derivedFrom = Optional.ofNullable(parseArtifactType((Map<String, Object>) artifactTypeMap.get("derived_from")));
+        if (artifactTypeMap == null) {
+            return null;
+        }
+
+        Optional<ArtifactType> derivedFrom = null;
+        try {
+            derivedFrom = Optional.ofNullable(getArtifactType((String) artifactTypeMap.get("derived_from")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+
         Optional<String> version = Optional.ofNullable((String) artifactTypeMap.get("version"));
         Optional<Map<String, String>> metadata = Optional.ofNullable((Map<String, String>) artifactTypeMap.get("metadata"));
         Optional<String> description = Optional.ofNullable((String) artifactTypeMap.get("description"));
@@ -95,11 +109,14 @@ public class ToscaFileConstructor {
         );
     }
 
+    private static ArtifactType getArtifactType(String derivedFrom) {
+        return artifactTypesNamesMap.getOrDefault(derivedFrom, null);
+    }
+
     private static Map<String, PropertyDefinition> parseProperties(Map<String, Object> propertiesMap) {
         if (propertiesMap == null) {
-            return null;
+            return Collections.emptyMap();
         }
-
         return propertiesMap.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
@@ -108,7 +125,10 @@ public class ToscaFileConstructor {
     }
 
     private static PropertyDefinition parsePropertyDefinition(Map<String, Object> propertyDefinitionMap) {
-        Object type = propertyDefinitionMap.get("type");
+        if (propertyDefinitionMap == null) {
+            return null;
+        }
+        String type = (String) propertyDefinitionMap.get("type");
         Optional<String> description = Optional.ofNullable((String) propertyDefinitionMap.get("description"));
         Optional<Map<String, Object>> metadata = Optional.ofNullable((Map<String, Object>) propertyDefinitionMap.get("metadata"));
         Optional<Boolean> required = Optional.ofNullable((Boolean) propertyDefinitionMap.get("required"));
