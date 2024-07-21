@@ -34,6 +34,12 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             Object propertyDefinition = propertyDefinitionsMap.get(PropertyDefinitionKey);
             if (propertyDefinition instanceof Map) {
                 validateRequiredKeys((Map<String, Object>) propertyDefinition,YamlContent);
+                if (((Map<?, ?>) propertyDefinition).containsKey("type") && ((Map<?, ?>) propertyDefinition).get("type").equals("map")) {
+                    ValidateEntrySchema(positions, YamlContent, lines, PropertyDefinitionKey, (Map<?, ?>) propertyDefinition);
+                    validateKeySchema(positions, YamlContent, lines, PropertyDefinitionKey, (Map<?, ?>) propertyDefinition);
+                } else if (((Map<?, ?>) propertyDefinition).containsKey("type") && ((Map<?, ?>) propertyDefinition).get("type").equals("list")) {
+                    ValidateEntrySchema(positions, YamlContent, lines, PropertyDefinitionKey, (Map<?, ?>) propertyDefinition);
+                }
                 for (String key : ((Map<String, Object>) propertyDefinition).keySet()) {
                     if (!validPropertyDefinitionKeywords.contains(key)) {
                         Mark mark = positions.get(key);
@@ -42,6 +48,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
                         handleNotValidKeywords("Invalid property definition keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
                     } 
+                    
                     if (key.equals("default")) {
                         String type = (String) ((Map<?, ?>) propertyDefinition).get("type");
                         Object defaultValue = ((Map<?, ?>) propertyDefinition).get(key);
@@ -54,11 +61,30 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                             handleNotValidKeywords("default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
                         }
                     }
-                    
                 }
             }
         }
         return diagnostics;
+    }
+
+    public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, String PropertyDefinitionKey, Map<?, ?> propertyDefinition) {
+        if (! propertyDefinition.containsKey("entry_schema")) {
+            Mark mark = positions.get(PropertyDefinitionKey);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
+            handleNotValidKeywords("Missing entry_schema at property: " + PropertyDefinitionKey, line, column, endColumn);
+        }
+    }
+
+    public void validateKeySchema(Map<String, Mark> positions, String YamlContent, String[] lines, String PropertyDefinitionKey, Map<?, ?> propertyDefinition) {
+        if (! propertyDefinition.containsKey("key_schema")) {
+            Mark mark = positions.get(PropertyDefinitionKey);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
+            handleNotValidKeywords("Missing key_schema at property: " + PropertyDefinitionKey, line, column, endColumn);
+        }
     }
 
     @Override

@@ -15,6 +15,7 @@ package org.eclipse.winery.lsp.Server.ServerCore.Parsing;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction.ToscaFileConstructor;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.error.Mark;
 

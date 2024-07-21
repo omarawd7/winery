@@ -11,26 +11,16 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-/**
- * Property Definition
- * For more details on the TOSCA specification, visit:
- * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#93-property-definition">Property Definition</a>
- */
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import io.soabase.recordbuilder.core.RecordBuilder;
 
-import java.util.Map;
 import java.util.Optional;
 
 @RecordBuilder
-public record PropertyDefinition<T>(
+public record SchemaDefinition<T>(
     T type,
     Optional<String> description,
-    Optional<Map<String, Object>> metadata,
-    Boolean required,
-    Optional<T> Default ,
-    Optional<Object> value,//TODO Replace the objects with the real object representation
     Optional<Object> validation,
     Optional<SchemaDefinition> keySchema,
     Optional<SchemaDefinition> entrySchema) { }
