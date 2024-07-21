@@ -42,8 +42,6 @@ public class ToscaTextDocService implements TextDocumentService {
     public void didChange(DidChangeTextDocumentParams params) {
         String uri = params.getTextDocument().getUri();
         Path uriPath = CommonUtils.uriToPath(uri);
-
-        BaseOperationContext context = ContextBuilder.baseContext(this.serverContext);
         if (CommonUtils.isToscaFile(uriPath)) {
             DiagnosticsPublisher diagnosticspublisher = DiagnosticsPublisher.getInstance(serverContext);
             List<TextDocumentContentChangeEvent> changes = params.getContentChanges();
@@ -72,7 +70,8 @@ public class ToscaTextDocService implements TextDocumentService {
         Position position = params.getPosition();
         String content = serverContext.getFileContent(uri);
         String line = content.split("\n")[position.getLine()];
-        List<CompletionItem> completionItems = AutoCompletionHandler.handel(line,position);
+        AutoCompletionHandler autoCompletionHandler = new AutoCompletionHandler(serverContext);
+        List<CompletionItem> completionItems = autoCompletionHandler.handel(line,position);
         return CompletableFuture.completedFuture(Either.forLeft(completionItems));
     }
 

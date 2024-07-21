@@ -15,19 +15,25 @@ package org.eclipse.winery.lsp.Server.ServerCore.Completion;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 
 import java.util.List;
 
 public class AutoCompletionHandler {
-    public static List<CompletionItem> handel(String line, Position position) {
-        return ArtifactTypeCompletion(line, position);
+    LSContext lsContext;
 
+    public AutoCompletionHandler(LSContext lsContext) {
+        this.lsContext = lsContext;
     }
 
-    private static List<CompletionItem> ArtifactTypeCompletion(String line, Position position) {
+    public List<CompletionItem> handel(String line, Position position) {
+        return ArtifactTypeCompletion(line, position);
+    }
+
+    private List<CompletionItem> ArtifactTypeCompletion(String line, Position position) {
         if (line.contains("derived_from:")) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
-            return completionItemGetter.getAvailableArtifactTypes();
+            return completionItemGetter.getAvailableArtifactTypes(lsContext);
         }
         if (line.trim().isEmpty()) { // Auto complete the TOSCAFile Keywords when press space 
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();

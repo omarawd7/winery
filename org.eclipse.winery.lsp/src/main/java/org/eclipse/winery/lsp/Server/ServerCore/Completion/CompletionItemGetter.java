@@ -15,23 +15,20 @@ package org.eclipse.winery.lsp.Server.ServerCore.Completion;
 
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CompletionItemGetter {
-    public List<CompletionItem> getAvailableArtifactTypes() {
-        List<String> artifactTypes = List.of( //TODO will be replaced with the currently exist artifactTypes 
-            " Root",
-            " File",
-            " Deployment",
-            " Deployment.Image",
-            " Deployment.Image.VM",
-            " Implementation",
-            " Implementation.Bash",
-            " Implementation.Python"
-        );
-
+    public List<CompletionItem> getAvailableArtifactTypes(LSContext lsContext) {
+        List<String> artifactTypes = new ArrayList<>();
+        for (Map.Entry<String, ArtifactType> itr:lsContext.getToscaFile().artifactTypes().get().entrySet()) {
+            artifactTypes.add(" " + itr.getKey());
+        }
         return artifactTypes.stream()
             .map(type -> {
                 CompletionItem item = new CompletionItem(type);
