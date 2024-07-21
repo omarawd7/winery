@@ -14,6 +14,7 @@
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.SchemaDefinition;
 
 import java.util.Collections;
 import java.util.Map;
@@ -44,10 +45,15 @@ public class PropertyDefinitionParser {
         Optional<Object> Default = Optional.ofNullable(propertyDefinitionMap.get("default"));
         Optional<Object> value = Optional.ofNullable(propertyDefinitionMap.get("value"));
         Optional<Object> validation = Optional.ofNullable(propertyDefinitionMap.get("validation"));
-        Optional<Object> keySchema = Optional.ofNullable(propertyDefinitionMap.get("key_schema"));
-        Optional<Object> entrySchema = Optional.ofNullable(propertyDefinitionMap.get("entry_schema"));
-
-        return new PropertyDefinition(
+        Optional<SchemaDefinition> keySchema = Optional.empty();
+        Optional<SchemaDefinition> entrySchema = Optional.empty();
+        try {
+            keySchema = Optional.ofNullable(SchemaDefenitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("key_schema",null)));
+            entrySchema = Optional.ofNullable(SchemaDefenitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("entrySchema",null)));
+        } catch (Exception e) {
+            System.err.println("Error parsing Schema");
+        }
+        return new PropertyDefinition (
             type,
             description,
             metadata,
