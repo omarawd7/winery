@@ -15,8 +15,11 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.SchemaDefinition;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.*;
 
+import java.time.OffsetDateTime;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -38,11 +41,11 @@ public class PropertyDefinitionParser {
         if (propertyDefinitionMap == null) {
             return null;
         }
-        String type = (String) propertyDefinitionMap.get("type");
-        Optional<String> description = Optional.ofNullable((String) propertyDefinitionMap.get("description"));
-        Optional<Map<String, Object>> metadata = Optional.ofNullable((Map<String, Object>) propertyDefinitionMap.get("metadata"));
-        Boolean required = (Boolean) propertyDefinitionMap.getOrDefault("required", true);
-        Optional<Object> Default = Optional.ofNullable(propertyDefinitionMap.get("default"));
+        ToscaString type = new ToscaString((String) propertyDefinitionMap.get("type"));
+        Optional<ToscaString> description = Optional.ofNullable(new ToscaString((String) propertyDefinitionMap.get("description")));
+        Optional<ToscaMap<String, Object>> metadata = Optional.ofNullable(new ToscaMap<>((Map<String, Object>) propertyDefinitionMap.get("metadata")));
+        ToscaBoolean required = new ToscaBoolean((Boolean) propertyDefinitionMap.getOrDefault("required", true));
+        Optional<Object> Default = Optional.ofNullable( getPropertyType(propertyDefinitionMap.get("default"), type));
         Optional<Object> value = Optional.ofNullable(propertyDefinitionMap.get("value"));
         Optional<Object> validation = Optional.ofNullable(propertyDefinitionMap.get("validation"));
         Optional<SchemaDefinition> keySchema = Optional.empty();
@@ -64,5 +67,22 @@ public class PropertyDefinitionParser {
             keySchema,
             entrySchema
         );
+    }
+
+    private static Object getPropertyType(Object defaultValue, ToscaString type) {
+        return switch (type.getValue()) {
+            case "boolean" -> new ToscaBoolean((Boolean) defaultValue);
+            case "string" -> new ToscaString((String) defaultValue);
+            case "integer" -> new ToscaInteger((int) defaultValue);
+            case "float" -> new ToscaFloat((float) defaultValue);
+            case "bytes" -> new ToscaFloat((Byte) defaultValue);
+            case "nil" -> ToscaNil.getInstance();
+            case "timestamp" -> new ToscaTimestamp((OffsetDateTime) defaultValue);
+            //Todo add scalar-unit and scalar-unit.time	
+            case "version" -> new ToscaVersion((String) defaultValue);
+            case "list" -> new ToscaList((List<Object>) defaultValue);
+            case "map" -> new ToscaMap<>((Map<Object, Object>) defaultValue);
+            default -> null;
+        };
     }
 }

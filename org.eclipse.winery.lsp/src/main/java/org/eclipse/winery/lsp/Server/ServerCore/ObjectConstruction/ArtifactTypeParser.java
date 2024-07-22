@@ -15,7 +15,9 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
-
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,18 +43,18 @@ public class ArtifactTypeParser {
             return null;
         }
 
-        Optional<ArtifactType> derivedFrom = null;
+        Optional<ArtifactType> derivedFrom = Optional.empty();
         try {
             derivedFrom = Optional.ofNullable(getArtifactType((String) artifactTypeMap.get("derived_from")));
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
 
-        Optional<String> version = Optional.ofNullable((String) artifactTypeMap.get("version"));
-        Optional<Map<String, String>> metadata = Optional.ofNullable((Map<String, String>) artifactTypeMap.get("metadata"));
-        Optional<String> description = Optional.ofNullable((String) artifactTypeMap.get("description"));
-        Optional<String> mimeType = Optional.ofNullable((String) artifactTypeMap.get("mime_type"));
-        Optional<List<String>> fileExt = Optional.ofNullable((List<String>) artifactTypeMap.get("file_ext"));
+        Optional<ToscaString> version = Optional.of(new ToscaString((String) artifactTypeMap.get("version")));
+        Optional<ToscaMap<String, String>> metadata = Optional.of(new ToscaMap<>((Map<String, String>) artifactTypeMap.get("metadata")));
+        Optional<ToscaString> description = Optional.of(new ToscaString((String) artifactTypeMap.get("description")));
+        Optional<ToscaString> mimeType = Optional.of(new ToscaString((String) artifactTypeMap.get("mime_type")));
+        Optional<ToscaList<String>> fileExt = Optional.of(new ToscaList<>((List<String>) artifactTypeMap.get("file_ext")));
         Optional<Map<String, PropertyDefinition>> properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) artifactTypeMap.get("properties")));
 
         return new ArtifactType(

@@ -11,17 +11,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
-import io.soabase.recordbuilder.core.RecordBuilder;
-import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+package org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes;
 
-import java.util.Optional;
+import java.time.OffsetDateTime;
 
-@RecordBuilder
-public record SchemaDefinition<T>(
-    T type,
-    Optional<ToscaString> description,
-    Optional<Object> validation,
-    Optional<SchemaDefinition> keySchema,
-    Optional<SchemaDefinition> entrySchema) { }
+public class ToscaTimestamp {
+    private final OffsetDateTime value;
+
+    public ToscaTimestamp(OffsetDateTime value) {
+        this.value = value;
+    }
+
+    public OffsetDateTime getValue() {
+        return value;
+    }
+}

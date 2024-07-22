@@ -11,17 +11,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
+package org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes;
 
-import io.soabase.recordbuilder.core.RecordBuilder;
-import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+import java.util.List;
 
-import java.util.Optional;
+public class ToscaList<T> {
+    private List<T> value;
 
-@RecordBuilder
-public record SchemaDefinition<T>(
-    T type,
-    Optional<ToscaString> description,
-    Optional<Object> validation,
-    Optional<SchemaDefinition> keySchema,
-    Optional<SchemaDefinition> entrySchema) { }
+    public ToscaList(List<T> value) {
+        this.value = value;
+    }
+
+    public List<T> getValue() {
+        return value;
+    }
+}

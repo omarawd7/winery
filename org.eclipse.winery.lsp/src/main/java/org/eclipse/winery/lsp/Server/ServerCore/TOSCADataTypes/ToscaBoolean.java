@@ -11,17 +11,17 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
-import io.soabase.recordbuilder.core.RecordBuilder;
-import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+package org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes;
 
-import java.util.Optional;
+public class ToscaBoolean {
+    private final boolean value;
 
-@RecordBuilder
-public record SchemaDefinition<T>(
-    T type,
-    Optional<ToscaString> description,
-    Optional<Object> validation,
-    Optional<SchemaDefinition> keySchema,
-    Optional<SchemaDefinition> entrySchema) { }
+    public ToscaBoolean(boolean value) {
+        this.value = value;
+    }
+
+    public boolean getValue() {
+        return value;
+    }
+}

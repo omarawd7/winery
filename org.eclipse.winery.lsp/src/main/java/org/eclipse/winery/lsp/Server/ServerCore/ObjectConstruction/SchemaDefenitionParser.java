@@ -15,6 +15,7 @@
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.SchemaDefinition;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 
 import java.util.Map;
 import java.util.Optional;
@@ -22,8 +23,8 @@ import java.util.Optional;
 public class SchemaDefenitionParser {
     public static SchemaDefinition parseSchemaDefinition(Map<String, Object> Schema) {
         if (Schema == null) { return null; }
-        String type = (String) Schema.get("type");
-        Optional<String> description = Optional.ofNullable((String) Schema.get("description"));
+        ToscaString type = new ToscaString((String) Schema.get("type"));
+        Optional<ToscaString> description = Optional.ofNullable(new ToscaString((String) Schema.get("description")));
         Optional<Object> validation = Optional.ofNullable(Schema.get("validation"));
         Optional<SchemaDefinition> keySchema = Optional.empty();
         Optional<SchemaDefinition> entrySchema = Optional.empty();

@@ -15,28 +15,31 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+
 import java.util.*;
 
 public class ToscaFileConstructor {
     public static TOSCAFile ConstructToscaFile(Map<String, Object> yamlMap) {
-        String toscaDefinitionsVersion = (String) yamlMap.get("tosca_definitions_version");
-        Optional<String> description = Optional.ofNullable((String) yamlMap.get("description"));
-        Optional<Map<String, Object>> metadata = Optional.ofNullable((Map<String, Object>) yamlMap.get("metadata"));
+        ToscaString toscaDefinitionsVersion = new ToscaString ((String) yamlMap.get("tosca_definitions_version"));
+        Optional<ToscaString> description = Optional.of(new ToscaString( (String) yamlMap.get("description")));
+        Optional<ToscaMap<String, Object>> metadata = Optional.of(new ToscaMap<>(((Map<String, Object>) yamlMap.get("metadata"))));
         Optional<Object> dslDefinitions = Optional.ofNullable(yamlMap.get("dsl_definitions"));
-
         Optional<Map<String, ArtifactType>> artifactTypes = Optional.ofNullable(ArtifactTypeParser.parseArtifactTypes((Map<String, Object>) yamlMap.get("artifact_types")));
 
-        Optional<Map<String, Object>> dataTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("data_types"));
-        Optional<Map<String, Object>> capabilityTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("capability_types"));
-        Optional<Map<String, Object>> interfaceTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("interface_types"));
-        Optional<Map<String, Object>> relationshipTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("relationship_types"));
-        Optional<Map<String, Object>> nodeTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("node_types"));
-        Optional<Map<String, Object>> groupTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("group_types"));
-        Optional<Map<String, Object>> policyTypes = Optional.ofNullable((Map<String, Object>) yamlMap.get("policy_types"));
-        Optional<Map<String, Object>> repositories = Optional.ofNullable((Map<String, Object>) yamlMap.get("repositories"));
-        Optional<Map<String, Object>> functions = Optional.ofNullable((Map<String, Object>) yamlMap.get("functions"));
-        Optional<String> profile = Optional.ofNullable((String) yamlMap.get("profile"));
-        Optional<List<Object>> imports = Optional.ofNullable((List<Object>) yamlMap.get("imports"));
+        Optional<ToscaMap<String, Object>> dataTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("data_types")));
+        Optional<ToscaMap<String, Object>> capabilityTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("capability_types")));
+        Optional<ToscaMap<String, Object>> interfaceTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("interface_types")));
+        Optional<ToscaMap<String, Object>> relationshipTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("relationship_types")));
+        Optional<ToscaMap<String, Object>> nodeTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("node_types")));
+        Optional<ToscaMap<String, Object>> groupTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("group_types")));
+        Optional<ToscaMap<String, Object>> policyTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("policy_types")));
+        Optional<ToscaMap<String, Object>> repositories = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("repositories")));
+        Optional<ToscaMap<String, Object>> functions = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("functions")));
+        Optional<ToscaString> profile = Optional.of(new ToscaString((String) yamlMap.get("profile")));
+        Optional<ToscaList<Object>> imports = Optional.of(new ToscaList<>((List<Object>) yamlMap.get("imports")));
         Optional<Object> serviceTemplate = Optional.ofNullable(yamlMap.get("service_template"));
 
         return new TOSCAFile(

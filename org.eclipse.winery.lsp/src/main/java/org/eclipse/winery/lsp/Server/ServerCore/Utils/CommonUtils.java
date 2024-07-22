@@ -40,7 +40,7 @@ public class CommonUtils {
         return lines[line - 1].length();
     }
 
-    public static boolean isTypeMatch(String type, Object value) {
+    public static boolean isTypeMatch(String type, Object value) { //TODO In YAML users should thus add quotation marks around literal strings that YAML would otherwise interpret as other types.
         return switch (type) {
             case "string" -> value instanceof String;
             case "int", "integer" -> value instanceof Integer;

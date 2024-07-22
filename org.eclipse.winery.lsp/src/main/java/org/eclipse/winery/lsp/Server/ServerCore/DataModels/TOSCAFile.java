@@ -19,26 +19,28 @@
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import io.soabase.recordbuilder.core.RecordBuilder;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 @RecordBuilder
-public record TOSCAFile(String toscaDefinitionsVersion, 
-                        Optional<String> description,
-                        Optional<Map<String, Object>> metadata,
+public record TOSCAFile(ToscaString toscaDefinitionsVersion, 
+                        Optional<ToscaString> description,
+                        Optional <ToscaMap<String, Object>> metadata,
                         Optional<Object> dslDefinitions,
-                        Optional<Map<String, ArtifactType>> artifactTypes,
-                        Optional<Map<String, Object>> dataTypes,//TODO Replace the objects with the real object representation
-                        Optional<Map<String, Object>> capabilityTypes,
-                        Optional<Map<String, Object>> interfaceTypes,
-                        Optional<Map<String, Object>> relationshipTypes,
-                        Optional<Map<String, Object>> nodeTypes,
-                        Optional<Map<String, Object>> groupTypes,
-                        Optional<Map<String, Object>> policyTypes,
-                        Optional<Map<String, Object>> repositories,
-                        Optional<Map<String, Object>> functions,
-                        Optional<String> profile,
-                        Optional<List<Object>> imports,
+                        Optional<Map<String, ArtifactType>> artifactTypes, //TODO change this to ToscaMap
+                        Optional<ToscaMap<String, Object>> dataTypes,//TODO Replace the objects with the real object representation
+                        Optional<ToscaMap<String, Object>> capabilityTypes,
+                        Optional<ToscaMap<String, Object>> interfaceTypes,
+                        Optional<ToscaMap<String, Object>> relationshipTypes,
+                        Optional<ToscaMap<String, Object>> nodeTypes,
+                        Optional<ToscaMap<String, Object>> groupTypes,
+                        Optional<ToscaMap<String, Object>> policyTypes,
+                        Optional<ToscaMap<String, Object>> repositories,
+                        Optional<ToscaMap<String, Object>> functions,
+                        Optional<ToscaString> profile,
+                        Optional<ToscaList<Object>> imports,
                         Optional<Object> serviceTemplate) { } 

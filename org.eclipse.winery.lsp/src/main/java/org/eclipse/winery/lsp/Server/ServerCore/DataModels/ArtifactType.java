@@ -19,19 +19,20 @@
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import io.soabase.recordbuilder.core.RecordBuilder;
-
-import java.util.List;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 import java.util.Map;
 import java.util.Optional;
 
 @RecordBuilder
 public record ArtifactType(
     Optional<ArtifactType> derivedFrom,
-    Optional<String> version,
-    Optional<Map<String, String>> metadata,
-    Optional<String> description,
-    Optional<String> mimeType,
-    Optional<List<String>> fileExt,
-    Optional<Map<String, PropertyDefinition>> properties
+    Optional<ToscaString> version,
+    Optional<ToscaMap<String, String>> metadata,
+    Optional<ToscaString> description,
+    Optional<ToscaString> mimeType,
+    Optional<ToscaList<String>> fileExt,
+    Optional<Map<String, PropertyDefinition>> properties //TODO change this to ToscaMap
 ) { }
 

@@ -19,16 +19,17 @@
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import io.soabase.recordbuilder.core.RecordBuilder;
-
-import java.util.Map;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaBoolean;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 import java.util.Optional;
 
 @RecordBuilder
 public record PropertyDefinition<T>(
     T type,
-    Optional<String> description,
-    Optional<Map<String, Object>> metadata,
-    Boolean required,
+    Optional<ToscaString> description,
+    Optional<ToscaMap<String, Object>> metadata,
+    ToscaBoolean required,
     Optional<T> Default ,
     Optional<Object> value,//TODO Replace the objects with the real object representation
     Optional<Object> validation,

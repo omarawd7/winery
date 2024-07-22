@@ -11,17 +11,19 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
+package org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes;
 
-import io.soabase.recordbuilder.core.RecordBuilder;
-import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+public class ToscaString {
+    private final String value;
 
-import java.util.Optional;
-
-@RecordBuilder
-public record SchemaDefinition<T>(
-    T type,
-    Optional<ToscaString> description,
-    Optional<Object> validation,
-    Optional<SchemaDefinition> keySchema,
-    Optional<SchemaDefinition> entrySchema) { }
+    public ToscaString(String value) {
+        if (value == null) {
+            //throw new IllegalArgumentException("TOSCA string cannot be null"+ value);
+            value = "";  
+        }
+        this.value = value;
+    }
+    public String getValue() {
+        return value;
+    }
+}
