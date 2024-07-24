@@ -23,11 +23,7 @@ public class ToscaMap<K, V> {
     public ToscaMap(Map<K, V> value) {
         this.value = value;
     }
-
-    public ToscaMap(ToscaMap<String, ArtifactType> stringArtifactTypeToscaMap) {
-        this.value = (Map<K, V>) stringArtifactTypeToscaMap;
-    }
-
+    
     public Map<K, V> getValue() {
         return value;
     }

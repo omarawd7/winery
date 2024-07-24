@@ -11,7 +11,6 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-
 package org.eclipse.winery.lsp.Server.Validation;
 
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
@@ -47,9 +46,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
                         handleNotValidKeywords("Invalid property definition keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
-                    } 
-                    
-                    if (key.equals("default")) {
+                    } else if (key.equals("default")) {
                         String type = (String) ((Map<?, ?>) propertyDefinition).get("type");
                         Object defaultValue = ((Map<?, ?>) propertyDefinition).get(key);
                         if (!CommonUtils.isTypeMatch(type, defaultValue)) {
@@ -60,11 +57,24 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
 
                             handleNotValidKeywords("default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
                         }
+                    } else if(key.equals("entry_schema")){
+                        ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
+                    } else if (key.equals("key_schema")) {
+                        ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
                     }
                 }
             }
         }
         return diagnostics;
+    }
+
+    public void ValidateSchemaDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> propertyDefinition) {
+        Object entrySchema = propertyDefinition.get("entry_schema");
+        if (entrySchema instanceof Map) {
+            ValidateSchemaDefinition validateSchemaDefinition = new ValidateSchemaDefinition();
+            ArrayList<DiagnosticsSetter> SchemaDefinitionDiagnostics = validateSchemaDefinition.validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, YamlContent, lines);
+            diagnostics.addAll(SchemaDefinitionDiagnostics); 
+        }
     }
 
     public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, String PropertyDefinitionKey, Map<?, ?> propertyDefinition) {
