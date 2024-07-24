@@ -55,6 +55,7 @@ public class DiagnosticsPublisher {
             toscaFileValidator.validateRequiredKeys(yamlMap, path);
             // Validate keywords and capture their positions
             toscaFileValidator.validateKeywords(yamlMap, toscaFileParser.getConstructorPositions(), toscaFileParser.getYamlContent());
+            
             context.setToscaFile(toscaFileParser.getToscaFile());
             List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
@@ -86,7 +87,7 @@ public class DiagnosticsPublisher {
             toscaFileValidator.validateRequiredKeys(yamlMap, content);
             // Validate keywords and capture their positions
             toscaFileValidator.validateKeywords(yamlMap, toscaFileParser.getConstructorPositions(), content);
-            //context.setToscaFile(toscaFileParser.getToscaFile());
+            context.setToscaFile(toscaFileParser.getToscaFile());
             List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
