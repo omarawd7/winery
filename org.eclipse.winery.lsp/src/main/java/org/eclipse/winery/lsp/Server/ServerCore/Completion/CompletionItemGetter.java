@@ -18,8 +18,6 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import static java.util.stream.Collectors.toList;
 
 public class CompletionItemGetter {
