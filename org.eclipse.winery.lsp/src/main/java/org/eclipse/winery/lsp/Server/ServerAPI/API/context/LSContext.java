@@ -1,9 +1,3 @@
-package org.eclipse.winery.lsp.Server.ServerAPI.API.context;
-
-import org.eclipse.lsp4j.ClientCapabilities;
-import org.eclipse.lsp4j.services.LanguageClient;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
-import java.util.Optional;
 /**
  * This class is designed to carry information between method calls.
  * <p>
@@ -14,6 +8,12 @@ import java.util.Optional;
  * </p>
  *
  */
+package org.eclipse.winery.lsp.Server.ServerAPI.API.context;
+
+import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import java.util.Optional;
 
 public interface LSContext {
     

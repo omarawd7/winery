@@ -35,6 +35,7 @@ public class AutoCompletionHandler {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableArtifactTypes(lsContext);
         }
+        //TODO add context dependent
         if (line.trim().isEmpty()) { // Auto complete the TOSCAFile Keywords when press space 
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getTOSCAFileKeywords(position);

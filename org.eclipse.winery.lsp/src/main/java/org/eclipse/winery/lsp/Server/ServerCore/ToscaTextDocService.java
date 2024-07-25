@@ -8,7 +8,7 @@ import org.eclipse.winery.lsp.Server.ServerAPI.API.context.ContextBuilder;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Completion.AutoCompletionHandler;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
-import org.eclipse.winery.lsp.Server.Validation.DiagnosticsPublisher;
+import org.eclipse.winery.lsp.Server.ServerCore.Validation.DiagnosticsPublisher;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

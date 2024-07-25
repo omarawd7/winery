@@ -16,18 +16,17 @@ package org.eclipse.winery.lsp.Server.ServerCore.Completion;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
+
+import static java.util.stream.Collectors.toList;
 
 public class CompletionItemGetter {
     public List<CompletionItem> getAvailableArtifactTypes(LSContext lsContext) {
         List<String> artifactTypes = new ArrayList<>();
-        for (Map.Entry<String, ArtifactType> itr:lsContext.getToscaFile().artifactTypes().get().entrySet()) {
-            artifactTypes.add(" " + itr.getKey());
+        for (String key : lsContext.getToscaFile().artifactTypes().get().keySet()) {
+            artifactTypes.add(" " + key);
         }
         return artifactTypes.stream()
             .map(type -> {
@@ -35,7 +34,7 @@ public class CompletionItemGetter {
                 item.setKind(CompletionItemKind.Value);
                 return item;
             })
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 
     public List<CompletionItem> getTOSCAFileKeywords(Position position) {
@@ -61,7 +60,7 @@ public class CompletionItemGetter {
                 item.setTextEdit(Either.forLeft(textEdit));
                 return item;
             })
-            .collect(Collectors.toList());
+            .collect(toList());
     }
 }
 

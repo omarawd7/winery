@@ -16,7 +16,7 @@
  * The DiagnosticsSetter class represents a diagnostic message with details about an error
  * such as its line and column positions, the message, the problem description, and the context.
  */
-package org.eclipse.winery.lsp.Server.Validation;
+package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
 public class DiagnosticsSetter {
     private int ErrorLine;
