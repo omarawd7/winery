@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
@@ -57,10 +58,20 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
 
                             handleNotValidKeywords("default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
                         }
-                    } else if(key.equals("entry_schema")){
+                    } else if (key.equals("entry_schema")) {
                         ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
                     } else if (key.equals("key_schema")) {
                         ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
+                    } else if (key.equals("validation")) {
+                        FunctionParser functionParser = new FunctionParser();
+                        //parsing the validation function 
+                        try {
+                            functionParser.parseFunctionCall((String) ((Map<?, ?>) propertyDefinition).get(key));    
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                        //TODO call the TOSCA function tha have been parsed 
+                        
                     }
                 }
             }
