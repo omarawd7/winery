@@ -50,7 +50,25 @@ public class CommonUtils {
             default -> false;
         };
     }
+    
+   public static Boolean isFunction(String line) {
+        line = line.trim();
+        if (line.startsWith("{") && line.endsWith("}")) {
+            return true;
+        }
+        throw new IllegalArgumentException("Malformed input: missing curly brackets");
+    }
 
+   public static Boolean isFunctionCall(String line) {
+        line = line.trim();
+        line = line.substring(0, line.length() - 1).trim();
+        if (line.startsWith("$")) {
+            // It's a function call return true scape if false
+            return line.length() <= 1 || line.charAt(1) != '$';
+        }
+        return false;
+    }
+    
     public static boolean isToscaFile(Path path) {
         String fileName = path.toString();
         return fileName.endsWith(".yaml") || fileName.endsWith(".yml") || fileName.endsWith(".tosca");

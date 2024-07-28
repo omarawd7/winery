@@ -66,7 +66,9 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         FunctionParser functionParser = new FunctionParser();
                         //parsing the validation function 
                         try {
-                            functionParser.parseFunctionCall((String) ((Map<?, ?>) propertyDefinition).get(key));    
+                            if (CommonUtils.isFunction((String) ((Map<?, ?>) propertyDefinition).get(key))) {
+                                functionParser.parseFunctionCall((String) ((Map<?, ?>) propertyDefinition).get(key));   
+                            }    
                         } catch (Exception e) {
                             e.printStackTrace();
                         }

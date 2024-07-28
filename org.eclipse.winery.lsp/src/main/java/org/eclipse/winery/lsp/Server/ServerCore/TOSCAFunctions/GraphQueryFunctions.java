@@ -15,10 +15,13 @@ package org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
 
+import java.util.List;
+
 public class GraphQueryFunctions {
-    public static Object value(PropertyDefinition propertyDefinition) {
-            if (propertyDefinition.value().isPresent()) {
-                return propertyDefinition.value().get();
+    
+    public static Object value(PropertyDefinition propertyDefinition,int index) {
+            if (propertyDefinition.value().isPresent() && propertyDefinition.value().get() instanceof List<?>) {
+                return ((List<?>) propertyDefinition.value().get()).get(index);
             }
             return null;
     }
