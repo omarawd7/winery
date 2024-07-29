@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 
@@ -25,6 +26,11 @@ import java.util.Set;
 
 public class ValidateSchemaDefinition implements DiagnosesHandler  {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
+    TOSCAFile toscaFile;
+    
+    public ValidateSchemaDefinition(TOSCAFile toscaFile) {
+    this.toscaFile = toscaFile;
+    }
 
     public ArrayList<DiagnosticsSetter> validateSchemaDefinitions(Map<String, Object> SchemaDefinitionMap, Map<String, Mark> positions, String yamlContent, String[] lines) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
@@ -47,6 +53,7 @@ public class ValidateSchemaDefinition implements DiagnosesHandler  {
         
         return diagnostics;
     }
+    
     public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, String PropertyDefinitionKey, Map<?, ?> propertyDefinition) {
         if (! propertyDefinition.containsKey("entry_schema")) {
             Mark mark = positions.get("entry_schema");
@@ -56,6 +63,7 @@ public class ValidateSchemaDefinition implements DiagnosesHandler  {
             handleNotValidKeywords("Missing entry_schema at Schema: " + PropertyDefinitionKey, line, column, endColumn);
         }
     }
+    
     @Override
     public void handleNotValidKeywords(String message, int line, int column, int endColumn) {
         DiagnosticsSetter SchemaDefinitionDiagnostic = new DiagnosticsSetter();

@@ -22,7 +22,9 @@ import io.soabase.recordbuilder.core.RecordBuilder;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaBoolean;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
 @RecordBuilder
 public record PropertyDefinition<T>(
@@ -31,7 +33,7 @@ public record PropertyDefinition<T>(
     Optional<ToscaMap<String, Object>> metadata,
     ToscaBoolean required,
     Optional<T> Default ,
-    Optional<Object> value,//TODO Replace the objects with the real object representation
-    Optional<Object> validation,
+    Optional<Object> value,
+    Optional<Stack<Map<String, Object>>> validation,
     Optional<SchemaDefinition> keySchema,
     Optional<SchemaDefinition> entrySchema) { }

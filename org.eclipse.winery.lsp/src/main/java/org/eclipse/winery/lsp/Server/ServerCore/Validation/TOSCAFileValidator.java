@@ -11,9 +11,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
@@ -25,11 +25,14 @@ import java.util.Set;
 
 public class TOSCAFileValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
-
-    public void validateRequiredKeys(Map<String, Object> yamlMap, Path path) {
-        if (!yamlMap.containsKey("tosca_definitions_version")) {
-            handleDiagnosticsError("Missing required key: tosca_definitions_version", path);
-        }
+    TOSCAFile toscaFile;
+    
+    public void validate(Map<String, Object> yamlMap, TOSCAFile toscaFile, String content, Map<String, Mark> positions ) {
+        this.toscaFile = toscaFile;
+        // Validate required keywords
+        validateRequiredKeys(yamlMap, content);
+        // Validate keywords and capture their positions
+        validateKeywords(yamlMap, positions, content);
     }
 
     public void validateRequiredKeys(Map<String, Object> yamlMap, String content) {
@@ -55,15 +58,19 @@ public class TOSCAFileValidator implements DiagnosesHandler {
                 int endColumn = CommonUtils.getEndColumn("", line, column, lines);
                 handleNotValidKeywords("Invalid keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
             } else if (key.equals("artifact_types")) {
-                Object artifactTypes = yamlMap.get(key);
-                if (artifactTypes instanceof Map) {
-                    ArtifactTypeValidator artifactTypeValidator = new ArtifactTypeValidator();
-                    ArrayList<DiagnosticsSetter> ArtifactTypeDiagnostics = artifactTypeValidator.validateArtifactTypes((Map<String, Object>) artifactTypes, positions, YamlContent, lines);
-                    diagnostics.addAll(ArtifactTypeDiagnostics);
-                }
+                ValidateArtifactTypes(yamlMap, positions, YamlContent, key, lines);
             }
         }
         
+    }
+
+    private void ValidateArtifactTypes(Map<String, Object> yamlMap, Map<String, Mark> positions, String YamlContent, String key, String[] lines) {
+        Object artifactTypes = yamlMap.get(key);
+        if (artifactTypes instanceof Map) {
+            ArtifactTypeValidator artifactTypeValidator = new ArtifactTypeValidator(toscaFile);
+            ArrayList<DiagnosticsSetter> ArtifactTypeDiagnostics = artifactTypeValidator.validateArtifactTypes((Map<String, Object>) artifactTypes, positions, YamlContent, lines);
+            diagnostics.addAll(ArtifactTypeDiagnostics);
+        }
     }
 
     @Override

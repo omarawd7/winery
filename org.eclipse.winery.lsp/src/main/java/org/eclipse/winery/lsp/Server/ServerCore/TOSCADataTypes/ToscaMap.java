@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes;
 
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
-
 import java.util.Map;
 
 public class ToscaMap<K, V> {

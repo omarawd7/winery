@@ -11,9 +11,9 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
@@ -24,10 +24,16 @@ import java.util.Map;
 import java.util.Set;
 
 public class ArtifactTypeValidator implements DiagnosesHandler {
-    public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
+    
+        public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
+        private TOSCAFile toscaFile;
+
+    public ArtifactTypeValidator(TOSCAFile toscaFile) {
+        this.toscaFile = toscaFile;
+    }
 
     public ArrayList<DiagnosticsSetter> validateArtifactTypes(Map<String, Object> artifactTypesMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
-
+        
         Set<String> validArtifactTypeKeywords = Set.of(
                 "derived_from", "version", "metadata", "description", "mime_type", "file_ext", "properties"
         );
@@ -54,7 +60,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                     } else if (key.equals("properties")) {
                         Object PropertyDefinitions = ((Map<?, ?>) artifactType).get(key);
                         if (PropertyDefinitions instanceof Map) {
-                            PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator();
+                            PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(toscaFile);
                             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines);
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }

@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
@@ -25,7 +26,12 @@ import java.util.Set;
 
 public class PropertyDefinitionValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
+    private TOSCAFile toscaFile;
     
+    public PropertyDefinitionValidator(TOSCAFile toscaFile) {
+        this.toscaFile = toscaFile;
+    }
+
     public ArrayList<DiagnosticsSetter> validatePropertyDefinitions(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
             "type", "description", "metadata", "required", "default", "value","validation", "key_schema", "entry_schema"
@@ -72,8 +78,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-                        //TODO call the TOSCA function tha have been parsed 
-                        
+                        //TODO call the TOSCA function tha have been parsed
                     }
                 }
             }
@@ -84,7 +89,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     public void ValidateSchemaDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> propertyDefinition) {
         Object entrySchema = propertyDefinition.get("entry_schema");
         if (entrySchema instanceof Map) {
-            ValidateSchemaDefinition validateSchemaDefinition = new ValidateSchemaDefinition();
+            ValidateSchemaDefinition validateSchemaDefinition = new ValidateSchemaDefinition(toscaFile);
             ArrayList<DiagnosticsSetter> SchemaDefinitionDiagnostics = validateSchemaDefinition.validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, YamlContent, lines);
             diagnostics.addAll(SchemaDefinitionDiagnostics); 
         }
