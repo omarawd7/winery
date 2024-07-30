@@ -18,10 +18,7 @@ import org.eclipse.winery.lsp.Server.ServerCore.DataModels.SchemaDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.*;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class PropertyDefinitionParser {
@@ -47,7 +44,7 @@ public class PropertyDefinitionParser {
         ToscaBoolean required = new ToscaBoolean((Boolean) propertyDefinitionMap.getOrDefault("required", true));
         Optional<Object> Default = Optional.ofNullable( getPropertyType(propertyDefinitionMap.get("default"), type));
         Optional<Object> value = Optional.ofNullable(propertyDefinitionMap.get("value"));
-        Optional<Object> validation = Optional.ofNullable(propertyDefinitionMap.get("validation"));
+        Optional<Stack<Map<String, Object>>> validation = Optional.empty(); //Constructed in the PropertyDefinition validation
         Optional<SchemaDefinition> keySchema = Optional.empty();
         Optional<SchemaDefinition> entrySchema = Optional.empty();
         try {

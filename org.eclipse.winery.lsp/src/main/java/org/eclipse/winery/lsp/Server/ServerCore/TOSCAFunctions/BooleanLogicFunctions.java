@@ -12,6 +12,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions;
+
 import java.util.regex.Pattern;
 import java.util.List;
 
@@ -49,23 +50,23 @@ public class BooleanLogicFunctions {
         return arg1.equals(arg2);
     }
 
-    public static <T extends Comparable<T>> boolean greaterThan(T arg1, T arg2) {
+    public static <T extends Comparable<T>> boolean greater_than(T arg1, T arg2) {
         return arg1.compareTo(arg2) > 0;
     }
 
-    public static <T extends Comparable<T>> boolean greaterOrEqual(T arg1, T arg2) {
+    public static <T extends Comparable<T>> boolean greater_or_equal(T arg1, T arg2) {
         return arg1.compareTo(arg2) >= 0;
     }
 
-    public static <T extends Comparable<T>> boolean lessThan(T arg1, T arg2) {
+    public static <T extends Comparable<T>> boolean less_than(T arg1, T arg2) {
         return arg1.compareTo(arg2) < 0;
     }
 
-    public static <T extends Comparable<T>> boolean lessOrEqual(T arg1, T arg2) {
+    public static <T extends Comparable<T>> boolean less_or_equal(T arg1, T arg2) {
         return arg1.compareTo(arg2) <= 0;
     }
 
-    public static <T> boolean validValues(T arg1, List<T> arg2) {
+    public static <T> boolean valid_values(T arg1, List<T> arg2) {
         return arg2.contains(arg1);
     }
 

@@ -12,6 +12,7 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Parsing;
+
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;

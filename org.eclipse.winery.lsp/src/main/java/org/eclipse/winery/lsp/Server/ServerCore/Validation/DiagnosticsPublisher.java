@@ -51,8 +51,8 @@ public class DiagnosticsPublisher {
         TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();
         try {
             Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(path,client);
-            toscaFileValidator.validate(yamlMap, toscaFileParser.getToscaFile(), toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions() );
             context.setToscaFile(toscaFileParser.getToscaFile());
+            toscaFileValidator.validate(yamlMap, toscaFileParser.getToscaFile(), toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions() );
             List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }

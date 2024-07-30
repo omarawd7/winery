@@ -19,13 +19,14 @@ import java.util.*;
 
 public class FunctionParser {
     private static final Yaml yaml = new Yaml();
-    private final Stack<Map<String, Object>> functionStack = new Stack<>();
+    private final Stack<Map<String, List<String>>> functionStack = new Stack<>();
 
-    public Stack<Map<String, Object>> getFunctionStack() {
+    public Stack<Map<String, List<String>>> getFunctionStack() {
         return functionStack;
     }
 
     public void parseFunctionCall(String line) {
+        line = line.trim();
         if (line.startsWith("{") && line.endsWith("}")) {
             line = line.substring(1, line.length() - 1).trim();    
         }

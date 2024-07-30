@@ -61,7 +61,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                         Object PropertyDefinitions = ((Map<?, ?>) artifactType).get(key);
                         if (PropertyDefinitions instanceof Map) {
                             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(toscaFile);
-                            ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines);
+                            ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey);
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }
                     }

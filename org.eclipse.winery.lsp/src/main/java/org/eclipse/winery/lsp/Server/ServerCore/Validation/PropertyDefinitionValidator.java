@@ -13,26 +13,26 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
+import org.eclipse.winery.lsp.Server.ServerCore.Utils.ValidatingUtils;
 import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class PropertyDefinitionValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
-    private TOSCAFile toscaFile;
+    private final TOSCAFile toscaFile;
     
     public PropertyDefinitionValidator(TOSCAFile toscaFile) {
         this.toscaFile = toscaFile;
     }
 
-    public ArrayList<DiagnosticsSetter> validatePropertyDefinitions(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
+    public ArrayList<DiagnosticsSetter> validatePropertyDefinitions(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines, String parentArtifactType) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
             "type", "description", "metadata", "required", "default", "value","validation", "key_schema", "entry_schema"
         );
@@ -48,11 +48,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 }
                 for (String key : ((Map<String, Object>) propertyDefinition).keySet()) {
                     if (!validPropertyDefinitionKeywords.contains(key)) {
-                        Mark mark = positions.get(key);
-                        int line = mark != null ? mark.getLine() + 1 : -1;
-                        int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
-                        handleNotValidKeywords("Invalid property definition keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
+                        handelInvalidPropertyDefinitionKeyword(positions, YamlContent, lines, key);
                     } else if (key.equals("default")) {
                         String type = (String) ((Map<?, ?>) propertyDefinition).get("type");
                         Object defaultValue = ((Map<?, ?>) propertyDefinition).get(key);
@@ -70,20 +66,84 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
                     } else if (key.equals("validation")) {
                         FunctionParser functionParser = new FunctionParser();
-                        //parsing the validation function 
+                        //parsing the validation function
                         try {
                             if (CommonUtils.isFunction((String) ((Map<?, ?>) propertyDefinition).get(key))) {
-                                functionParser.parseFunctionCall((String) ((Map<?, ?>) propertyDefinition).get(key));   
+                                functionParser.parseFunctionCall((String) ((Map<?, ?>) propertyDefinition).get(key));
+                                //setting the validation variable in Tosca object
+                                toscaFile.artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
                             }    
                         } catch (Exception e) {
-                            e.printStackTrace();
+                            Mark mark = positions.get("validation");
+                            int line = mark != null ? mark.getLine() + 1 : -1;
+                            int column = mark != null ? mark.getColumn() + 1 : -1;
+                            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+                            handleNotValidKeywords(e.getMessage() , line, column, endColumn);
                         }
-                        //TODO call the TOSCA function tha have been parsed
+                        // validating the property definition fixed value by applying the validation functions entered by the user
+                        if (((Map<?, ?>) propertyDefinition).containsKey("value") && !isValidPropertyDefinitionsValue(toscaFile.artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey), positions, YamlContent , lines)) {
+                            Mark mark = positions.get(((Map<?, ?>) propertyDefinition).get("value"));
+                            int line = mark != null ? mark.getLine() + 1 : -1;
+                            int column = mark != null ? mark.getColumn() + 1 : -1;
+                            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+
+                            handleNotValidKeywords("Invalid property value " + ((Map<?, ?>) propertyDefinition).get("value") + column, line, column, endColumn);
+                        }
                     }
                 }
             }
         }
         return diagnostics;
+    }
+
+    public boolean isValidPropertyDefinitionsValue(PropertyDefinition propertyDefinition, Map<String, Mark> positions, String yamlContent, String[] lines) {
+        return validateValue(propertyDefinition.validation(), propertyDefinition.value(), positions ,yamlContent , lines);
+    }
+
+    private boolean validateValue(Optional<Stack<Map<String,List<String>>>> validation, Object value, Map<String, Mark> positions, String yamlContent, String[] lines) {
+        Object result = null;
+        if (validation.isEmpty()) {
+            throw new IllegalArgumentException("Validation function stack is not present");
+        }
+        Stack<Map<String,List<String>>> validationStack = validation.get();
+        Map<String,Object> FunctionValues = new HashMap<>();
+        
+        while (!validationStack.empty()) {
+            Map<String, List<String>> item = validationStack.peek();
+            String function = "";
+            List<String> parameters = List.of();
+            for (Map.Entry<String, List<String>> entry : item.entrySet()) {
+                function = entry.getKey();
+                parameters = entry.getValue();
+                break;
+            }
+            if (ValidatingUtils.validFunction(function)) {
+                    if (ValidatingUtils.isParametersContainsFunction(parameters)) {
+                        parameters = ValidatingUtils.replaceFunctionsByValue(FunctionValues, parameters, value);
+                    }
+                    try {
+                        result = ValidatingUtils.callBooleanFunction(function,parameters);
+                        FunctionValues.put(function,result);
+                    } catch (Exception e) {
+                        Mark mark = positions.get("validation");
+                        int line = mark != null ? mark.getLine() + 1 : -1;
+                        int column = mark != null ? mark.getColumn() + 1 : -1;
+                        int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
+                        handleNotValidKeywords(e.getMessage() , line, column, endColumn);
+                    }
+                }
+            validationStack.pop(); // Remove the processed item
+
+        }
+        return (boolean) result;
+    }
+    
+    private void handelInvalidPropertyDefinitionKeyword(Map<String, Mark> positions, String YamlContent, String[] lines, String key) {
+        Mark mark = positions.get(key);
+        int line = mark != null ? mark.getLine() + 1 : -1;
+        int column = mark != null ? mark.getColumn() + 1 : -1;
+        int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
+        handleNotValidKeywords("Invalid property definition keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
     }
 
     public void ValidateSchemaDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> propertyDefinition) {

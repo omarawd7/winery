@@ -32,8 +32,24 @@ public record PropertyDefinition<T>(
     Optional<ToscaString> description,
     Optional<ToscaMap<String, Object>> metadata,
     ToscaBoolean required,
-    Optional<T> Default ,
+    Optional<T> Default,
     Optional<Object> value,
     Optional<Stack<Map<String, Object>>> validation,
     Optional<SchemaDefinition> keySchema,
-    Optional<SchemaDefinition> entrySchema) { }
+    Optional<SchemaDefinition> entrySchema) {
+
+    // Method to set the validation variable
+    public PropertyDefinition<T> withValidation(Stack<Map<String, Object>> newValidation) {
+        return new PropertyDefinition<>(
+            this.type,
+            this.description,
+            this.metadata,
+            this.required,
+            this.Default,
+            this.value,
+            Optional.ofNullable(newValidation),
+            this.keySchema,
+            this.entrySchema
+        );
+    }
+}
