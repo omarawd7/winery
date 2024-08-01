@@ -72,4 +72,3 @@ artifact_types:
         entry_schema:
           type: string
         required: false
-        

@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Utils;
 
+import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.BooleanLogicFunctions;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -29,12 +30,12 @@ public class ValidatingUtils {
             return true;
         }
         
-    public static boolean validFunction(String function) { //TODO validate if the function valid Tosca function
-       return true; 
+    public static boolean validFunction(String function) {
+        return function.startsWith("$") && function.charAt(1) != '$';
     }
-    
-    public static Object callBooleanFunction(String function, List<String> parameters) {
-            try {
+
+    public static Object callBooleanFunction(String function, List<String> parameters, String type, LSContext context) {
+        try {
             // Remove the leading $ from the function name
             String functionName = function.substring(1);
 
@@ -53,25 +54,15 @@ public class ValidatingUtils {
             }
 
             // Convert string parameters to appropriate types
-            Class<?>[] parameterTypes = targetMethod.getParameterTypes();
             Object[] convertedParameters = new Object[parameters.size()];
 
             for (int i = 0; i < parameters.size(); i++) {
-                Class<?> paramType = parameterTypes[i];
-
-                if (paramType == List.class) {
-                    // Assuming the List type contains Boolean
-                    List<Boolean> booleanList = new ArrayList<>();
-                    for (String param : parameters) {
-                        booleanList.add(Boolean.parseBoolean(param));
-                    }
-                    convertedParameters[i] = booleanList;
-                } else if (paramType == boolean.class) {
-                    convertedParameters[i] = Boolean.parseBoolean(parameters.get(i));
-                } else if (paramType == String.class) {
-                    convertedParameters[i] = parameters.get(i);
-                } else {
-                    throw new IllegalArgumentException("Unsupported parameter type: " + paramType.getName());
+                switch (type) {
+                    case "string" -> convertedParameters[i] = parameters.get(i);
+                    case "integer" -> convertedParameters[i] = Integer.parseInt(parameters.get(i).trim());
+                    case "float" -> convertedParameters[i] = Float.parseFloat(parameters.get(i).trim());
+                    case "boolean" -> convertedParameters[i] = Boolean.parseBoolean(parameters.get(i).trim());
+                    default -> throw new IllegalArgumentException("Unsupported type: " + type);
                 }
             }
 
@@ -79,8 +70,7 @@ public class ValidatingUtils {
             return targetMethod.invoke(null, convertedParameters);
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Error invoking function: " + function, e);
+            throw new RuntimeException("Error invoking function: " + e.getMessage());
         }
     }
     
@@ -93,15 +83,12 @@ public class ValidatingUtils {
         return false;
     }
 
-    public static List<String> replaceFunctionsByValue(Map<String, Object> functionValues, List<String> parameters, Object value) {
+    public static List<String> replaceFunctionsByValue(Map<String, Object> functionValues, List<String> parameters) {
         List<String> replacedParameters = new ArrayList<>();
         for (String param : parameters) {
             if (param.startsWith("$")) {
-                String functionName = param.substring(1);
-                if (functionValues.containsKey(functionName)) {
-                    replacedParameters.add(functionValues.get(functionName).toString());
-                } else if ("value".equals(functionName)) {
-                    replacedParameters.add(value.toString());
+                if (functionValues.containsKey(param)) {
+                    replacedParameters.add(functionValues.get(param).toString());
                 } else {
                     replacedParameters.add(param); // Keep the function if not found in the map
                 }
@@ -111,6 +98,5 @@ public class ValidatingUtils {
         }
         return replacedParameters;
     }
-    
 }
     

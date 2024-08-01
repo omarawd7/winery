@@ -13,7 +13,7 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
@@ -26,10 +26,10 @@ import java.util.Set;
 public class ArtifactTypeValidator implements DiagnosesHandler {
     
         public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
-        private TOSCAFile toscaFile;
+        private LSContext context;
 
-    public ArtifactTypeValidator(TOSCAFile toscaFile) {
-        this.toscaFile = toscaFile;
+    public ArtifactTypeValidator(LSContext context) {
+        this.context = context;
     }
 
     public ArrayList<DiagnosticsSetter> validateArtifactTypes(Map<String, Object> artifactTypesMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
@@ -60,7 +60,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                     } else if (key.equals("properties")) {
                         Object PropertyDefinitions = ((Map<?, ?>) artifactType).get(key);
                         if (PropertyDefinitions instanceof Map) {
-                            PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(toscaFile);
+                            PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
                             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey);
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }

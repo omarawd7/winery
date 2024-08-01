@@ -30,12 +30,12 @@ public class FunctionParser {
         if (line.startsWith("{") && line.endsWith("}")) {
             line = line.substring(1, line.length() - 1).trim();    
         }
-        int colonIndex = line.indexOf(':');
+        int separatorIndex = Math.max(line.indexOf(':'), line.indexOf('='));
         List<String> arguments;
         String key;
-        if (colonIndex != -1) {
-            key = line.substring(0, colonIndex).trim();
-            String value = line.substring(colonIndex + 1).trim();
+        if (separatorIndex != -1) {
+            key = line.substring(0, separatorIndex).trim();
+            String value = line.substring(separatorIndex + 1).trim();
 
             // Check if it's the only key in a YAML map using SnakeYAML
             Map<String, Object> map = yaml.load(key + ": " + value);
@@ -66,6 +66,19 @@ public class FunctionParser {
             return Arrays.asList(value.split(","));
         } else {
             throw new IllegalArgumentException("Malformed arguments: not a valid list");
+        }
+    }
+    
+    public static void main(String[] args) {
+        FunctionParser functionParser = new FunctionParser();
+        functionParser.parseFunctionCall("{$greater_or_equal=[$value, 0]}");
+        Stack<Map<String, List<String>>> functionStack = functionParser.getFunctionStack();
+        
+        while (!functionStack.empty()) {
+            Map<String, List<String>> function = functionStack.pop();
+            for (String key : function.keySet()) {
+                System.out.println(key + " the parameters" + function.get(key));
+            }
         }
     }
 }

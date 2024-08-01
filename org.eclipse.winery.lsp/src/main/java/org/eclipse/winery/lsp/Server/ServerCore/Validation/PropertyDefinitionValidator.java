@@ -13,8 +13,8 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.ValidatingUtils;
@@ -26,10 +26,10 @@ import java.util.*;
 
 public class PropertyDefinitionValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
-    private final TOSCAFile toscaFile;
+    private final LSContext context;
     
-    public PropertyDefinitionValidator(TOSCAFile toscaFile) {
-        this.toscaFile = toscaFile;
+    public PropertyDefinitionValidator(LSContext context) {
+        this.context = context;
     }
 
     public ArrayList<DiagnosticsSetter> validatePropertyDefinitions(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines, String parentArtifactType) {
@@ -64,14 +64,29 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
                     } else if (key.equals("key_schema")) {
                         ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
-                    } else if (key.equals("validation")) {
+                    } else if (key.equals("validation") ) {
                         FunctionParser functionParser = new FunctionParser();
+
                         //parsing the validation function
                         try {
-                            if (CommonUtils.isFunction((String) ((Map<?, ?>) propertyDefinition).get(key))) {
-                                functionParser.parseFunctionCall((String) ((Map<?, ?>) propertyDefinition).get(key));
+                            if (CommonUtils.isFunction(String.valueOf(((Map<?, ?>) propertyDefinition).get("validation")))) {
+                                functionParser.parseFunctionCall(String.valueOf(((Map<?, ?>) propertyDefinition).get(key)));
                                 //setting the validation variable in Tosca object
-                                toscaFile.artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
+
+                                setValidationStack(parentArtifactType, PropertyDefinitionKey, functionParser);
+                                // validating the property definition fixed value by applying the validation functions entered by the user
+                               //TODO ADD this line PropertyDefinition propertyDefinitionObject = getPropertyDefinitionObject(parentArtifactType, PropertyDefinitionKey);
+                                if (((Map<?, ?>) propertyDefinition).containsKey("value") ) {
+                                    if (!isValidPropertyDefinitionsValue(functionParser, ((Map<?, ?>) propertyDefinition).get("value"), ((Map<?, ?>) propertyDefinition).get("type") ,positions, YamlContent , lines)) {
+                                        Mark mark = positions.get("value");
+                                        int line = mark != null ? mark.getLine() + 1 : -1;
+                                        int column = mark != null ? mark.getColumn() + 1 : -1;
+                                        int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+
+                                        handleNotValidKeywords("The value " + ((Map<?, ?>) propertyDefinition).get("value") + " did not pass the validation ", line, column, endColumn);
+
+                                    }
+                                }
                             }    
                         } catch (Exception e) {
                             Mark mark = positions.get("validation");
@@ -80,15 +95,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                             int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
                             handleNotValidKeywords(e.getMessage() , line, column, endColumn);
                         }
-                        // validating the property definition fixed value by applying the validation functions entered by the user
-                        if (((Map<?, ?>) propertyDefinition).containsKey("value") && !isValidPropertyDefinitionsValue(toscaFile.artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey), positions, YamlContent , lines)) {
-                            Mark mark = positions.get(((Map<?, ?>) propertyDefinition).get("value"));
-                            int line = mark != null ? mark.getLine() + 1 : -1;
-                            int column = mark != null ? mark.getColumn() + 1 : -1;
-                            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-
-                            handleNotValidKeywords("Invalid property value " + ((Map<?, ?>) propertyDefinition).get("value") + column, line, column, endColumn);
-                        }
+                        
                     }
                 }
             }
@@ -96,20 +103,29 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         return diagnostics;
     }
 
-    public boolean isValidPropertyDefinitionsValue(PropertyDefinition propertyDefinition, Map<String, Mark> positions, String yamlContent, String[] lines) {
-        return validateValue(propertyDefinition.validation(), propertyDefinition.value(), positions ,yamlContent , lines);
+    private PropertyDefinition getPropertyDefinitionObject(String parentArtifactType, String PropertyDefinitionKey) {
+        PropertyDefinition propertyDefinitionObject = context.getToscaFile().artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey);
+        return propertyDefinitionObject;
     }
 
-    private boolean validateValue(Optional<Stack<Map<String,List<String>>>> validation, Object value, Map<String, Mark> positions, String yamlContent, String[] lines) {
+    private void setValidationStack(String parentArtifactType, String PropertyDefinitionKey, FunctionParser functionParser) {
+     //   PropertyDefinition propertyDefinition = context.getToscaFile().artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
+    //TODO continue constructing the new ToscaFile object
+    }
+
+    public boolean isValidPropertyDefinitionsValue(FunctionParser functionParser, Object value, Object type, Map<String, Mark> positions, String yamlContent, String[] lines) {
+        return validateValue(functionParser.getFunctionStack(), value, type, positions ,yamlContent , lines);
+    }
+
+    private boolean validateValue(Stack<Map<String,List<String>>> validation, Object value, Object type, Map<String, Mark> positions, String yamlContent, String[] lines) {
         Object result = null;
         if (validation.isEmpty()) {
             throw new IllegalArgumentException("Validation function stack is not present");
         }
-        Stack<Map<String,List<String>>> validationStack = validation.get();
         Map<String,Object> FunctionValues = new HashMap<>();
         
-        while (!validationStack.empty()) {
-            Map<String, List<String>> item = validationStack.peek();
+        while (!validation.empty()) {
+            Map<String, List<String>> item = validation.peek();
             String function = "";
             List<String> parameters = List.of();
             for (Map.Entry<String, List<String>> entry : item.entrySet()) {
@@ -119,10 +135,14 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             }
             if (ValidatingUtils.validFunction(function)) {
                     if (ValidatingUtils.isParametersContainsFunction(parameters)) {
-                        parameters = ValidatingUtils.replaceFunctionsByValue(FunctionValues, parameters, value);
+                        parameters = ValidatingUtils.replaceFunctionsByValue(FunctionValues, parameters);
                     }
                     try {
-                        result = ValidatingUtils.callBooleanFunction(function,parameters);
+                        if (function.equals("$value")) {
+                            result = value;
+                        } else {
+                            result = ValidatingUtils.callBooleanFunction(function,parameters,(String) type, context );
+                        }
                         FunctionValues.put(function,result);
                     } catch (Exception e) {
                         Mark mark = positions.get("validation");
@@ -132,8 +152,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         handleNotValidKeywords(e.getMessage() , line, column, endColumn);
                     }
                 }
-            validationStack.pop(); // Remove the processed item
-
+            validation.pop(); // Remove the processed item
         }
         return (boolean) result;
     }
@@ -149,7 +168,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     public void ValidateSchemaDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> propertyDefinition) {
         Object entrySchema = propertyDefinition.get("entry_schema");
         if (entrySchema instanceof Map) {
-            ValidateSchemaDefinition validateSchemaDefinition = new ValidateSchemaDefinition(toscaFile);
+            ValidateSchemaDefinition validateSchemaDefinition = new ValidateSchemaDefinition(context.getToscaFile());
             ArrayList<DiagnosticsSetter> SchemaDefinitionDiagnostics = validateSchemaDefinition.validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, YamlContent, lines);
             diagnostics.addAll(SchemaDefinitionDiagnostics); 
         }
