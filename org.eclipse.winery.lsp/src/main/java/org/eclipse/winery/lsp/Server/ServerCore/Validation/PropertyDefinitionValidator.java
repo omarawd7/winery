@@ -14,7 +14,9 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.ValidatingUtils;
@@ -36,6 +38,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         Set<String> validPropertyDefinitionKeywords = Set.of(
             "type", "description", "metadata", "required", "default", "value","validation", "key_schema", "entry_schema"
         );
+
         for (String PropertyDefinitionKey : propertyDefinitionsMap.keySet()) {
             Object propertyDefinition = propertyDefinitionsMap.get(PropertyDefinitionKey);
             if (propertyDefinition instanceof Map) {
@@ -66,25 +69,21 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
                     } else if (key.equals("validation") ) {
                         FunctionParser functionParser = new FunctionParser();
-
                         //parsing the validation function
                         try {
                             if (CommonUtils.isFunction(String.valueOf(((Map<?, ?>) propertyDefinition).get("validation")))) {
                                 functionParser.parseFunctionCall(String.valueOf(((Map<?, ?>) propertyDefinition).get(key)));
                                 //setting the validation variable in Tosca object
-
                                 setValidationStack(parentArtifactType, PropertyDefinitionKey, functionParser);
                                 // validating the property definition fixed value by applying the validation functions entered by the user
-                               //TODO ADD this line PropertyDefinition propertyDefinitionObject = getPropertyDefinitionObject(parentArtifactType, PropertyDefinitionKey);
+                                PropertyDefinition propertyDefinitionObject = getPropertyDefinitionObject(parentArtifactType, PropertyDefinitionKey);
                                 if (((Map<?, ?>) propertyDefinition).containsKey("value") ) {
-                                    if (!isValidPropertyDefinitionsValue(functionParser, ((Map<?, ?>) propertyDefinition).get("value"), ((Map<?, ?>) propertyDefinition).get("type") ,positions, YamlContent , lines)) {
+                                    if (!isValidPropertyDefinitionsValue( functionParser.getFunctionStack(), ((Map<?, ?>) propertyDefinition).get("value"), ((Map<?, ?>) propertyDefinition).get("type") ,positions, YamlContent , lines)) {
                                         Mark mark = positions.get("value");
                                         int line = mark != null ? mark.getLine() + 1 : -1;
                                         int column = mark != null ? mark.getColumn() + 1 : -1;
                                         int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-
                                         handleNotValidKeywords("The value " + ((Map<?, ?>) propertyDefinition).get("value") + " did not pass the validation ", line, column, endColumn);
-
                                     }
                                 }
                             }    
@@ -95,7 +94,6 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                             int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
                             handleNotValidKeywords(e.getMessage() , line, column, endColumn);
                         }
-                        
                     }
                 }
             }
@@ -109,12 +107,14 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     }
 
     private void setValidationStack(String parentArtifactType, String PropertyDefinitionKey, FunctionParser functionParser) {
-     //   PropertyDefinition propertyDefinition = context.getToscaFile().artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
-    //TODO continue constructing the new ToscaFile object
+        PropertyDefinition newPropertyDefinition = context.getToscaFile().artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
+        ArtifactType newArtifactType = context.getToscaFile().artifactTypes().get().get(parentArtifactType).overridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinition);
+        TOSCAFile toscaFile = context.getToscaFile().overrideTOSCAFile(parentArtifactType , newArtifactType);
+        context.setToscaFile(toscaFile);
     }
 
-    public boolean isValidPropertyDefinitionsValue(FunctionParser functionParser, Object value, Object type, Map<String, Mark> positions, String yamlContent, String[] lines) {
-        return validateValue(functionParser.getFunctionStack(), value, type, positions ,yamlContent , lines);
+    public boolean isValidPropertyDefinitionsValue(Stack<Map<String,List<String>>> validation, Object value, Object type, Map<String, Mark> positions, String yamlContent, String[] lines) {
+        return validateValue(validation , value, type, positions ,yamlContent , lines);
     }
 
     private boolean validateValue(Stack<Map<String,List<String>>> validation, Object value, Object type, Map<String, Mark> positions, String yamlContent, String[] lines) {
@@ -123,7 +123,6 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             throw new IllegalArgumentException("Validation function stack is not present");
         }
         Map<String,Object> FunctionValues = new HashMap<>();
-        
         while (!validation.empty()) {
             Map<String, List<String>> item = validation.peek();
             String function = "";

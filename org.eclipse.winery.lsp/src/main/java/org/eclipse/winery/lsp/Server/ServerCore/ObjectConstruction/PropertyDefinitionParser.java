@@ -42,9 +42,9 @@ public class PropertyDefinitionParser {
         Optional<ToscaString> description = Optional.ofNullable(new ToscaString((String) propertyDefinitionMap.get("description")));
         Optional<ToscaMap<String, Object>> metadata = Optional.ofNullable(new ToscaMap<>((Map<String, Object>) propertyDefinitionMap.get("metadata")));
         ToscaBoolean required = new ToscaBoolean((Boolean) propertyDefinitionMap.getOrDefault("required", true));
-        Optional<Object> Default = Optional.ofNullable( getPropertyType(propertyDefinitionMap.get("default"), type));
+        Optional<Object> Default = Optional.ofNullable( propertyDefinitionMap.get("default"));
         Optional<Object> value = Optional.ofNullable(propertyDefinitionMap.get("value"));
-        Optional<Stack<Map<String, Object>>> validation = Optional.empty(); //Constructed in the PropertyDefinition validation
+        Optional<Stack<Map<String, List<String>>>> validation = Optional.empty(); //Constructed in the PropertyDefinition validation
         Optional<SchemaDefinition> keySchema = Optional.empty();
         Optional<SchemaDefinition> entrySchema = Optional.empty();
         try {

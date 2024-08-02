@@ -43,4 +43,32 @@ public record TOSCAFile(ToscaString toscaDefinitionsVersion,
                         Optional<ToscaMap<String, Object>> functions,
                         Optional<ToscaString> profile,
                         Optional<ToscaList<Object>> imports,
-                        Optional<Object> serviceTemplate) { } 
+                        Optional<Object> serviceTemplate) {
+    
+    public TOSCAFile overrideTOSCAFile(String key, ArtifactType newArtifactType) {
+        if (artifactTypes.isPresent()) {
+            Map<String, ArtifactType> updatedArtifactTypes = artifactTypes.get();
+            updatedArtifactTypes.put(key, newArtifactType);
+            return new TOSCAFile(
+                toscaDefinitionsVersion,
+                 description,
+                 metadata,
+                 dslDefinitions,
+                 Optional.of(updatedArtifactTypes),
+                 dataTypes,
+                 capabilityTypes,
+                 interfaceTypes,
+                 relationshipTypes,
+                 nodeTypes,
+                 groupTypes,
+                 policyTypes,
+                 repositories,
+                 functions,
+                 profile,
+                 imports,
+                 serviceTemplate
+            );
+        }
+        throw new RuntimeException("No property definition found for key " + key);
+    }
+} 

@@ -22,25 +22,27 @@ import io.soabase.recordbuilder.core.RecordBuilder;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaBoolean;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Stack;
 
 @RecordBuilder
-public record PropertyDefinition<T>(
-    T type,
+public record PropertyDefinition(
+    Object type,
     Optional<ToscaString> description,
     Optional<ToscaMap<String, Object>> metadata,
     ToscaBoolean required,
-    Optional<T> Default,
+    Optional<Object> Default,
     Optional<Object> value,
-    Optional<Stack<Map<String, Object>>> validation,
+    Optional<Stack<Map<String, List<String>>>> validation,
     Optional<SchemaDefinition> keySchema,
     Optional<SchemaDefinition> entrySchema) {
 
     // Method to set the validation variable
-    public PropertyDefinition<T> withValidation(Stack<Map<String, Object>> newValidation) {
-        return new PropertyDefinition<>(
+    public PropertyDefinition withValidation(Stack<Map<String, List<String>>> newValidation) {
+        return new PropertyDefinition(
             this.type,
             this.description,
             this.metadata,
