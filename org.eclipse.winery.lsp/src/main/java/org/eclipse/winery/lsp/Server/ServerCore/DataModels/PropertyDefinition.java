@@ -22,7 +22,6 @@ import io.soabase.recordbuilder.core.RecordBuilder;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaBoolean;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +29,7 @@ import java.util.Stack;
 
 @RecordBuilder
 public record PropertyDefinition(
-    Object type,
+    ToscaString type,
     Optional<ToscaString> description,
     Optional<ToscaMap<String, Object>> metadata,
     ToscaBoolean required,
@@ -39,6 +38,26 @@ public record PropertyDefinition(
     Optional<Stack<Map<String, List<String>>>> validation,
     Optional<SchemaDefinition> keySchema,
     Optional<SchemaDefinition> entrySchema) {
+
+    // Copy constructor
+    public PropertyDefinition(PropertyDefinition other) {
+        this(
+            other.type,
+            other.description,
+            other.metadata,
+            other.required,
+            other.Default,
+            other.value,
+            other.validation,
+            other.keySchema,
+            other.entrySchema
+        );
+    }
+
+    // Method to return a copy of the current object
+    public PropertyDefinition copy() {
+        return new PropertyDefinition(this);
+    }
 
     // Method to set the validation variable
     public PropertyDefinition withValidation(Stack<Map<String, List<String>>> newValidation) {
@@ -50,6 +69,21 @@ public record PropertyDefinition(
             this.Default,
             this.value,
             Optional.ofNullable(newValidation),
+            this.keySchema,
+            this.entrySchema
+        );
+    }
+
+    // Method to set the value variable
+    public PropertyDefinition withValue(Object newValue) {
+        return new PropertyDefinition(
+            this.type,
+            this.description,
+            this.metadata,
+            this.required,
+            this.Default,
+            Optional.ofNullable(newValue),
+            this.validation,
             this.keySchema,
             this.entrySchema
         );

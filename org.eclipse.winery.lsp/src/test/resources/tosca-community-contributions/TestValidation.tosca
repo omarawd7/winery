@@ -1,0 +1,35 @@
+tosca_definitions_version: tosca_2_0
+
+metadata:
+  template_name: artifact_types.yaml
+  template_author: Oasis Open
+  template_version: 2.0
+
+description: >
+  TOSCA Simple Profile artifact type definitions
+
+profile: org.oasis-open.tosca.simple:2.0
+
+artifact_types:
+
+  Root:
+    description: >
+      The TOSCA base artifact type from which all other normative
+      TOSCA artifact types derive.
+    properties:
+      testProperty:
+        description: >-
+          Identifies the virtualization environments (e.g. hypervisor) compatible with this software
+          image.
+        type: integer
+        validation: { $less_or_equal: [ $value, 500 ] }
+  
+  File:
+    description: >-
+      The File artifact type is used when an artifact definition needs
+      to have its associated file simply treated as a file without any
+      special handling.
+    derived_from: Root
+    properties:
+      testProperty: 5000
+      

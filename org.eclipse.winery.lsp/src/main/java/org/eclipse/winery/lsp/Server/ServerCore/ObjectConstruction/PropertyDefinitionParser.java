@@ -28,6 +28,7 @@ public class PropertyDefinitionParser {
             return Collections.emptyMap();
         }
         return propertiesMap.entrySet().stream()
+            .filter(e -> e.getValue() instanceof Map) // Check if the value is an instance of Map
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> parsePropertyDefinition((Map<String, Object>) e.getValue())

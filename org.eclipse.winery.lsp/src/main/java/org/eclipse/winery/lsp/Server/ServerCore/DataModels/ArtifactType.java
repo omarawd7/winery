@@ -52,5 +52,20 @@ public record ArtifactType(
         }
         throw new RuntimeException("No property definition found for key " + key);
     }
+    
+    public ArtifactType addOrOverridePropertyDefinition(String key, PropertyDefinition newDefinition) {
+        
+            Map<String, PropertyDefinition> updatedProperties = properties.get();
+            updatedProperties.put(key, newDefinition);
+            return new ArtifactType(
+                derivedFrom,
+                version,
+                metadata,
+                description,
+                mimeType,
+                fileExt,
+                Optional.of(updatedProperties)
+            );
+        }
 }
 

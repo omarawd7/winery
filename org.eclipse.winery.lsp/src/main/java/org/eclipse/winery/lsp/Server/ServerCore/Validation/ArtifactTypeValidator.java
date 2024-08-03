@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
@@ -61,7 +63,12 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                         Object PropertyDefinitions = ((Map<?, ?>) artifactType).get(key);
                         if (PropertyDefinitions instanceof Map) {
                             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
-                            ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey);
+                            ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
+                            if (((Map<?, ?>) artifactType).containsKey("derived_from")) {
+                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey, (String) ((Map<?, ?>) artifactType).get("derived_from"));
+                            } else {
+                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey, null);
+                            }
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }
                     }
