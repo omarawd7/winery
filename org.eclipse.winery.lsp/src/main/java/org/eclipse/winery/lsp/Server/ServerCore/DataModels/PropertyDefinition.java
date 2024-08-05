@@ -22,10 +22,7 @@ import io.soabase.recordbuilder.core.RecordBuilder;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaBoolean;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 
 @RecordBuilder
 public record PropertyDefinition(
@@ -37,28 +34,8 @@ public record PropertyDefinition(
     Optional<Object> value,
     Optional<Stack<Map<String, List<String>>>> validation,
     Optional<SchemaDefinition> keySchema,
-    Optional<SchemaDefinition> entrySchema) {
-
-    // Copy constructor
-    public PropertyDefinition(PropertyDefinition other) {
-        this(
-            other.type,
-            other.description,
-            other.metadata,
-            other.required,
-            other.Default,
-            other.value,
-            other.validation,
-            other.keySchema,
-            other.entrySchema
-        );
-    }
-
-    // Method to return a copy of the current object
-    public PropertyDefinition copy() {
-        return new PropertyDefinition(this);
-    }
-
+    Optional<SchemaDefinition> entrySchema) implements Cloneable {
+    
     // Method to set the validation variable
     public PropertyDefinition withValidation(Stack<Map<String, List<String>>> newValidation) {
         return new PropertyDefinition(
@@ -87,5 +64,14 @@ public record PropertyDefinition(
             this.keySchema,
             this.entrySchema
         );
+    }
+
+    @Override
+    public PropertyDefinition clone() {
+        try {
+            return (PropertyDefinition) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(); // Can't happen
+        }
     }
 }

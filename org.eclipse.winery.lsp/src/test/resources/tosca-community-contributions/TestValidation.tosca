@@ -22,6 +22,7 @@ artifact_types:
           Identifies the virtualization environments (e.g. hypervisor) compatible with this software
           image.
         type: integer
+        value: 5
         validation: { $less_or_equal: [ $value, 500 ] }
   
   File:
@@ -31,5 +32,13 @@ artifact_types:
       special handling.
     derived_from: Root
     properties:
+      testProperty: 50
+
+  File1:
+    description: >-
+      The File artifact type is used when an artifact definition needs
+      to have its associated file simply treated as a file without any
+      special handling.
+    derived_from: Root
+    properties:
       testProperty: 5000
-      

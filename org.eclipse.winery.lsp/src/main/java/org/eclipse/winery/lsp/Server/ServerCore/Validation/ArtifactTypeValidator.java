@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
