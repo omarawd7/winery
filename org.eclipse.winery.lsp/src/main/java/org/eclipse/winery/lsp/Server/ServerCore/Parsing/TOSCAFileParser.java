@@ -28,8 +28,14 @@ import java.util.Map;
 public class TOSCAFileParser implements Parser {
     
     private Map<String, Mark>  ConstructorPositions;
+    private Map<String, Mark> ContextDependentConstructorPositions;
+
     private TOSCAFile ToscaFile;
     private String yamlContent;
+
+    public Map<String, Mark> getContextDependentConstructorPositions() {
+        return ContextDependentConstructorPositions;
+    }
 
     public String getYamlContent() {
         return yamlContent;
@@ -56,7 +62,10 @@ public class TOSCAFileParser implements Parser {
 
     public Map<String, Object> getStringObjectMap(String yamlContent, LanguageClient client) {
         ToscaFileParsingConstructor constructor = new ToscaFileParsingConstructor();
+        ToscaFileContextDependentConstructor validatingConstructor = new ToscaFileContextDependentConstructor();
         Yaml yaml = new Yaml(constructor);
+        Yaml uniqueKeysYaml = new Yaml(validatingConstructor);
+        uniqueKeysYaml.load(yamlContent);
         Map<String, Object> yamlMap = yaml.load(yamlContent);
         try {
             ToscaFile = ToscaFileConstructor.ConstructToscaFile(yamlMap) ;
@@ -67,6 +76,7 @@ public class TOSCAFileParser implements Parser {
         }
         
         ConstructorPositions = constructor.getPositions();
+        ContextDependentConstructorPositions = validatingConstructor.getPositions(); 
         return yamlMap;
     }
 }

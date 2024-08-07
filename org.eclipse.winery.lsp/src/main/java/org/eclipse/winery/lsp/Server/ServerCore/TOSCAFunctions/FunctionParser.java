@@ -68,17 +68,4 @@ public class FunctionParser {
             throw new IllegalArgumentException("Malformed arguments: not a valid list");
         }
     }
-    
-    public static void main(String[] args) {
-        FunctionParser functionParser = new FunctionParser();
-        functionParser.parseFunctionCall("{$greater_or_equal=[$value, 0]}");
-        Stack<Map<String, List<String>>> functionStack = functionParser.getFunctionStack();
-        
-        while (!functionStack.empty()) {
-            Map<String, List<String>> function = functionStack.pop();
-            for (String key : function.keySet()) {
-                System.out.println(key + " the parameters" + function.get(key));
-            }
-        }
-    }
 }

@@ -4,7 +4,7 @@ import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
-
+import org.yaml.snakeyaml.error.Mark;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -16,7 +16,7 @@ public class ToscaLSContentImpl implements LSContext {
     private LanguageClient languageClient;
     private ClientCapabilities clientCapabilities;
     private TOSCAFile toscaFile;
-    
+    private Map<String, Mark> contextDependentConstructorPositions;
     public <V> void put(LSContext.Key<V> key, V value) {
         props.put(key, value);
     }
@@ -70,5 +70,14 @@ public class ToscaLSContentImpl implements LSContext {
 
     public void setToscaFile(TOSCAFile toscaFile) {
         this.toscaFile = toscaFile;
+    }
+
+    @Override
+    public void setCotextDependentPositions(Map<String, Mark> contextDependentConstructorPositions) {
+        this.contextDependentConstructorPositions = contextDependentConstructorPositions;
+    }
+
+    public Map<String, Mark> getContextDependentConstructorPositions() {
+        return contextDependentConstructorPositions;
     }
 }

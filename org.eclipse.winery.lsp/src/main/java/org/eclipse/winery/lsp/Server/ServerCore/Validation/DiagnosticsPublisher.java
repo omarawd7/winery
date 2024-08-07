@@ -52,6 +52,7 @@ public class DiagnosticsPublisher {
         try {
             Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(path,client);
             context.setToscaFile(toscaFileParser.getToscaFile());
+            context.setCotextDependentPositions(toscaFileParser.getContextDependentConstructorPositions());
             toscaFileValidator.validate(yamlMap, context, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions() );
             List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
@@ -80,6 +81,7 @@ public class DiagnosticsPublisher {
         try {
             Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(content , client);
             context.setToscaFile(toscaFileParser.getToscaFile());
+            context.setCotextDependentPositions(toscaFileParser.getContextDependentConstructorPositions());
             toscaFileValidator.validate(yamlMap, context , content, toscaFileParser.getConstructorPositions());
             List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));

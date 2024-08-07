@@ -72,6 +72,5 @@ public class ToscaFileParsingConstructor extends Constructor {
                 Optional.ofNullable(map.get("service_template"))
             );
         }
-        
     }
 }

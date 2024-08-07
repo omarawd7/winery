@@ -42,7 +42,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
             if (artifactType instanceof Map) {
                 for (String key : ((Map<String, Object>) artifactType).keySet()) {
                     if (!validArtifactTypeKeywords.contains(key)) {
-                        Mark mark = positions.get(key);
+                        Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + artifactTypeKey + "." + key);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
@@ -51,7 +51,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                     }
                     //Check if the derived_from keyword exists, that it contains a valid Artifact type parent
                     else if (key.equals("derived_from") && !artifactTypesMap.containsKey(((Map<?, ?>) artifactType).get(key))) {
-                        Mark mark = positions.get(((Map<?, ?>) artifactType).get(key));
+                        Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + artifactTypeKey + "." + ((Map<?, ?>) artifactType).get(key));
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);

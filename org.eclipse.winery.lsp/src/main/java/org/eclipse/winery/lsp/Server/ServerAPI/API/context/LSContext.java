@@ -13,6 +13,9 @@ package org.eclipse.winery.lsp.Server.ServerAPI.API.context;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import org.yaml.snakeyaml.error.Mark;
+
+import java.util.Map;
 import java.util.Optional;
 
 public interface LSContext {
@@ -39,9 +42,13 @@ public interface LSContext {
 
     public TOSCAFile getToscaFile();
     
-    public void setToscaFile(TOSCAFile toscaFile);    
-    
-    class Key<K> {
+    public void setToscaFile(TOSCAFile toscaFile);
+
+    void setCotextDependentPositions(Map<String, Mark> contextDependentConstructorPositions);
+
+    public Map<String, Mark> getContextDependentConstructorPositions() ;
+
+        class Key<K> {
     }
 
 }
