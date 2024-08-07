@@ -54,8 +54,8 @@ public class ValidateSchemaDefinition implements DiagnosesHandler  {
     }
     
     public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, String PropertyDefinitionKey, Map<?, ?> propertyDefinition) {
-        if (! propertyDefinition.containsKey("entry_schema")) {
-            Mark mark = positions.get("entry_schema");
+        if (! propertyDefinition.containsKey("entry_schema")) { 
+            Mark mark = positions.get("entry_schema");//TODO make it depends on the unique key names map
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;
             int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);

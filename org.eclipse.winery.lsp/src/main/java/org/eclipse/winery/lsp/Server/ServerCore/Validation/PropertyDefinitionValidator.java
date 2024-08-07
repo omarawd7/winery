@@ -36,7 +36,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         this.context = context;
     }
 
-    public ArrayList<DiagnosticsSetter> validatePropertyDefinitions(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines, String parentArtifactType, String derivedFrom) {
+    public ArrayList<DiagnosticsSetter> validatePropertyDefinitions(Map<String, Object> propertyDefinitionsMap, Map<String, Mark> positions, String YamlContent, String[] lines, String parentArtifactType, String derivedFrom) { //TODO take the type as a parameter (artifact type, ect..)
         Set<String> validPropertyDefinitionKeywords = Set.of(
             "type", "description", "metadata", "required", "default", "value","validation", "key_schema", "entry_schema"
         );
