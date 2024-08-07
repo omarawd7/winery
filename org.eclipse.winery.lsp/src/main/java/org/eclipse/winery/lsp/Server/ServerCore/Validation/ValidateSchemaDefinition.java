@@ -13,6 +13,7 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
@@ -26,31 +27,29 @@ import java.util.Set;
 
 public class ValidateSchemaDefinition implements DiagnosesHandler  {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
-    TOSCAFile toscaFile;
-    
-    public ValidateSchemaDefinition(TOSCAFile toscaFile) {
-    this.toscaFile = toscaFile;
+    private final LSContext context;
+
+    public ValidateSchemaDefinition(LSContext context) {
+    this.context = context;
     }
 
-    public ArrayList<DiagnosticsSetter> validateSchemaDefinitions(Map<String, Object> SchemaDefinitionMap, Map<String, Mark> positions, String yamlContent, String[] lines) {
+    public ArrayList<DiagnosticsSetter> validateSchemaDefinitions(Map<String, Object> SchemaDefinitionMap, Map<String, Mark> positions, String yamlContent, String[] lines, String parentArtifactType, String PropertyDefinitionKey , String SchemaType) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
             "type", "description","validation", "key_schema", "entry_schema"
         );
-        validateRequiredKeys(SchemaDefinitionMap,yamlContent);
-
+        validateRequiredKeys(SchemaDefinitionMap,yamlContent, lines,  parentArtifactType, PropertyDefinitionKey, SchemaType );
         for (String SchemaDefinitionKey : SchemaDefinitionMap.keySet()) {
             if (!validPropertyDefinitionKeywords.contains(SchemaDefinitionKey)) {
-                Mark mark = positions.get(SchemaDefinitionKey);
+                Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + PropertyDefinitionKey + "." + SchemaType + "." + SchemaDefinitionKey );
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
-                handleNotValidKeywords("Invalid property definition keyword: " + SchemaDefinitionKey + " at line " + line + ", column " + column, line, column, endColumn);
+                handleNotValidKeywords("Invalid Schema definition keyword: " + SchemaDefinitionKey, line, column, endColumn);
             }
             if ((SchemaDefinitionMap).containsKey("type") && (((Map<?, ?>) SchemaDefinitionMap).get("type").equals("list") || ((Map<?, ?>) SchemaDefinitionMap).get("type").equals("map"))) {
                 ValidateEntrySchema(positions, yamlContent, lines, SchemaDefinitionKey, SchemaDefinitionMap);
             }
         }
-        
         return diagnostics;
     }
     
@@ -104,9 +103,13 @@ public class ValidateSchemaDefinition implements DiagnosesHandler  {
         return (int) content.lines().count();
     }
 
-    public void validateRequiredKeys(Map<String, Object> yamlMap, String content) {
+    public void validateRequiredKeys(Map<String, Object> yamlMap, String content, String[] lines, String parentArtifactType, String PropertyDefinitionKey , String SchemaType) {
         if (!yamlMap.containsKey("type")) {
-            handleDiagnosticsError("Property Definition Missing required key: type", content);
+            Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + PropertyDefinitionKey + "." + SchemaType);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumn(content, line, column, lines);
+            handleNotValidKeywords("Property Definition Missing required key: type ", line, column, endColumn);
         }
         
     }

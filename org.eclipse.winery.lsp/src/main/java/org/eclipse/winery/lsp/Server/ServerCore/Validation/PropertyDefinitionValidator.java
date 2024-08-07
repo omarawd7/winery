@@ -43,7 +43,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         for (String PropertyDefinitionKey : propertyDefinitionsMap.keySet()) {
             Object propertyDefinition = propertyDefinitionsMap.get(PropertyDefinitionKey);
             if (propertyDefinition instanceof Map) {
-                validateRequiredKeys((Map<String, Object>) propertyDefinition,YamlContent, lines, parentArtifactType, PropertyDefinitionKey );
+                validateRequiredKeys((Map<String, Object>) propertyDefinition, YamlContent, lines, parentArtifactType, PropertyDefinitionKey );
                 if (((Map<?, ?>) propertyDefinition).containsKey("type") && ((Map<?, ?>) propertyDefinition).get("type").equals("map")) {
                     ValidateEntrySchema(positions, YamlContent, lines, PropertyDefinitionKey, (Map<?, ?>) propertyDefinition, parentArtifactType);
                     validateKeySchema(positions, YamlContent, lines, PropertyDefinitionKey, (Map<?, ?>) propertyDefinition, parentArtifactType);
@@ -59,21 +59,16 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                      }
                         
                     } else if (key.equals("default")) {
-                        String type = (String) ((Map<?, ?>) propertyDefinition).get("type");
-                        Object defaultValue = ((Map<?, ?>) propertyDefinition).get(key);
-                        if (!CommonUtils.isTypeMatch(type, defaultValue)) {
-                            Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + PropertyDefinitionKey + "." + ((Map<?, ?>) propertyDefinition).get(key));
-                            int line = mark != null ? mark.getLine() + 1 : -1;
-                            int column = mark != null ? mark.getColumn() + 1 : -1;
-                            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-                            handleNotValidKeywords("Default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
-                        }
+                        validateDefaultValue(YamlContent, lines, parentArtifactType, PropertyDefinitionKey, key, (Map<?, ?>) propertyDefinition);
                     } else if (key.equals("entry_schema")) {
-                        ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
+                        ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition, parentArtifactType, PropertyDefinitionKey ,key);
                     } else if (key.equals("key_schema")) {
-                        ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition);
+                        ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition, parentArtifactType, PropertyDefinitionKey,key);
                     } else if (key.equals("validation") ) {
                         checkValidation(positions, YamlContent, lines, parentArtifactType, PropertyDefinitionKey, key, (Map<?, ?>) propertyDefinition);
+                    } else if (key.equals("value")) {
+                        validateFixedValue(YamlContent, lines, parentArtifactType, PropertyDefinitionKey, key, (Map<?, ?>) propertyDefinition);
+
                     }
                 }
             }  
@@ -93,6 +88,40 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         return diagnostics;
     }
 
+    private void validateFixedValue(String yamlContent, String[] lines, String parentArtifactType, String propertyDefinitionKey, String key, Map<?,?> propertyDefinition) {
+        if (propertyDefinition.containsKey("type")) {
+            String type = (String) propertyDefinition.get("type");
+            Object fixedValue = propertyDefinition.get(key);
+            if (!CommonUtils.isTypeMatch(type, fixedValue)) {
+                Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + propertyDefinitionKey + "." + propertyDefinition.get(key));
+                int line = mark != null ? mark.getLine() + 1 : -1;
+                int column = mark != null ? mark.getColumn() + 1 : -1;
+                int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+                handleNotValidKeywords("Default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
+            }    
+        } else {
+            Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + propertyDefinitionKey + "." + propertyDefinition.get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+            handleNotValidKeywords("The property type is missing", line, column, endColumn);
+
+        }
+        
+    }
+
+    private void validateDefaultValue(String YamlContent, String[] lines, String parentArtifactType, String PropertyDefinitionKey, String key, Map<?, ?> propertyDefinition) {
+        String type = (String) propertyDefinition.get("type");
+        Object defaultValue = propertyDefinition.get(key);
+        if (!CommonUtils.isTypeMatch(type, defaultValue)) {
+            Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + PropertyDefinitionKey + "." + propertyDefinition.get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+            handleNotValidKeywords("Default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
+        }
+    }
+
     private void refinePropertyFromDerivedType(Map<String, Mark> positions, String YamlContent, String[] lines, String parentArtifactType, String derivedFrom, String PropertyDefinitionKey, Object propertyDefinition) {
         if (derivedFrom == null ) {
             Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + PropertyDefinitionKey);
@@ -100,7 +129,13 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             int column = mark != null ? mark.getColumn() + 1 : -1;
             int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
             handleNotValidKeywords("The property " + PropertyDefinitionKey + " is not found" , line, column, endColumn);
-        } 
+        } else if (getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey).type().getValue().isEmpty()) {
+            Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + PropertyDefinitionKey);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+            handleNotValidKeywords("The type of the property " + PropertyDefinitionKey + " is not found" , line, column, endColumn);
+        }
         else { 
             //handle if the property has a fixed value
             if (getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey).value().isPresent()) {
@@ -241,13 +276,18 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         
     }
 
-    public void ValidateSchemaDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> propertyDefinition) {
+    public void ValidateSchemaDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> propertyDefinition, String parentArtifactType, String propertyDefinitionKey  , String key) {
         Object entrySchema = propertyDefinition.get("entry_schema");
-        if (entrySchema instanceof Map) {
-            ValidateSchemaDefinition validateSchemaDefinition = new ValidateSchemaDefinition(context.getToscaFile());
-            ArrayList<DiagnosticsSetter> SchemaDefinitionDiagnostics = validateSchemaDefinition.validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, YamlContent, lines);
-            diagnostics.addAll(SchemaDefinitionDiagnostics); 
+        try {
+            if (entrySchema instanceof Map) {
+                ValidateSchemaDefinition validateSchemaDefinition = new ValidateSchemaDefinition(context);
+                ArrayList<DiagnosticsSetter> SchemaDefinitionDiagnostics = validateSchemaDefinition.validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, YamlContent, lines, parentArtifactType,propertyDefinitionKey, key );
+                diagnostics.addAll(SchemaDefinitionDiagnostics);
+            }
+        } catch (Exception e) {
+            context.getClient().logMessage(new MessageParams(MessageType.Error,"the error message: " + e.getMessage()));            
         }
+       
     }
 
     public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, String PropertyDefinitionKey, Map<?, ?> propertyDefinition, String parentArtifactType) {

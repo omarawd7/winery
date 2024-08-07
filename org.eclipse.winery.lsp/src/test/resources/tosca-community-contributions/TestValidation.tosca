@@ -21,21 +21,10 @@ artifact_types:
         description: >-
           Identifies the virtualization environments (e.g. hypervisor) compatible with this software
           image.
-        typel: integer
+        type: integer
+        value: 4
         validation: { $less_or_equal: [ $value, 500 ] }
   
-  Root1:
-    description: >
-      The TOSCA base artifact type from which all other normative
-      TOSCA artifact types derive.
-    properties:
-      testPropertyl:
-        description: >-
-          Identifies the virtualization environments (e.g. hypervisor) compatible with this software
-          image.
-        type: integer
-        validation: { $less_or_equal: [ $value, 500 ] }
-
 
   File:
     description: >-
@@ -53,5 +42,5 @@ artifact_types:
       special handling.
     derived_from: Root
     properties:
-      testProperty: 5000
+      testProperty: 5
 
