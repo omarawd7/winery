@@ -1,0 +1,15 @@
+tosca_definitions_version: 2.0
+node_types:
+  Database:
+    description: "An abstract node type for all databases"
+  WebApplication:
+    description: "An abstract node type"
+  my_webapp_node_type:
+    derived_from: WebApplication
+    properties:
+      my_port:
+        type: integer
+  my_database_node_type:
+    derived_from: Database
+    capabilities:
+      mycompany.mytypes.myfeatures.transactSQL

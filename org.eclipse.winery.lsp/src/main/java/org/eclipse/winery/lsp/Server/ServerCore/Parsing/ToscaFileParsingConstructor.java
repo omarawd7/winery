@@ -21,7 +21,6 @@ import org.yaml.snakeyaml.nodes.Node;
 import org.yaml.snakeyaml.nodes.Tag;
 import org.yaml.snakeyaml.nodes.MappingNode;
 import org.yaml.snakeyaml.nodes.ScalarNode;
-
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;

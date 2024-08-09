@@ -63,6 +63,7 @@ public class TOSCAFileParser implements Parser {
     public Map<String, Object> getStringObjectMap(String yamlContent, LanguageClient client) {
         ToscaFileParsingConstructor constructor = new ToscaFileParsingConstructor();
         ToscaFileContextDependentConstructor validatingConstructor = new ToscaFileContextDependentConstructor();
+        // Load the YAML content to parse it
         Yaml yaml = new Yaml(constructor);
         Yaml uniqueKeysYaml = new Yaml(validatingConstructor);
         uniqueKeysYaml.load(yamlContent);

@@ -69,5 +69,6 @@ artifact_types:
           image.
         type: list
         entry_schema:
-          type: string
-        required: false
+          type: list
+          entry_schema:
+            type: map

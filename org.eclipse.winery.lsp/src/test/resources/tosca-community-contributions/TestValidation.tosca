@@ -43,4 +43,3 @@ artifact_types:
     derived_from: Root
     properties:
       testProperty: 5
-

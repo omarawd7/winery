@@ -20,7 +20,7 @@ import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 import java.util.Map;
 import java.util.Optional;
 
-public class SchemaDefenitionParser {
+public class SchemaDefinitionParser {
     public static SchemaDefinition parseSchemaDefinition(Map<String, Object> Schema) {
         if (Schema == null) { return null; }
         ToscaString type = new ToscaString((String) Schema.get("type"));
@@ -29,7 +29,7 @@ public class SchemaDefenitionParser {
         Optional<SchemaDefinition> keySchema = Optional.empty();
         Optional<SchemaDefinition> entrySchema = Optional.empty();
         try {
-            keySchema = Optional.ofNullable(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("key_schema",null)));
+            keySchema = Optional.ofNullable(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("key_schema",getDefaultKeySchema())));
             entrySchema = Optional.ofNullable(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("entrySchema",null)));
         } catch (Exception e) {
             System.err.println("Error parsing Schema");
@@ -40,6 +40,17 @@ public class SchemaDefenitionParser {
             validation,
             keySchema,
             entrySchema
+        );
+    }
+
+    private static SchemaDefinition getDefaultKeySchema() {
+        ToscaString type = new ToscaString("string");
+        return new SchemaDefinition(
+            type,
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty(),
+            Optional.empty()
         );
     }
 

@@ -63,9 +63,9 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
                             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
                             if (((Map<?, ?>) artifactType).containsKey("derived_from")) {
-                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey, (String) ((Map<?, ?>) artifactType).get("derived_from"));
+                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey, "artifact_types", (String) ((Map<?, ?>) artifactType).get("derived_from"));
                             } else {
-                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey, null);
+                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, artifactTypeKey, "artifact_types",null);
                             }
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }

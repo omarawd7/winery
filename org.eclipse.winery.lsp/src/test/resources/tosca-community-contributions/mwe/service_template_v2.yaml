@@ -1,0 +1,8 @@
+service_template:
+  node_templates:
+    my_application:
+      type: WebApplication
+      count: 3
+      requirements:
+        - host: 
+            node: [ tomcat_server, $node_index ]

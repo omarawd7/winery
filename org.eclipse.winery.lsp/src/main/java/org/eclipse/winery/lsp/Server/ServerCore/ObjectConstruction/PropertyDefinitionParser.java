@@ -49,8 +49,8 @@ public class PropertyDefinitionParser {
         Optional<SchemaDefinition> keySchema = Optional.empty();
         Optional<SchemaDefinition> entrySchema = Optional.empty();
         try {
-            keySchema = Optional.ofNullable(SchemaDefenitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("key_schema",null)));
-            entrySchema = Optional.ofNullable(SchemaDefenitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("entrySchema",null)));
+            keySchema = Optional.ofNullable(SchemaDefinitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("key_schema",null)));
+            entrySchema = Optional.ofNullable(SchemaDefinitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("entrySchema",null)));
         } catch (Exception e) {
             System.err.println("Error parsing Schema");
         }

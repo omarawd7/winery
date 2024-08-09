@@ -17,6 +17,7 @@ public class ToscaLSContentImpl implements LSContext {
     private ClientCapabilities clientCapabilities;
     private TOSCAFile toscaFile;
     private Map<String, Mark> contextDependentConstructorPositions;
+    
     public <V> void put(LSContext.Key<V> key, V value) {
         props.put(key, value);
     }
@@ -76,7 +77,8 @@ public class ToscaLSContentImpl implements LSContext {
     public void setCotextDependentPositions(Map<String, Mark> contextDependentConstructorPositions) {
         this.contextDependentConstructorPositions = contextDependentConstructorPositions;
     }
-
+    
+    @Override
     public Map<String, Mark> getContextDependentConstructorPositions() {
         return contextDependentConstructorPositions;
     }

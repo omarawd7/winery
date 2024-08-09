@@ -13,11 +13,11 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -33,33 +33,47 @@ public class ValidateSchemaDefinition implements DiagnosesHandler  {
     this.context = context;
     }
 
-    public ArrayList<DiagnosticsSetter> validateSchemaDefinitions(Map<String, Object> SchemaDefinitionMap, Map<String, Mark> positions, String yamlContent, String[] lines, String parentArtifactType, String PropertyDefinitionKey , String SchemaType) {
+    public ArrayList<DiagnosticsSetter> validateSchemaDefinitions(Map<String, Object> SchemaDefinitionMap, Map<String, Mark> positions, String yamlContent, String[] lines, String schemaPath) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
             "type", "description","validation", "key_schema", "entry_schema"
         );
-        validateRequiredKeys(SchemaDefinitionMap,yamlContent, lines,  parentArtifactType, PropertyDefinitionKey, SchemaType );
+        validateRequiredKeys(SchemaDefinitionMap,yamlContent, lines,  schemaPath);
         for (String SchemaDefinitionKey : SchemaDefinitionMap.keySet()) {
             if (!validPropertyDefinitionKeywords.contains(SchemaDefinitionKey)) {
-                Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + PropertyDefinitionKey + "." + SchemaType + "." + SchemaDefinitionKey );
+                Mark mark = context.getContextDependentConstructorPositions().get( schemaPath + "." + SchemaDefinitionKey);
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
                 handleNotValidKeywords("Invalid Schema definition keyword: " + SchemaDefinitionKey, line, column, endColumn);
             }
             if ((SchemaDefinitionMap).containsKey("type") && (((Map<?, ?>) SchemaDefinitionMap).get("type").equals("list") || ((Map<?, ?>) SchemaDefinitionMap).get("type").equals("map"))) {
-                ValidateEntrySchema(positions, yamlContent, lines, SchemaDefinitionKey, SchemaDefinitionMap);
+                ValidateEntrySchema(positions, yamlContent, lines, SchemaDefinitionMap, schemaPath );
+            }
+        }
+        if ((SchemaDefinitionMap).containsKey("entry_schema")) {
+            Object entrySchema = SchemaDefinitionMap.get("entry_schema");
+            context.getClient().logMessage(new MessageParams(MessageType.Info, "the sub schema: " + entrySchema.toString()));
+            if (entrySchema instanceof Map) {
+                validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, yamlContent, lines, schemaPath + "." + "entry_schema" );
+            } else {
+                Mark mark = context.getContextDependentConstructorPositions().get( schemaPath + "." + "entry_schema");
+                int line = mark != null ? mark.getLine() + 1 : -1;
+                int column = mark != null ? mark.getColumn() + 1 : -1;
+                int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
+                handleNotValidKeywords("Invalid Schema definition, Schema definition needs to be a map.", line, column, endColumn);
             }
         }
         return diagnostics;
     }
     
-    public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, String PropertyDefinitionKey, Map<?, ?> propertyDefinition) {
-        if (! propertyDefinition.containsKey("entry_schema")) { 
-            Mark mark = positions.get("entry_schema");//TODO make it depends on the unique key names map
+    public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> schemaDefinition, String schemaPath) {
+        if (! schemaDefinition.containsKey("entry_schema")) { 
+            context.getClient().logMessage(new MessageParams(MessageType.Info, " Missing entry_schema: "));
+            Mark mark = context.getContextDependentConstructorPositions().get(schemaPath);
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;
             int endColumn = CommonUtils.getEndColumn(YamlContent, line, column, lines);
-            handleNotValidKeywords("Missing entry_schema at Schema: " + PropertyDefinitionKey, line, column, endColumn);
+            handleNotValidKeywords("Missing entry_schema", line, column, endColumn);
         }
     }
     
@@ -103,9 +117,9 @@ public class ValidateSchemaDefinition implements DiagnosesHandler  {
         return (int) content.lines().count();
     }
 
-    public void validateRequiredKeys(Map<String, Object> yamlMap, String content, String[] lines, String parentArtifactType, String PropertyDefinitionKey , String SchemaType) {
+    public void validateRequiredKeys(Map<String, Object> yamlMap, String content, String[] lines, String SchemaPath) {
         if (!yamlMap.containsKey("type")) {
-            Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + parentArtifactType + "." + "properties" + "." + PropertyDefinitionKey + "." + SchemaType);
+            Mark mark = context.getContextDependentConstructorPositions().get(SchemaPath);
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;
             int endColumn = CommonUtils.getEndColumn(content, line, column, lines);

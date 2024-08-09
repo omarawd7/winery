@@ -40,15 +40,14 @@ public interface LSContext {
     
     void setFileContent(String uri, String content);
 
-    public TOSCAFile getToscaFile();
+    TOSCAFile getToscaFile();
     
-    public void setToscaFile(TOSCAFile toscaFile);
+    void setToscaFile(TOSCAFile toscaFile);
 
     void setCotextDependentPositions(Map<String, Mark> contextDependentConstructorPositions);
-
-    public Map<String, Mark> getContextDependentConstructorPositions() ;
-
-        class Key<K> {
-    }
+    
+    Map<String, Mark> getContextDependentConstructorPositions() ;
+    
+    class Key<K> { }
 
 }

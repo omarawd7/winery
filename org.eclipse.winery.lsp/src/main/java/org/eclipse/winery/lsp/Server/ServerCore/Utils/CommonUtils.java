@@ -3,11 +3,10 @@ package org.eclipse.winery.lsp.Server.ServerCore.Utils;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
+import java.util.Map;
 
 public class CommonUtils {
-    public static final String LINE_SEPARATOR = System.lineSeparator();
-    public static final String MD_LINE_SEPARATOR = LINE_SEPARATOR + LINE_SEPARATOR;
-
     private CommonUtils() {
     }
 
@@ -41,14 +40,57 @@ public class CommonUtils {
     }
 
     public static boolean isTypeMatch(String type, Object value) {
-        return switch (type) {
-            case "string" -> value instanceof String && value.toString().startsWith("\"") && value.toString().endsWith("\"");
-            case "int", "integer" -> value instanceof Integer;
-            case "float" -> value instanceof Float;
-            case "boolean" -> value instanceof Boolean;
-            //TODO support more types
-            default -> false;
-        };
+        switch (type.toLowerCase()) {
+            case "integer":
+                return isInteger(value);
+            case "string":
+                return isString(value);
+            case "map":
+                return isMap(value);
+            case "list":
+                return isList(value);
+            case "float":
+                return isFloat(value);
+            case "boolean":
+                return isBoolean(value);
+                //TODO support more types
+            default:
+                return false;
+        }
+    }
+
+    private static boolean isInteger(Object value) {
+        try {
+            Integer.parseInt(value.toString());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isString(Object value) {
+        return value instanceof String && ((String) value).trim().startsWith("\"") && ((String) value).trim().endsWith("\"");
+    }
+
+    private static boolean isMap(Object value) {
+        return value instanceof Map;
+    }
+
+    private static boolean isList(Object value) {
+        return value instanceof List;
+    }
+
+    private static boolean isFloat(Object value) {
+        try {
+            Float.parseFloat(value.toString());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
+        }
+    }
+
+    private static boolean isBoolean(Object value) {
+        return "true".equalsIgnoreCase(value.toString()) || "false".equalsIgnoreCase(value.toString());
     }
     
    public static Boolean isFunction(String line) {

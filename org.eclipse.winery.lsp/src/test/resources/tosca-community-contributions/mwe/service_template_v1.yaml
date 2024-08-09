@@ -1,0 +1,8 @@
+tosca_definitions_version: 2.0
+service_template:
+  node_templates:
+    my_application_node_template:
+      type: WebApplication
+      requirements:
+        - host: 
+            node: WebServer
