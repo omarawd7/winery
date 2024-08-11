@@ -22,7 +22,6 @@ import io.soabase.recordbuilder.core.RecordBuilder;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
-
 import java.util.Map;
 import java.util.Optional;
 

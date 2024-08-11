@@ -9,13 +9,17 @@ import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Completion.AutoCompletionHandler;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.eclipse.winery.lsp.Server.ServerCore.Validation.DiagnosticsPublisher;
+
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ToscaTextDocService implements TextDocumentService {
     private final LSContext serverContext;
-
     public ToscaTextDocService(LSContext serverContext) {
         this.serverContext = serverContext;
     }
@@ -30,6 +34,22 @@ public class ToscaTextDocService implements TextDocumentService {
         Path uriPath = CommonUtils.uriToPath(uri);
         String content = params.getTextDocument().getText();
         serverContext.setFileContent(uri, content);
+
+        // Get the directory path and list all files in it
+        Path directoryPath = uriPath.getParent();
+        try (Stream<Path> walk = Files.walk(directoryPath)) {
+            List<String> filePaths = walk.filter(Files::isRegularFile)
+                .map(Path::toString)
+                .collect(Collectors.toList());
+
+            // Log the file paths
+            for (String filePath : filePaths) {
+                messageParams.setMessage("File in directory: " + filePath);
+                this.serverContext.getClient().logMessage(messageParams);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         BaseOperationContext context = ContextBuilder.baseContext(this.serverContext);
         if (CommonUtils.isToscaFile(uriPath)) {
             context.clientLogManager().showInfoMessage("TOSCA file opened");
