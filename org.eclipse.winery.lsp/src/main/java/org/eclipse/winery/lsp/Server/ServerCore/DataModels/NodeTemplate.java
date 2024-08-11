@@ -19,11 +19,8 @@
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.*;
-
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Stack;
 
 public record NodeTemplate(ToscaString type,
                            Optional<ToscaString> description,

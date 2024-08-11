@@ -12,23 +12,24 @@
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
 /**
- * Artifact Definition
+ * Workflow Step Definition
  * For more details on the TOSCA specification, visit:
- * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#122-artifact-definition">Artifact Definition</a>
+ * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#1322-workflow-step-definition">Workflow Step Definition</a>
  */
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
-import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Stack;
 
-public record ArtifactDefinition(ToscaString type,
-                                 ToscaString file,
-                                 Optional<ToscaString>  repository,
-                                 Optional<ToscaString> description,
-                                 Optional <ToscaMap<String, Object>> metadata,
-                                 Optional<ToscaString> artifact_version,
-                                 Optional<ToscaString> checksum,
-                                 Optional<ToscaString> checksum_algorithm,
-                                 Optional<Map<String, PropertyDefinition>> properties) { }
+public record WorkflowStepDefinition(ToscaString target,
+                                     Optional<ToscaString> target_relationship,
+                                     Optional<Stack<Map<String, List<String>>>> filter,
+                                     ToscaList<Object> activities,//TODO Activity definitions
+                                     Optional<ToscaList<String>> on_success,
+                                     Optional<ToscaList<String>> on_failure
+                                     ) { }
