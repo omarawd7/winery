@@ -58,13 +58,15 @@ public class TOSCAFileValidator implements DiagnosesHandler {
                 int endColumn = CommonUtils.getEndColumn("", line, column, lines);
                 handleNotValidKeywords("Invalid keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
             } else if (key.equals("artifact_types")) {
-                ValidateArtifactTypes(yamlMap, positions, YamlContent, key, lines);
+                validateArtifactTypes(yamlMap, positions, YamlContent, key, lines);
+            } else if (key.equals("capability_types")) {
+                validateCapabilityTypes(yamlMap, positions, YamlContent, key, lines);
             }
         }
         
     }
 
-    private void ValidateArtifactTypes(Map<String, Object> yamlMap, Map<String, Mark> positions, String YamlContent, String key, String[] lines) {
+    private void validateArtifactTypes(Map<String, Object> yamlMap, Map<String, Mark> positions, String YamlContent, String key, String[] lines) {
         Object artifactTypes = yamlMap.get(key);
         if (artifactTypes instanceof Map) {
             ArtifactTypeValidator artifactTypeValidator = new ArtifactTypeValidator(context);
@@ -73,6 +75,15 @@ public class TOSCAFileValidator implements DiagnosesHandler {
         }
     }
 
+    private void validateCapabilityTypes(Map<String, Object> yamlMap, Map<String, Mark> positions, String YamlContent, String key, String[] lines) {
+        Object capabilityTypes = yamlMap.get(key);
+        if (capabilityTypes instanceof Map) {
+            CapabilityTypeValidator capabilityTypeValidator = new CapabilityTypeValidator(context);
+            ArrayList<DiagnosticsSetter> ArtifactTypeDiagnostics = capabilityTypeValidator.validateCapabilityTypes((Map<String, Object>) capabilityTypes, positions, YamlContent, lines);
+            diagnostics.addAll(ArtifactTypeDiagnostics);
+        }
+    }
+    
     @Override
     public void handleNotValidKeywords(String message, int line, int column, int endColumn) {
         DiagnosticsSetter toscaFileDiagnostic = new DiagnosticsSetter();
