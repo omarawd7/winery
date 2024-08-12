@@ -20,11 +20,17 @@ package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+
 import java.util.Map;
 import java.util.Optional;
 
-public record CapabilityType(Optional<ToscaList<String>> valid_source_node_types,
+public record CapabilityType(Optional<CapabilityType> derivedFrom,
+                             Optional<ToscaString> version,
+                             Optional<ToscaMap<String, String>> metadata,
+                             Optional<ToscaString> description,
+                             Optional<ToscaList<String>> valid_source_node_types,
                              Optional<ToscaList<String>> valid_relationship_types,
                              Optional<Map<String, PropertyDefinition>> properties,
-                             Optional<ToscaMap<String, AttributeDefinition>> attributes) {
+                             Optional<Map<String, AttributeDefinition>> attributes) {
 }

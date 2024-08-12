@@ -13,8 +13,10 @@ import org.eclipse.winery.lsp.Server.ServerCore.Validation.DiagnosticsPublisher;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -38,15 +40,19 @@ public class ToscaTextDocService implements TextDocumentService {
         // Get the directory path and list all files in it
         Path directoryPath = uriPath.getParent();
         try (Stream<Path> walk = Files.walk(directoryPath)) {
-            List<String> filePaths = walk.filter(Files::isRegularFile)
-                .map(Path::toString)
-                .collect(Collectors.toList());
+            List<String[]> filePaths = walk.filter(Files::isRegularFile)
+                .map(path -> path.toString().split(Pattern.quote("\\")))
+                .toList();
+          // add each file path array
+            this.serverContext.setDirectoryFilePaths(filePaths);
 
-            // Log the file paths
-            for (String filePath : filePaths) {
-                messageParams.setMessage("File in directory: " + filePath);
+            // Log each file path array
+            for (String[] filePathArray : filePaths) {
+                this.serverContext.setDirectoryFilePaths(filePaths);
+                messageParams.setMessage("File path components: " + Arrays.toString(filePathArray));
                 this.serverContext.getClient().logMessage(messageParams);
             }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

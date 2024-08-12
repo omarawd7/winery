@@ -32,7 +32,7 @@ public record TOSCAFile(ToscaString toscaDefinitionsVersion,
                         Optional<Object> dslDefinitions,
                         Optional<Map<String, ArtifactType>> artifactTypes,
                         Optional<ToscaMap<String, Object>> dataTypes,//TODO Replace the objects with the real object representation
-                        Optional<ToscaMap<String, Object>> capabilityTypes,
+                        Optional<Map<String, CapabilityType>> capabilityTypes,
                         Optional<ToscaMap<String, Object>> interfaceTypes,
                         Optional<ToscaMap<String, Object>> relationshipTypes,
                         Optional<ToscaMap<String, Object>> nodeTypes,

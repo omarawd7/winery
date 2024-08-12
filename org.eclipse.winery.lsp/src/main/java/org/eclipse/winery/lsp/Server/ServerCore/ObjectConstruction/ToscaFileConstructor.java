@@ -14,6 +14,7 @@
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
@@ -30,7 +31,7 @@ public class ToscaFileConstructor {
         Optional<Map<String, ArtifactType>> artifactTypes = Optional.ofNullable(ArtifactTypeParser.parseArtifactTypes((Map<String, Object>) yamlMap.get("artifact_types")));
 
         Optional<ToscaMap<String, Object>> dataTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("data_types")));
-        Optional<ToscaMap<String, Object>> capabilityTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("capability_types")));
+        Optional<Map<String, CapabilityType>> capabilityTypes = Optional.of(CapabilityTypeParser.parseCapabilityTypes((Map<String, Object>) yamlMap.get("capability_types")));
         Optional<ToscaMap<String, Object>> interfaceTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("interface_types")));
         Optional<ToscaMap<String, Object>> relationshipTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("relationship_types")));
         Optional<ToscaMap<String, Object>> nodeTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("node_types")));
