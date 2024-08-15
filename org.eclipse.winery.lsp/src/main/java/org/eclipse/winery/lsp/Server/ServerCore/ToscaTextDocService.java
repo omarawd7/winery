@@ -9,14 +9,12 @@ import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Completion.AutoCompletionHandler;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.eclipse.winery.lsp.Server.ServerCore.Validation.DiagnosticsPublisher;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ToscaTextDocService implements TextDocumentService {
@@ -38,16 +36,49 @@ public class ToscaTextDocService implements TextDocumentService {
 
         // Get the directory path and list all files in it
         Path directoryPath = uriPath.getParent();
+        
+        /*
+        
+        // import of relative paths
+        
+        String url = "../green/example-green.tosca";
+        Path currentFilePath = Path.of("C:\\temp\\tosca-files\\blue\\example.tosca"); // current tosca file containing import->url
+        Path pathOfOtherToscaFile = currentFilePath.getParent().resolve(url); // result: C:\temp\tosca-files\green\example-green.tosca 
+
+        // profile handling 
+
+        // processing a TOSCA file defining "profile"
+        String profile = "org.base:v1"; // read from the file
+        // currentFilePath // current tosca file containing profile:
+        Map<String, Path> profilePaths = new HashMap<>(); // a map from profile names to real paths
+        profilePaths.put(profile, currentFilePath);
+        
+        // processing a import of a profile
+        // currentFilePath // current tosca file containing import->profile and import->namespace
+        String namespace = "ns1"; // namespace read from .tosca file
+        Map<String, TOSCAFile> namespaceDefinitions = new HashMap<>(); // global variable in LSP
+        // TODO: parse should be 1. load yaml, then TOSCAFileConstructor(yamlMap)
+        namespaceDefinitions.put(namespace, parse(profilePaths.get(profile))); // parse converts file Path to ToscaDefinition
+        */
+        
+        // Determine all parent directories of all files
         try (Stream<Path> walk = Files.walk(directoryPath)) {
-            List<String[]> filePaths = walk.filter(Files::isRegularFile)
-                .map(path -> path.toString().split(Pattern.quote("\\")))
-                .toList();
-          // add each file path array
+            Set<Path> filePaths = walk.filter(Files::isRegularFile)
+                .flatMap(path -> {
+                    List<Path> additions = new ArrayList<>();
+                    do {
+                        additions.add(path);
+                        path = path.getParent();
+                    } while (path != null);
+                    return additions.stream();
+                })
+                .collect(Collectors.toSet());
             this.serverContext.setDirectoryFilePaths(filePaths);
             
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
         BaseOperationContext context = ContextBuilder.baseContext(this.serverContext);
         if (CommonUtils.isToscaFile(uriPath)) {
             context.clientLogManager().showInfoMessage("TOSCA file opened");

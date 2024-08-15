@@ -301,7 +301,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     }
 
     public void validateKeySchema(String YamlContent, String[] lines, String PropertyDefinitionKey, String path) {
-        if (!context.getContextDependentConstructorPositions().containsKey(path + "." + "entry_schema")){
+        if (!context.getContextDependentConstructorPositions().containsKey(path + "." + "entry_schema")) {
             Mark mark = context.getContextDependentConstructorPositions().get(path);
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;

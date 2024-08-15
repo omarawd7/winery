@@ -15,9 +15,10 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.yaml.snakeyaml.error.Mark;
 
-import java.util.List;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 public interface LSContext {
     
@@ -49,9 +50,9 @@ public interface LSContext {
     
     Map<String, Mark> getContextDependentConstructorPositions() ;
 
-    List<String[]> getDirectoryFilePaths();
+    Set<Path> getDirectoryFilePaths();
 
-    void setDirectoryFilePaths(List<String[]> directoryFilePaths) ;
+    void setDirectoryFilePaths(Set<Path> directoryFilePaths) ;
     
     class Key<K> { }
 

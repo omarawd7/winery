@@ -11,19 +11,13 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-//TODO add java doc for why this file is created
-package org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes;
 
-import java.util.Map;
+package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
-public class ToscaMap<K, V> {
-    private Map<K, V> value;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ServiceTemplate;
 
-    public ToscaMap(Map<K, V> value) {
-        this.value = value;
-    }
-    
-    public Map<K, V> getValue() {
-        return value;
+public class ServiceTemplateParser {
+    public static ServiceTemplate parseServiceTemplate(Object serviceTemplate) { //TODO
+        return null;
     }
 }

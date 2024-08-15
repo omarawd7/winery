@@ -5,10 +5,9 @@ import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.yaml.snakeyaml.error.Mark;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.nio.file.Path;
+import java.util.*;
 
 public class ToscaLSContentImpl implements LSContext {
     private final Map<String, String> fileContents = new HashMap<>();
@@ -18,7 +17,7 @@ public class ToscaLSContentImpl implements LSContext {
     private ClientCapabilities clientCapabilities;
     private TOSCAFile toscaFile;
     private Map<String, Mark> contextDependentConstructorPositions;
-    private List<String[]> DirectoryFilePaths;   
+    private Set<Path>  directoryFilePaths;   
     public <V> void put(LSContext.Key<V> key, V value) {
         props.put(key, value);
     }
@@ -84,11 +83,11 @@ public class ToscaLSContentImpl implements LSContext {
         return contextDependentConstructorPositions;
     }
 
-    public List<String[]> getDirectoryFilePaths() {
-        return DirectoryFilePaths;
+    public Set<Path> getDirectoryFilePaths() {
+        return directoryFilePaths;
     }
 
-    public void setDirectoryFilePaths(List<String[]> directoryFilePaths) {
-        DirectoryFilePaths = directoryFilePaths;
+    public void setDirectoryFilePaths(Set<Path>  directoryFilePaths) {
+        this.directoryFilePaths = directoryFilePaths;
     }
 }

@@ -17,7 +17,6 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.ToscaContext;
-
 import java.util.List;
 
 public class AutoCompletionHandler {
@@ -58,7 +57,7 @@ public class AutoCompletionHandler {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getArtifactTypesKeyWords(position);
         }
-        return null;
+        return List.of();
         }
 
         private List<CompletionItem> capabilityTypeCompletion(String line, Position position) {
@@ -70,6 +69,6 @@ public class AutoCompletionHandler {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getCapabilityTypesKeyWords(position);
         }
-        return null;
+        return List.of();
         }
 }

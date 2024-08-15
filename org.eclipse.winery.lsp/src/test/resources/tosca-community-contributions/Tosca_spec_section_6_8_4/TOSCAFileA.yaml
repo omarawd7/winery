@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_2_0
 description: TOSCA File A
 imports:
-  - url: TOSCAFileB.yaml
+  - url: TOSCAFileB_v1.yaml
 node_types:
   MyNode:
     derived_from: Root

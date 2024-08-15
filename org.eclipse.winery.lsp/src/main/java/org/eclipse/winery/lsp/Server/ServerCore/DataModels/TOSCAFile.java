@@ -42,7 +42,7 @@ public record TOSCAFile(ToscaString toscaDefinitionsVersion,
                         Optional<ToscaMap<String, Object>> functions,
                         Optional<ToscaString> profile,
                         Optional<ToscaList<Object>> imports,
-                        Optional<Object> serviceTemplate) {
+                        Optional<ServiceTemplate> serviceTemplate) {
     
     public TOSCAFile overrideTOSCAFile(String key, ArtifactType newArtifactType) {
         if (artifactTypes.isPresent()) {
