@@ -34,7 +34,8 @@ public class AutoCompletionHandler {
     }
 
         private List<CompletionItem> handelCompletion(String line, Position position, String content) {
-            if (line.startsWith(" ") && line.length() == 2) { // Auto complete the TOSCAFile Keywords when press space 
+            if (line.startsWith(" ") && line.length() <= 2) { 
+                // Auto complete the TOSCAFile Keywords when press space 
                 CompletionItemGetter completionItemGetter = new CompletionItemGetter();
                 return completionItemGetter.getTOSCAFileKeywords(position);
             }    
@@ -50,10 +51,10 @@ public class AutoCompletionHandler {
         }
         
         private List<CompletionItem> artifactTypeCompletion(String line, Position position) {
-        if (line.contains("derived_from:") && (toscaContext.getContextStack().peek().equals("artifact_types"))) {
+        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("artifact_types")) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableArtifactTypes(lsContext);
-        } else if (line.startsWith("    ") && (toscaContext.getContextStack().peek().equals("artifact_types"))) {
+        } else if (line.startsWith("    ") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("artifact_types"))) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getArtifactTypesKeyWords(position);
         }
@@ -61,11 +62,11 @@ public class AutoCompletionHandler {
         }
 
         private List<CompletionItem> capabilityTypeCompletion(String line, Position position) {
-        if (line.contains("derived_from:") && (toscaContext.getContextStack().peek().equals("capability_types"))) {
+        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && toscaContext.getContextStack() != null && toscaContext.getContextStack().peek().equals("capability_types")) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableCapabilityTypes(lsContext);
         }
-        else if (line.startsWith("    ") && (toscaContext.getContextStack().peek().equals("capability_types"))) {
+        else if (line.startsWith("    ") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("capability_types"))) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getCapabilityTypesKeyWords(position);
         }

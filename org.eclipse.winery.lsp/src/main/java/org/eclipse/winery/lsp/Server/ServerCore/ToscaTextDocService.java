@@ -44,12 +44,7 @@ public class ToscaTextDocService implements TextDocumentService {
                 .toList();
           // add each file path array
             this.serverContext.setDirectoryFilePaths(filePaths);
-
-            // Log each file path array
-            for (String[] filePathArray : filePaths) {
-                this.serverContext.setDirectoryFilePaths(filePaths);
-            }
-
+            
         } catch (IOException e) {
             e.printStackTrace();
         }
