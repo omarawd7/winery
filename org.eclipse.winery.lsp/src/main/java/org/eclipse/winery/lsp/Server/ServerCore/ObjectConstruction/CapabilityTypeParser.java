@@ -34,7 +34,10 @@ public class CapabilityTypeParser {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    CapabilityType capabilityType = CapabilityTypeParser.parseCapabilityType((Map<String, Object>) e.getValue());
+                    CapabilityType capabilityType = new CapabilityType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    if (e.getValue() instanceof Map) {
+                         capabilityType = CapabilityTypeParser.parseCapabilityType((Map<String, Object>) e.getValue());
+                    }
                     CapabilityTypesNamesMap.put(e.getKey(), capabilityType);
                     return capabilityType;
                 }

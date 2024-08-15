@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ToscaTextDocService implements TextDocumentService {
@@ -49,8 +48,6 @@ public class ToscaTextDocService implements TextDocumentService {
             // Log each file path array
             for (String[] filePathArray : filePaths) {
                 this.serverContext.setDirectoryFilePaths(filePaths);
-                messageParams.setMessage("File path components: " + Arrays.toString(filePathArray));
-                this.serverContext.getClient().logMessage(messageParams);
             }
 
         } catch (IOException e) {
@@ -97,7 +94,7 @@ public class ToscaTextDocService implements TextDocumentService {
         String content = serverContext.getFileContent(uri);
         String line = content.split("\n")[position.getLine()];
         AutoCompletionHandler autoCompletionHandler = new AutoCompletionHandler(serverContext);
-        List<CompletionItem> completionItems = autoCompletionHandler.handel(line,position);
+        List<CompletionItem> completionItems = autoCompletionHandler.handel(line,position, content);
         return CompletableFuture.completedFuture(Either.forLeft(completionItems));
     }
 

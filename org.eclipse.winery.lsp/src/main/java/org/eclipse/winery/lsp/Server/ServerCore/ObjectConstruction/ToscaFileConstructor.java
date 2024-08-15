@@ -24,14 +24,17 @@ import java.util.*;
 
 public class ToscaFileConstructor {
     public static TOSCAFile ConstructToscaFile(Map<String, Object> yamlMap) {
-        ToscaString toscaDefinitionsVersion = new ToscaString ((String) yamlMap.get("tosca_definitions_version"));
+        ToscaString toscaDefinitionsVersion = new ToscaString (yamlMap.get("tosca_definitions_version").toString());
         Optional<ToscaString> description = Optional.of(new ToscaString( (String) yamlMap.get("description")));
         Optional<ToscaMap<String, Object>> metadata = Optional.of(new ToscaMap<>(((Map<String, Object>) yamlMap.get("metadata"))));
         Optional<Object> dslDefinitions = Optional.ofNullable(yamlMap.get("dsl_definitions"));
         Optional<Map<String, ArtifactType>> artifactTypes = Optional.ofNullable(ArtifactTypeParser.parseArtifactTypes((Map<String, Object>) yamlMap.get("artifact_types")));
 
         Optional<ToscaMap<String, Object>> dataTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("data_types")));
-        Optional<Map<String, CapabilityType>> capabilityTypes = Optional.of(CapabilityTypeParser.parseCapabilityTypes((Map<String, Object>) yamlMap.get("capability_types")));
+        Optional<Map<String, CapabilityType>> capabilityTypes = Optional.empty();
+        if (yamlMap.get("capability_types") instanceof Map) { 
+            capabilityTypes = Optional.of(CapabilityTypeParser.parseCapabilityTypes((Map<String, Object>) yamlMap.get("capability_types")));
+        }
         Optional<ToscaMap<String, Object>> interfaceTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("interface_types")));
         Optional<ToscaMap<String, Object>> relationshipTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("relationship_types")));
         Optional<ToscaMap<String, Object>> nodeTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("node_types")));

@@ -22,7 +22,6 @@ artifact_types:
           Identifies the virtualization environments (e.g. hypervisor) compatible with this software
           image.
         type: integer
-        value: 4
         validation: { $less_or_equal: [ $value, 500 ] }
   
 
@@ -33,7 +32,7 @@ artifact_types:
       special handling.
     derived_from: Root
     properties:
-      testProperty: 500000
+      testProperty: 50
 
   File1:
     description: >-

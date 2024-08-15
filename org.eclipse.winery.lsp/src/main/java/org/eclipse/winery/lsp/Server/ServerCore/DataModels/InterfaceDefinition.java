@@ -11,24 +11,18 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-/**
- * Relationship Template
- * For more details on the TOSCA specification, visit:
- * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#74-relationship-template">Relationship Template</a>
- */
+
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 
-import java.util.Map;
 import java.util.Optional;
 
-public record RelationshipTemplate(Optional<ToscaString> description,
-                                   Optional<ToscaMap<String, Object>> metadata,
-                                   Optional<Map<String, PropertyDefinition>> relationship,
-                                   Optional<ToscaString> capability,
-                                   ToscaString node,
-                                   Optional<ToscaMap<String, AttributeDefinition>> attributes,
-                                   Optional<ToscaMap<String, InterfaceAssignment>> interfaces,
-                                   Optional<ToscaString> copy) { }
+public record InterfaceDefinition(ToscaString type,
+                                  Optional<ToscaString> description,
+                                  Optional<ToscaMap<String, String>> metadata,
+                                  Optional<ToscaMap<String, ParameterDefinition>> inputs,
+                                  Optional<ToscaMap<String, OperationDefinition>> operations,
+                                  Optional<ToscaMap<String, NotificationDefinition>> notifications) {
+}
