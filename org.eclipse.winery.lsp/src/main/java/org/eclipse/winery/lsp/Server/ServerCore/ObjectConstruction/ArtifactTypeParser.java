@@ -26,12 +26,17 @@ public class ArtifactTypeParser {
     public static Map<String, ArtifactType> parseArtifactTypes(Map<String, Object> artifactTypesMap) {
         if (artifactTypesMap == null) {
             return Collections.emptyMap();
-        }
+        } 
         return artifactTypesMap.entrySet().stream()
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    ArtifactType artifactType = ArtifactTypeParser.parseArtifactType((Map<String, Object>) e.getValue());
+                    ArtifactType artifactType  = new ArtifactType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    if (e.getValue() != null && e.getValue() instanceof Map) {
+                        artifactType = ArtifactTypeParser.parseArtifactType((Map<String, Object>) e.getValue());
+                        artifactTypesNamesMap.put(e.getKey(), artifactType);
+
+                    }
                     artifactTypesNamesMap.put(e.getKey(), artifactType);
                     return artifactType;
                 }
@@ -49,13 +54,34 @@ public class ArtifactTypeParser {
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
+        Optional<ToscaString> version = Optional.empty();
+        if (artifactTypeMap.get("version") != null && artifactTypeMap.get("version") instanceof String) {
+            version = Optional.of(new ToscaString((String) artifactTypeMap.get("version")));
+        }
+        Optional<ToscaMap<String, String>> metadata  = Optional.empty();
+        if (artifactTypeMap.get("metadata") != null && artifactTypeMap.get("metadata") instanceof Map) {
+            metadata = Optional.of(new ToscaMap<>((Map<String, String>) artifactTypeMap.get("metadata")));
+        }
 
-        Optional<ToscaString> version = Optional.of(new ToscaString((String) artifactTypeMap.get("version")));
-        Optional<ToscaMap<String, String>> metadata = Optional.of(new ToscaMap<>((Map<String, String>) artifactTypeMap.get("metadata")));
-        Optional<ToscaString> description = Optional.of(new ToscaString((String) artifactTypeMap.get("description")));
-        Optional<ToscaString> mimeType = Optional.of(new ToscaString((String) artifactTypeMap.get("mime_type")));
-        Optional<ToscaList<String>> fileExt = Optional.of(new ToscaList<>((List<String>) artifactTypeMap.get("file_ext")));
-        Optional<Map<String, PropertyDefinition>> properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) artifactTypeMap.get("properties")));
+        Optional<ToscaString> description = Optional.empty();
+        if (artifactTypeMap.get("description") != null && artifactTypeMap.get("description") instanceof String) {
+            description = Optional.of(new ToscaString((String) artifactTypeMap.get("description")));
+        }
+
+        Optional<ToscaString> mimeType = Optional.empty();
+        if (artifactTypeMap.get("mime_type") != null && artifactTypeMap.get("mime_type") instanceof String) {
+            mimeType = Optional.of(new ToscaString((String) artifactTypeMap.get("mime_type")));
+        }
+
+        Optional<ToscaList<String>> fileExt  = Optional.empty();
+        if (artifactTypeMap.get("file_ext") != null && artifactTypeMap.get("file_ext") instanceof List<?>) {
+            fileExt = Optional.of(new ToscaList<>((List<String>) artifactTypeMap.get("file_ext")));
+        }
+
+        Optional<Map<String, PropertyDefinition>> properties = Optional.empty();
+        if (artifactTypeMap.get("properties") != null && artifactTypeMap.get("properties") instanceof Map) {
+            properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) artifactTypeMap.get("properties")));
+        }
 
         return new ArtifactType(
             derivedFrom,

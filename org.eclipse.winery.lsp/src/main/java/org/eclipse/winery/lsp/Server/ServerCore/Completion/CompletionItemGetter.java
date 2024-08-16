@@ -41,7 +41,6 @@ public class CompletionItemGetter {
     
     public List<CompletionItem> getAvailableCapabilityTypes(LSContext lsContext) {
         List<String> capabilityTypes = new ArrayList<>();
-        lsContext.getClient().logMessage(new MessageParams(MessageType.Info," the capabilities: " + lsContext.getToscaFile().capabilityTypes().get()));
         if (lsContext.getToscaFile() != null && lsContext.getToscaFile().capabilityTypes().get() != null) {
             for (String key : lsContext.getToscaFile().capabilityTypes().get().keySet()) {
                 capabilityTypes.add(" " + key);

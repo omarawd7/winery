@@ -16,21 +16,33 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.SchemaDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
-
 import java.util.Map;
 import java.util.Optional;
 
 public class SchemaDefinitionParser {
     public static SchemaDefinition parseSchemaDefinition(Map<String, Object> Schema) {
         if (Schema == null) { return null; }
-        ToscaString type = new ToscaString((String) Schema.get("type"));
-        Optional<ToscaString> description = Optional.ofNullable(new ToscaString((String) Schema.get("description")));
-        Optional<Object> validation = Optional.ofNullable(Schema.get("validation"));
+        
+        ToscaString type  = new ToscaString("");
+        if (Schema.get("type") != null && Schema.get("type") instanceof String) {
+            type = new ToscaString((String) Schema.get("type"));
+        }
+
+        Optional<ToscaString> description  = Optional.empty();
+        if (Schema.get("description") != null && Schema.get("description") instanceof String) {
+            description = Optional.of(new ToscaString((String) Schema.get("description")));
+        }
+
+        Optional<Object> validation   = Optional.empty();
+        if (Schema.get("validation") != null && Schema.get("validation") instanceof String) {
+            validation = Optional.of(Schema.get("validation")); //TODO add validation clause as a stack of function
+        }
+        
         Optional<SchemaDefinition> keySchema = Optional.empty();
         Optional<SchemaDefinition> entrySchema = Optional.empty();
         try {
-            keySchema = Optional.ofNullable(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("key_schema",getDefaultKeySchema())));
-            entrySchema = Optional.ofNullable(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("entrySchema",null)));
+            keySchema = Optional.of(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("key_schema",getDefaultKeySchema())));
+            entrySchema = Optional.of(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("entrySchema",Optional.empty())));
         } catch (Exception e) {
             System.err.println("Error parsing Schema");
         }

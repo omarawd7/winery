@@ -37,8 +37,8 @@ public class CapabilityTypeParser {
                     CapabilityType capabilityType = new CapabilityType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
                     if (e.getValue() instanceof Map) {
                          capabilityType = CapabilityTypeParser.parseCapabilityType((Map<String, Object>) e.getValue());
+                         CapabilityTypesNamesMap.put(e.getKey(), capabilityType);
                     }
-                    CapabilityTypesNamesMap.put(e.getKey(), capabilityType);
                     return capabilityType;
                 }
             ));
@@ -56,12 +56,36 @@ public class CapabilityTypeParser {
             System.err.println(e.getMessage());
         }
 
-        Optional<ToscaString> version = Optional.of(new ToscaString((String) capabilityTypeMap.get("version")));
-        Optional<ToscaMap<String, String>> metadata = Optional.of(new ToscaMap<>((Map<String, String>) capabilityTypeMap.get("metadata")));
-        Optional<ToscaString> description = Optional.of(new ToscaString((String) capabilityTypeMap.get("description")));
-        Optional<ToscaList<String>> valid_source_node_types = Optional.of(new ToscaList<>((List<String>) capabilityTypeMap.get("valid_source_node_types")));
-        Optional<ToscaList<String>> valid_relationship_types = Optional.of(new ToscaList<>((List<String>) capabilityTypeMap.get("valid_relationship_types")));
-        Optional<Map<String, PropertyDefinition>> properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) capabilityTypeMap.get("properties")));
+        Optional<ToscaString> version = Optional.empty();
+        if (capabilityTypeMap.get("version") != null && capabilityTypeMap.get("version") instanceof String) {
+            version = Optional.of(new ToscaString((String) capabilityTypeMap.get("version")));
+        }
+
+        Optional<ToscaMap<String, String>> metadata = Optional.empty();
+        if (capabilityTypeMap.get("metadata") != null && capabilityTypeMap.get("metadata") instanceof String) {
+            metadata = Optional.of(new ToscaMap<>((Map<String, String>) capabilityTypeMap.get("metadata")));
+        }
+
+        Optional<ToscaString> description = Optional.empty();
+        if (capabilityTypeMap.get("description") != null && capabilityTypeMap.get("description") instanceof String) {
+            description = Optional.of(new ToscaString((String) capabilityTypeMap.get("description")));
+        }
+
+        Optional<ToscaList<String>> valid_source_node_types = Optional.empty();
+        if (capabilityTypeMap.get("valid_source_node_types") != null && capabilityTypeMap.get("valid_source_node_types") instanceof List<?>) {
+            valid_source_node_types = Optional.of(new ToscaList<>((List<String>) capabilityTypeMap.get("valid_source_node_types")));
+        }
+
+        Optional<ToscaList<String>> valid_relationship_types  = Optional.empty();
+        if (capabilityTypeMap.get("valid_relationship_types") != null && capabilityTypeMap.get("valid_relationship_types") instanceof List<?>) {
+            valid_relationship_types = Optional.of(new ToscaList<>((List<String>) capabilityTypeMap.get("valid_relationship_types")));
+        }
+
+        Optional<Map<String, PropertyDefinition>> properties  = Optional.empty();
+        if (capabilityTypeMap.get("properties") != null && capabilityTypeMap.get("properties") instanceof Map) {
+            properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) capabilityTypeMap.get("properties")));        
+        }
+
         Optional<Map<String, AttributeDefinition>> attributes = Optional.ofNullable((Map<String, AttributeDefinition>) capabilityTypeMap.get("attributes")); //TODO add the attribute definition parser
 
         return new CapabilityType(

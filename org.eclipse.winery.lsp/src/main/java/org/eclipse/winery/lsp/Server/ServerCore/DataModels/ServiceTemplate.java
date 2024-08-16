@@ -18,6 +18,7 @@
  */
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 import java.util.Map;
@@ -27,11 +28,10 @@ public record ServiceTemplate(
                               Optional<ToscaString> description,
                               Optional <ToscaMap<String, Object>> metadata,
                               Optional<ToscaMap<String, ParameterDefinition>> inputs,
-                              Optional<ToscaMap<String, NodeTemplate>> node_templates,
-                              Optional<ToscaMap<String, Object>> relationshipTypes,
-                              Optional<Map<String, GroupDefinition>> groups,
+                              ToscaMap<String, NodeTemplate> nodeTemplates,
+                              Optional<ToscaMap<String, RelationshipTemplate>> relationshipTemplate,
+                              Optional<ToscaMap<String, GroupDefinition>> groups,
                               Optional<ToscaMap<String, WorkflowDefinitions>> workflows,
-                              Optional<ToscaMap<String, PolicyDefinition>> policies,
+                              Optional<ToscaList<PolicyDefinition>> policies,
                               Optional<ToscaMap<String, ParameterDefinition>> outputs,
-                              Optional<ToscaMap<String, SubstitutionMapping>> substitution_mappings) {
-}
+                              Optional<SubstitutionMapping> substitutionMappings) { }

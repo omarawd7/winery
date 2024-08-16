@@ -14,6 +14,8 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Completion;
 
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.ToscaContext;
@@ -39,11 +41,11 @@ public class AutoCompletionHandler {
                 return completionItemGetter.getTOSCAFileKeywords(position);
             }    
             // Artifact type auto-completion logic 
-            if (artifactTypeCompletion(line, position) != null) {
+            if (artifactTypeCompletion(line, position) != null && !artifactTypeCompletion(line, position).isEmpty()) {
                 return artifactTypeCompletion(line, position);
             }
             // Capability type auto-completion logic
-            if (capabilityTypeCompletion(line, position) != null) {
+            if (capabilityTypeCompletion(line, position) != null && !capabilityTypeCompletion(line, position).isEmpty() ) {
                 return capabilityTypeCompletion(line, position);
             }
             return List.of();
@@ -61,7 +63,7 @@ public class AutoCompletionHandler {
         }
 
         private List<CompletionItem> capabilityTypeCompletion(String line, Position position) {
-        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && toscaContext.getContextStack() != null && toscaContext.getContextStack().peek().equals("capability_types")) {
+            if (line.contains("derived_from:") && toscaContext.getContextStack() != null && toscaContext.getContextStack().peek().equals("capability_types")) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableCapabilityTypes(lsContext);
         }

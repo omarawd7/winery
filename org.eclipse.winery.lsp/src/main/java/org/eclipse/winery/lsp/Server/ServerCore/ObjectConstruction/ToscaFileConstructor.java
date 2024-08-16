@@ -100,7 +100,7 @@ public class ToscaFileConstructor {
         }
         Optional<ServiceTemplate> serviceTemplate = Optional.empty();
         if (yamlMap.get("service_template") instanceof Map) {
-            serviceTemplate = Optional.of(Objects.requireNonNull(ServiceTemplateParser.parseServiceTemplate(yamlMap.get("service_template"))));
+            serviceTemplate = Optional.of(Objects.requireNonNull(ServiceTemplateParser.parseServiceTemplate( (Map<String, Object>) yamlMap.get("service_template"))));
         }
 
         return new TOSCAFile(
