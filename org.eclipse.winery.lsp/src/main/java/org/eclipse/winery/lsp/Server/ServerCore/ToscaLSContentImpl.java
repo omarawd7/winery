@@ -15,7 +15,11 @@ public class ToscaLSContentImpl implements LSContext {
     private Map<Class<?>, Object> objects = new HashMap<>();
     private LanguageClient languageClient;
     private ClientCapabilities clientCapabilities;
-    private TOSCAFile toscaFile;
+    private TOSCAFile currentToscaFile;
+    private Path currentToscaFilePath;
+    private Map<String, TOSCAFile> namespaceDefinitions = new HashMap<>();
+    private Map<String, TOSCAFile> importedToscaFiles = new HashMap<>();
+    private Map<String, Path> profilePaths = new HashMap<>();
     private Map<String, Mark> contextDependentConstructorPositions;
     private Set<Path>  directoryFilePaths;   
     public <V> void put(LSContext.Key<V> key, V value) {
@@ -65,12 +69,12 @@ public class ToscaLSContentImpl implements LSContext {
     }
 
     @Override
-    public TOSCAFile getToscaFile() {
-        return toscaFile;
+    public TOSCAFile getCurrentToscaFile() {
+        return currentToscaFile;
     }
 
-    public void setToscaFile(TOSCAFile toscaFile) {
-        this.toscaFile = toscaFile;
+    public void setCurrentToscaFile(TOSCAFile currentToscaFile) {
+        this.currentToscaFile = currentToscaFile;
     }
 
     @Override
@@ -82,12 +86,54 @@ public class ToscaLSContentImpl implements LSContext {
     public Map<String, Mark> getContextDependentConstructorPositions() {
         return contextDependentConstructorPositions;
     }
-
+    
+    @Override
     public Set<Path> getDirectoryFilePaths() {
         return directoryFilePaths;
     }
-
+    
+    @Override
     public void setDirectoryFilePaths(Set<Path>  directoryFilePaths) {
         this.directoryFilePaths = directoryFilePaths;
+    }
+
+    @Override
+    public Path getCurrentToscaFilePath() {
+        return currentToscaFilePath;
+    }
+
+    @Override
+    public void setCurrentToscaFilePath(Path currentToscaFilePath) {
+        this.currentToscaFilePath = currentToscaFilePath;
+    }
+
+    @Override
+    public Map<String, TOSCAFile> getNamespaceDefinitions() {
+        return namespaceDefinitions;
+    }
+
+    @Override
+    public void setNamespaceDefinitions(Map<String, TOSCAFile> namespaceDefinitions) {
+        this.namespaceDefinitions = namespaceDefinitions;
+    }
+
+    @Override
+    public Map<String, Path> getProfilePaths() {
+        return profilePaths;
+    }
+
+    @Override
+    public void setProfilePaths(Map<String, Path> profilePaths) {
+        this.profilePaths = profilePaths;
+    }
+
+    @Override
+    public Map<String, TOSCAFile> getImportedToscaFiles() {
+        return importedToscaFiles;
+    }
+
+    @Override
+    public void setImportedToscaFiles(Map<String, TOSCAFile> importedToscaFiles) {
+        this.importedToscaFiles = importedToscaFiles;
     }
 }

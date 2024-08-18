@@ -42,9 +42,9 @@ public interface LSContext {
     
     void setFileContent(String uri, String content);
 
-    TOSCAFile getToscaFile();
+    TOSCAFile getCurrentToscaFile();
     
-    void setToscaFile(TOSCAFile toscaFile);
+    void setCurrentToscaFile(TOSCAFile currentToscaFile);
 
     void setCotextDependentPositions(Map<String, Mark> contextDependentConstructorPositions);
     
@@ -53,6 +53,23 @@ public interface LSContext {
     Set<Path> getDirectoryFilePaths();
 
     void setDirectoryFilePaths(Set<Path> directoryFilePaths) ;
+
+    Path getCurrentToscaFilePath();
+    
+    void setCurrentToscaFilePath(Path currentToscaFilePath);
+
+    Map<String, TOSCAFile> getNamespaceDefinitions();
+
+    void setNamespaceDefinitions(Map<String, TOSCAFile> namespaceDefinitions);
+    
+    Map<String, Path> getProfilePaths();
+
+    void setProfilePaths(Map<String, Path> profilePaths);
+    
+    public Map<String, TOSCAFile> getImportedToscaFiles();
+
+    
+    public void setImportedToscaFiles(Map<String, TOSCAFile> importedToscaFiles);
     
     class Key<K> { }
 

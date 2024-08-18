@@ -1,7 +1,7 @@
 tosca_definitions_version: tosca_2_0
 description: TOSCA file A
 imports:
-  - url: /templates/TOSCAFileB.yaml
+  - url: TOSCAFileB_v1.yaml
     namespace: fileB
 node_types:
   MyNode:

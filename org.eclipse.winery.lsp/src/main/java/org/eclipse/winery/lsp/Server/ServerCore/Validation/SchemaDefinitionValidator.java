@@ -25,11 +25,11 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-public class ValidateSchemaDefinition implements DiagnosesHandler  {
+public class SchemaDefinitionValidator implements DiagnosesHandler  {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
     private final LSContext context;
 
-    public ValidateSchemaDefinition(LSContext context) {
+    public SchemaDefinitionValidator(LSContext context) {
     this.context = context;
     }
 

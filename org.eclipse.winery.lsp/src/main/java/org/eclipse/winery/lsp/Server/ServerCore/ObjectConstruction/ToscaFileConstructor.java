@@ -13,10 +13,7 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityType;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ServiceTemplate;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.*;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
@@ -93,11 +90,12 @@ public class ToscaFileConstructor {
         if (yamlMap.get("repositories") != null && yamlMap.get("repositories") instanceof Map) {
             functions = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("functions")));
         }
-        
-        Optional<ToscaList<Object>> imports = Optional.empty();
-        if (yamlMap.get("imports") instanceof List<?>) {
-            imports = Optional.of(new ToscaList<>((List<Object>) yamlMap.get("imports")));
+
+        Optional<ToscaList<ImportDefinition>> imports = Optional.empty();
+        if (yamlMap.get("imports") != null) {
+            imports = Optional.of(new ToscaList<>(ImportDefinitionParser.parseImportDefinitions(yamlMap.get("imports"))));
         }
+        
         Optional<ServiceTemplate> serviceTemplate = Optional.empty();
         if (yamlMap.get("service_template") instanceof Map) {
             serviceTemplate = Optional.of(Objects.requireNonNull(ServiceTemplateParser.parseServiceTemplate( (Map<String, Object>) yamlMap.get("service_template"))));

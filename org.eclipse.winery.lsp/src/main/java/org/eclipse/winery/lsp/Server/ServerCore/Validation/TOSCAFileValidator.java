@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -61,9 +62,20 @@ public class TOSCAFileValidator implements DiagnosesHandler {
                 validateArtifactTypes(yamlMap, positions, YamlContent, key, lines);
             } else if (key.equals("capability_types")) {
                 validateCapabilityTypes(yamlMap, positions, YamlContent, key, lines);
+            } else if (key.equals("imports")) {
+                validateImports(yamlMap, positions, YamlContent, key, lines);
             }
         }
         
+    }
+
+    private void validateImports(Map<String, Object> yamlMap, Map<String, Mark> positions, String yamlContent, String key, String[] lines) {
+    Object imports = yamlMap.get("imports");
+    if (imports instanceof List) {
+       ImportsValidator importsValidator = new ImportsValidator(context);
+       ArrayList<DiagnosticsSetter> ImportsDiagnostics = importsValidator.validateImports((List<Object>) imports, positions, yamlContent, lines);
+       diagnostics.addAll(ImportsDiagnostics);
+    }
     }
 
     private void validateArtifactTypes(Map<String, Object> yamlMap, Map<String, Mark> positions, String YamlContent, String key, String[] lines) {

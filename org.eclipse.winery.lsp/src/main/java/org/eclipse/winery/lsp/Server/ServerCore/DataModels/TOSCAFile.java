@@ -41,7 +41,7 @@ public record TOSCAFile(ToscaString toscaDefinitionsVersion,
                         Optional<ToscaMap<String, Object>> repositories,
                         Optional<ToscaMap<String, Object>> functions,
                         Optional<ToscaString> profile,
-                        Optional<ToscaList<Object>> imports,
+                        Optional<ToscaList<ImportDefinition>> imports,
                         Optional<ServiceTemplate> serviceTemplate) {
     
     public TOSCAFile overrideTOSCAFile(String key, ArtifactType newArtifactType) {

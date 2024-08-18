@@ -24,8 +24,8 @@ public class CompletionItemGetter {
     public List<CompletionItem> getAvailableArtifactTypes(LSContext lsContext) {
         List<String> artifactTypes = new ArrayList<>();
         
-        if (lsContext.getToscaFile() != null && lsContext.getToscaFile().artifactTypes().get() != null) {
-            for (String key : lsContext.getToscaFile().artifactTypes().get().keySet()) {
+        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().artifactTypes().get() != null) {
+            for (String key : lsContext.getCurrentToscaFile().artifactTypes().get().keySet()) {
                 artifactTypes.add(" " + key);
             }
             return artifactTypes.stream()
@@ -41,8 +41,8 @@ public class CompletionItemGetter {
     
     public List<CompletionItem> getAvailableCapabilityTypes(LSContext lsContext) {
         List<String> capabilityTypes = new ArrayList<>();
-        if (lsContext.getToscaFile() != null && lsContext.getToscaFile().capabilityTypes().get() != null) {
-            for (String key : lsContext.getToscaFile().capabilityTypes().get().keySet()) {
+        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().capabilityTypes().get() != null) {
+            for (String key : lsContext.getCurrentToscaFile().capabilityTypes().get().keySet()) {
                 capabilityTypes.add(" " + key);
             }
             return capabilityTypes.stream()

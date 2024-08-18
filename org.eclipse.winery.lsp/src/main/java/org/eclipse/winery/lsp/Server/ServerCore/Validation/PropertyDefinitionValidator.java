@@ -174,9 +174,9 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         PropertyDefinition newPropertyDefinitionObject ;
         newPropertyDefinitionObject = getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey).clone();
         newPropertyDefinitionObject = newPropertyDefinitionObject.withValue(newValue);
-        ArtifactType newArtifactType = context.getToscaFile().artifactTypes().get().get(parentArtifactType).addOrOverridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinitionObject);
-        TOSCAFile toscaFile = context.getToscaFile().overrideTOSCAFile(parentArtifactType , newArtifactType);
-        context.setToscaFile(toscaFile);
+        ArtifactType newArtifactType = context.getCurrentToscaFile().artifactTypes().get().get(parentArtifactType).addOrOverridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinitionObject);
+        TOSCAFile toscaFile = context.getCurrentToscaFile().overrideTOSCAFile(parentArtifactType , newArtifactType);
+        context.setCurrentToscaFile(toscaFile);
         return newPropertyDefinitionObject;
     }
 
@@ -209,7 +209,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     }
     
     private PropertyDefinition getPropertyDefinitionObject(String ArtifactType, String PropertyDefinitionKey) {
-        PropertyDefinition propertyDefinition = context.getToscaFile().artifactTypes().get().get(ArtifactType).properties().get().get(PropertyDefinitionKey);
+        PropertyDefinition propertyDefinition = context.getCurrentToscaFile().artifactTypes().get().get(ArtifactType).properties().get().get(PropertyDefinitionKey);
         if (propertyDefinition == null) {
         throw new IllegalArgumentException("The propertyDefinition " + ArtifactType + "." + PropertyDefinitionKey + " does not exist");   
         }
@@ -217,10 +217,10 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     }
 
     private void setValidationStack(String parentArtifactType, String PropertyDefinitionKey, FunctionParser functionParser) {
-        PropertyDefinition newPropertyDefinition = context.getToscaFile().artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
-        ArtifactType newArtifactType = context.getToscaFile().artifactTypes().get().get(parentArtifactType).overridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinition);
-        TOSCAFile toscaFile = context.getToscaFile().overrideTOSCAFile(parentArtifactType , newArtifactType);
-        context.setToscaFile(toscaFile);
+        PropertyDefinition newPropertyDefinition = context.getCurrentToscaFile().artifactTypes().get().get(parentArtifactType).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
+        ArtifactType newArtifactType = context.getCurrentToscaFile().artifactTypes().get().get(parentArtifactType).overridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinition);
+        TOSCAFile toscaFile = context.getCurrentToscaFile().overrideTOSCAFile(parentArtifactType , newArtifactType);
+        context.setCurrentToscaFile(toscaFile);
     }
     
     public boolean isValidPropertyDefinitionsValue(Stack<Map<String,List<String>>> TheValidation, Object value, String type, Map<String, Mark> positions, String yamlContent, String[] lines, String parentArtifactType, String PropertyDefinitionKey) {
@@ -279,9 +279,9 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         Object entrySchema = propertyDefinition.get("entry_schema");
         try {
             if (entrySchema instanceof Map) {
-                ValidateSchemaDefinition validateSchemaDefinition = new ValidateSchemaDefinition(context);
+                SchemaDefinitionValidator schemaDefinitionValidator = new SchemaDefinitionValidator(context);
                 String schemaPath = path + "." + key;
-                ArrayList<DiagnosticsSetter> SchemaDefinitionDiagnostics = validateSchemaDefinition.validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, YamlContent, lines, schemaPath );
+                ArrayList<DiagnosticsSetter> SchemaDefinitionDiagnostics = schemaDefinitionValidator.validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, YamlContent, lines, schemaPath );
                 diagnostics.addAll(SchemaDefinitionDiagnostics);
             }
         } catch (Exception e) {

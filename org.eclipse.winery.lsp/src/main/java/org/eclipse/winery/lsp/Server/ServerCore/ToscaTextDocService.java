@@ -30,37 +30,12 @@ public class ToscaTextDocService implements TextDocumentService {
         messageParams.setType(MessageType.Info);
         this.serverContext.getClient().logMessage(messageParams);
         String uri = params.getTextDocument().getUri();
-        Path uriPath = CommonUtils.uriToPath(uri);
+        Path Path = CommonUtils.uriToPath(uri);
+        serverContext.setCurrentToscaFilePath(Path);
         String content = params.getTextDocument().getText();
         serverContext.setFileContent(uri, content);
-
         // Get the directory path and list all files in it
-        Path directoryPath = uriPath.getParent();
-        
-        /*
-        
-        // import of relative paths
-        
-        String url = "../green/example-green.tosca";
-        Path currentFilePath = Path.of("C:\\temp\\tosca-files\\blue\\example.tosca"); // current tosca file containing import->url
-        Path pathOfOtherToscaFile = currentFilePath.getParent().resolve(url); // result: C:\temp\tosca-files\green\example-green.tosca 
-
-        // profile handling 
-
-        // processing a TOSCA file defining "profile"
-        String profile = "org.base:v1"; // read from the file
-        // currentFilePath // current tosca file containing profile:
-        Map<String, Path> profilePaths = new HashMap<>(); // a map from profile names to real paths
-        profilePaths.put(profile, currentFilePath);
-        
-        // processing a import of a profile
-        // currentFilePath // current tosca file containing import->profile and import->namespace
-        String namespace = "ns1"; // namespace read from .tosca file
-        Map<String, TOSCAFile> namespaceDefinitions = new HashMap<>(); // global variable in LSP
-        // TODO: parse should be 1. load yaml, then TOSCAFileConstructor(yamlMap)
-        namespaceDefinitions.put(namespace, parse(profilePaths.get(profile))); // parse converts file Path to ToscaDefinition
-        */
-        
+        Path directoryPath = Path.getParent();
         // Determine all parent directories of all files
         try (Stream<Path> walk = Files.walk(directoryPath)) {
             Set<Path> filePaths = walk.filter(Files::isRegularFile)
@@ -74,29 +49,46 @@ public class ToscaTextDocService implements TextDocumentService {
                 })
                 .collect(Collectors.toSet());
             this.serverContext.setDirectoryFilePaths(filePaths);
-            
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
         BaseOperationContext context = ContextBuilder.baseContext(this.serverContext);
-        if (CommonUtils.isToscaFile(uriPath)) {
+        if (CommonUtils.isToscaFile(Path)) {
             context.clientLogManager().showInfoMessage("TOSCA file opened");
             DiagnosticsPublisher diagnosticspublisher = DiagnosticsPublisher.getInstance(serverContext);
-            diagnosticspublisher.publishDiagnostics(serverContext, uriPath);
+            diagnosticspublisher.publishDiagnostics(serverContext, Path);
         }
     }
 
     @Override
     public void didChange(DidChangeTextDocumentParams params) {
         String uri = params.getTextDocument().getUri();
-        Path uriPath = CommonUtils.uriToPath(uri);
-        if (CommonUtils.isToscaFile(uriPath)) {
+        Path filePath = CommonUtils.uriToPath(uri);
+        // Get the directory path and list all files in it
+        Path directoryPath = filePath.getParent();
+        // Determine all parent directories of all files
+        try (Stream<Path> walk = Files.walk(directoryPath)) {
+            Set<Path> filePaths = walk.filter(Files::isRegularFile)
+                .flatMap(path -> {
+                    List<Path> additions = new ArrayList<>();
+                    do {
+                        additions.add(path);
+                        path = path.getParent();
+                    } while (path != null);
+                    return additions.stream();
+                })
+                .collect(Collectors.toSet());
+            this.serverContext.setDirectoryFilePaths(filePaths);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (CommonUtils.isToscaFile(filePath)) {
             DiagnosticsPublisher diagnosticspublisher = DiagnosticsPublisher.getInstance(serverContext);
             List<TextDocumentContentChangeEvent> changes = params.getContentChanges();
             if (!changes.isEmpty()) {
                 String content = changes.get(0).getText();
-                diagnosticspublisher.publishDiagnostics(serverContext, uriPath, content);
+                diagnosticspublisher.publishDiagnostics(serverContext, filePath, content);
                 serverContext.setFileContent(uri, content);
             }
         }

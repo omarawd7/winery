@@ -35,7 +35,6 @@ public class ArtifactTypeParser {
                     if (e.getValue() != null && e.getValue() instanceof Map) {
                         artifactType = ArtifactTypeParser.parseArtifactType((Map<String, Object>) e.getValue());
                         artifactTypesNamesMap.put(e.getKey(), artifactType);
-
                     }
                     artifactTypesNamesMap.put(e.getKey(), artifactType);
                     return artifactType;
