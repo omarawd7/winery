@@ -14,6 +14,7 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeType;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
@@ -64,9 +65,20 @@ public class TOSCAFileValidator implements DiagnosesHandler {
                 validateCapabilityTypes(yamlMap, positions, YamlContent, key, lines);
             } else if (key.equals("imports")) {
                 validateImports(yamlMap, positions, YamlContent, key, lines);
+            } else if (key.equals("node_types")) {
+                validateNodeTypes(yamlMap, positions, YamlContent, key, lines);
             }
         }
         
+    }
+
+    private void validateNodeTypes(Map<String, Object> yamlMap, Map<String, Mark> positions, String yamlContent, String key, String[] lines) {
+        Object NodeTypes = yamlMap.get(key);
+        if (NodeTypes instanceof Map) {
+            NodeTypeValidator nodeTypeValidator = new NodeTypeValidator(context);
+            ArrayList<DiagnosticsSetter> nodeTypeDiagnostics = nodeTypeValidator.validateNodeTypes((Map<String, Object>) NodeTypes, positions, yamlContent, lines);
+            diagnostics.addAll(nodeTypeDiagnostics);
+        }
     }
 
     private void validateImports(Map<String, Object> yamlMap, Map<String, Mark> positions, String yamlContent, String key, String[] lines) {

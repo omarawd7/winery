@@ -11,27 +11,22 @@
  *
  * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
  *******************************************************************************/
-/**
- * Node Type
- * For more details on the TOSCA specification, visit:
- * <a href="https://docs.oasis-open.org/tosca/TOSCA/v2.0/csd06/TOSCA-v2.0-csd06.html#71-node-type">Node Type</a>
- */
 
 package org.eclipse.winery.lsp.Server.ServerCore.DataModels;
 
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
+
 import java.util.Map;
 import java.util.Optional;
 
-public record NodeType(Optional<NodeType> derivedFrom,
-                       Optional<ToscaString> version,
-                       Optional<ToscaMap<String, String>> metadata,
-                       Optional<ToscaString> description,
-                       Optional<Map<String, PropertyDefinition>> properties,
-                       Optional<ToscaMap<String, AttributeDefinition>> attributes,
-                       Optional<ToscaMap<String, CapabilityDefinition>> capabilities,
-                       Optional<ToscaList<RequirementDefinition>> requirements,
-                       Optional<ToscaMap<String,  InterfaceDefinition>> interfaces,
-                       Optional<ToscaMap<String, ArtifactDefinition>> artifacts) { }
+public record CapabilityDefinition(ToscaString type,
+                                   Optional<ToscaString> description,
+                                   Optional<ToscaMap<String, String>> metadata,
+                                   Optional<ToscaList<String>> valid_source_node_types,
+                                   Optional<ToscaList<String>> valid_relationship_types,
+                                   Optional<Map<String, PropertyDefinition>> properties,
+                                   Optional<Map<String, AttributeDefinition>> attributes
+) {
+}

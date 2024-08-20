@@ -18,6 +18,8 @@ import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+
 import static java.util.stream.Collectors.toList;
 
 public class CompletionItemGetter {
@@ -113,6 +115,46 @@ public class CompletionItemGetter {
             "properties:", "attributes:", "valid_source_node_types:", "valid_relationship_types:"
         );
 
+        return keywords.stream()
+            .map(keyword -> {
+                CompletionItem item = new CompletionItem(keyword);
+                item.setKind(CompletionItemKind.Keyword);
+                // Create a TextEdit to remove the trailing space
+                TextEdit textEdit = new TextEdit(
+                    new Range(
+                        new Position(position.getLine(), Math.max(0, position.getCharacter() - 1)), // Ensure character index is not negative
+                        new Position(position.getLine(), position.getCharacter())
+                    ),
+                    keyword
+                );
+                item.setTextEdit(Either.forLeft(textEdit));
+                return item;
+            })
+            .collect(toList());
+    }
+
+    public List<CompletionItem> getAvailableNodeTypes(LSContext lsContext) {
+        List<String> nodeTypes = new ArrayList<>();
+        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().nodeTypes().get() != null) {
+            for (String key : lsContext.getCurrentToscaFile().nodeTypes().get().getValue().keySet()) {
+                nodeTypes.add(" " + key);
+            }
+            return nodeTypes.stream()
+                .map(type -> {
+                    CompletionItem item = new CompletionItem(type);
+                    item.setKind(CompletionItemKind.Value);
+                    return item;
+                })
+                .collect(toList());
+        }
+        return new ArrayList<>();
+
+    }
+
+    public List<CompletionItem> getNodeTypesKeyWords(Position position) {
+        List<String> keywords = List.of(
+            "derived_from:", "version:", "metadata:", "description:", "properties:", "attributes:", "capabilities:", "requirements:","interfaces:", "artifacts:"
+        );
         return keywords.stream()
             .map(keyword -> {
                 CompletionItem item = new CompletionItem(keyword);

@@ -29,7 +29,7 @@ public record NodeTemplate(ToscaString type,
                            Optional<Map<String, PropertyDefinition>> properties,
                            Optional<ToscaMap<String, AttributeDefinition>> attributes,
                            Optional<ToscaMap<String, CapabilityType>> capabilities,
-                           Optional<RequirementAssignment> requirements,
+                           Optional<ToscaList<RequirementAssignment>> requirements,
                            Optional<ToscaMap<String, InterfaceAssignment>> interfaces,
                            Optional<ToscaMap<String, ArtifactDefinition>> artifacts,
                            Optional<ToscaInteger> count, //TODO must be non negative

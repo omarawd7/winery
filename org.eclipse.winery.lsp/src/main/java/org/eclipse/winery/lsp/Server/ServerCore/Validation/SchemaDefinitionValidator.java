@@ -52,7 +52,6 @@ public class SchemaDefinitionValidator implements DiagnosesHandler  {
         }
         if ((SchemaDefinitionMap).containsKey("entry_schema")) {
             Object entrySchema = SchemaDefinitionMap.get("entry_schema");
-            context.getClient().logMessage(new MessageParams(MessageType.Info, "the sub schema: " + entrySchema.toString()));
             if (entrySchema instanceof Map) {
                 validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, yamlContent, lines, schemaPath + "." + "entry_schema" );
             } else {
@@ -67,8 +66,7 @@ public class SchemaDefinitionValidator implements DiagnosesHandler  {
     }
     
     public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> schemaDefinition, String schemaPath) {
-        if (! schemaDefinition.containsKey("entry_schema")) { 
-            context.getClient().logMessage(new MessageParams(MessageType.Info, " Missing entry_schema: "));
+        if (! schemaDefinition.containsKey("entry_schema")) {
             Mark mark = context.getContextDependentConstructorPositions().get(schemaPath);
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;
@@ -123,7 +121,7 @@ public class SchemaDefinitionValidator implements DiagnosesHandler  {
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;
             int endColumn = CommonUtils.getEndColumn(content, line, column, lines);
-            handleNotValidKeywords("Property Definition Missing required key: type ", line, column, endColumn);
+            handleNotValidKeywords("Schema Definition Missing required key: type ", line, column, endColumn);
         }
         
     }

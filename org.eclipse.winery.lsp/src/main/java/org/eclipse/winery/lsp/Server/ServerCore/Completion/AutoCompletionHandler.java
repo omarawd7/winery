@@ -48,6 +48,11 @@ public class AutoCompletionHandler {
             if (capabilityTypeCompletion(line, position) != null && !capabilityTypeCompletion(line, position).isEmpty() ) {
                 return capabilityTypeCompletion(line, position);
             }
+            // Node type auto-completion logic
+            if (nodeTypeCompletion(line, position) != null && !nodeTypeCompletion(line, position).isEmpty() ) {
+                return nodeTypeCompletion(line, position);
+            }
+            
             return List.of();
         }
         
@@ -73,4 +78,16 @@ public class AutoCompletionHandler {
         }
         return List.of();
         }
+
+    private List<CompletionItem> nodeTypeCompletion(String line, Position position) {
+        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && toscaContext.getContextStack().peek().equals("node_types")) {
+            CompletionItemGetter completionItemGetter = new CompletionItemGetter();
+            return completionItemGetter.getAvailableNodeTypes(lsContext);
+        }
+        else if (line.startsWith("    ") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("node_types"))) {
+            CompletionItemGetter completionItemGetter = new CompletionItemGetter();
+            return completionItemGetter.getNodeTypesKeyWords(position);
+        }
+        return List.of();
+    }
 }

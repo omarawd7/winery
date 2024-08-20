@@ -14,6 +14,8 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
@@ -87,16 +89,18 @@ public class ImportsValidator implements DiagnosesHandler {
 
     private void validateProfile(String yamlContent, String[] lines, Map<?, ?> importElement, String importsKey) {
         if (importElement.get(importsKey) instanceof String) {
-            String profileValue = (String) importElement.get(importsKey);
+            String profileValue = ((String) importElement.get(importsKey));
             TOSCAFileParser toscaFileParser = new TOSCAFileParser();
             try {
                 Boolean isFileExist = false;
                 for (Path ToscaFilePath: context.getDirectoryFilePaths()) {
                     if (CommonUtils.isToscaFile(ToscaFilePath)) {
                     toscaFileParser.ParseTOSCAFile(ToscaFilePath,context.getClient());
+
                     if ( toscaFileParser.getToscaFile() != null && toscaFileParser.getToscaFile().profile().isPresent() && toscaFileParser.getToscaFile().profile().get().getValue().equals(profileValue)) {
                         context.getImportedToscaFiles().put(profileValue, toscaFileParser.getToscaFile());
                         isFileExist = true;
+                        context.getClient().logMessage(new MessageParams(MessageType.Info, "The profile val:" + profileValue + " the tosca file path: " + ToscaFilePath));
                         if (importElement.get("namespace") != null) {
                             if (importElement.get("namespace") instanceof String) {
                                 String namespace = (String) importElement.get("namespace");
@@ -111,7 +115,7 @@ public class ImportsValidator implements DiagnosesHandler {
                     Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "profile" + "." + importElement.get(importsKey));
                     int line = mark != null ? mark.getLine() + 1 : -1;
                     int column = mark != null ? mark.getColumn() + 1 : -1;
-                    int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
+                    int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
                     handleNotValidKeywords("Tosca File not found.", line, column, endColumn); 
                 }
             } catch (Exception e) {
@@ -139,7 +143,7 @@ public class ImportsValidator implements DiagnosesHandler {
                 Path ImportedToscaFilePath = currentFilePath.getParent().resolve(url);
                 if (CommonUtils.isToscaFile(ImportedToscaFilePath)) {
                     toscaFileParser.ParseTOSCAFile(ImportedToscaFilePath,context.getClient());
-                context.getImportedToscaFiles().put(url, toscaFileParser.getToscaFile());
+                context.getToscaFilesPath().put(currentFilePath, toscaFileParser.getToscaFile());
                 if (importElement.get("namespace") != null) {
                     if (importElement.get("namespace") instanceof String) {
                         String namespace = (String) importElement.get("namespace");
@@ -151,7 +155,7 @@ public class ImportsValidator implements DiagnosesHandler {
                 Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "url");
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
-                int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
+                int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
                 handleNotValidKeywords(e.getMessage(), line, column, endColumn);
             }
         }

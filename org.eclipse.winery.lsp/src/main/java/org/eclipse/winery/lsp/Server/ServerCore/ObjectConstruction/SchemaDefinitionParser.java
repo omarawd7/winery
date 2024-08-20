@@ -39,13 +39,16 @@ public class SchemaDefinitionParser {
         }
         
         Optional<SchemaDefinition> keySchema = Optional.empty();
-        Optional<SchemaDefinition> entrySchema = Optional.empty();
-        try {
+        if (Schema.get("keySchema") != null && Schema.get("keySchema") instanceof Map) {
             keySchema = Optional.of(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("key_schema",getDefaultKeySchema())));
-            entrySchema = Optional.of(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("entrySchema",Optional.empty())));
-        } catch (Exception e) {
-            System.err.println("Error parsing Schema");
+
         }
+        
+        Optional<SchemaDefinition> entrySchema = Optional.empty();
+        if (Schema.get("entrySchema") != null && Schema.get("entrySchema") instanceof Map) {
+            entrySchema = Optional.of(parseSchemaDefinition((Map<String, Object>) Schema.getOrDefault("entrySchema",Optional.empty())));
+        }
+            
         return new SchemaDefinition(
             type,
             description,

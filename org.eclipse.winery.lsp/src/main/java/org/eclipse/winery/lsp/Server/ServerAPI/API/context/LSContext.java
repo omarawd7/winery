@@ -66,10 +66,13 @@ public interface LSContext {
 
     void setProfilePaths(Map<String, Path> profilePaths);
     
-    public Map<String, TOSCAFile> getImportedToscaFiles();
-
+    Map<String, TOSCAFile> getImportedToscaFiles();
     
-    public void setImportedToscaFiles(Map<String, TOSCAFile> importedToscaFiles);
+    void setImportedToscaFiles(Map<String, TOSCAFile> importedToscaFiles);
+
+    Map<Path, TOSCAFile> getToscaFilesPath();
+
+    void setToscaFilesPath(Map<Path, TOSCAFile> toscaFilesPath);
     
     class Key<K> { }
 

@@ -66,9 +66,13 @@ public class ToscaFileConstructor {
             relationshipTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("relationship_types")));       
         }
         
-        Optional<ToscaMap<String, Object>> nodeTypes = Optional.empty();
+        Optional<ToscaMap<String, NodeType>> nodeTypes = Optional.empty();
         if (yamlMap.get("node_types") != null && yamlMap.get("node_types") instanceof Map) {
-            nodeTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("node_types")));
+        try {
+            nodeTypes = Optional.of(new ToscaMap<>(NodeTypeParser.parseNodeTypes((Map<String, Object>) yamlMap.get("node_types"))));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
         }
 
         Optional<ToscaMap<String, Object>> groupTypes = Optional.empty();

@@ -21,7 +21,8 @@ public class ToscaLSContentImpl implements LSContext {
     private Map<String, TOSCAFile> importedToscaFiles = new HashMap<>();
     private Map<String, Path> profilePaths = new HashMap<>();
     private Map<String, Mark> contextDependentConstructorPositions;
-    private Set<Path>  directoryFilePaths;   
+    private Set<Path>  directoryFilePaths;
+    private Map<Path, TOSCAFile> ToscaFilesPath = new HashMap<>();
     public <V> void put(LSContext.Key<V> key, V value) {
         props.put(key, value);
     }
@@ -135,5 +136,13 @@ public class ToscaLSContentImpl implements LSContext {
     @Override
     public void setImportedToscaFiles(Map<String, TOSCAFile> importedToscaFiles) {
         this.importedToscaFiles = importedToscaFiles;
+    }
+
+    public Map<Path, TOSCAFile> getToscaFilesPath() {
+        return ToscaFilesPath;
+    }
+
+    public void setToscaFilesPath(Map<Path, TOSCAFile> toscaFilesPath) {
+        ToscaFilesPath = toscaFilesPath;
     }
 }

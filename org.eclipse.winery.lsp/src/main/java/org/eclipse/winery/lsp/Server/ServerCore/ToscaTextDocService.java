@@ -25,10 +25,6 @@ public class ToscaTextDocService implements TextDocumentService {
 
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
-        MessageParams messageParams = new MessageParams();
-        messageParams.setMessage("A file was opened");
-        messageParams.setType(MessageType.Info);
-        this.serverContext.getClient().logMessage(messageParams);
         String uri = params.getTextDocument().getUri();
         Path Path = CommonUtils.uriToPath(uri);
         serverContext.setCurrentToscaFilePath(Path);
@@ -90,6 +86,12 @@ public class ToscaTextDocService implements TextDocumentService {
                 String content = changes.get(0).getText();
                 diagnosticspublisher.publishDiagnostics(serverContext, filePath, content);
                 serverContext.setFileContent(uri, content);
+                // Update the edited file
+                if (serverContext.getCurrentToscaFile() != null && serverContext.getCurrentToscaFile().profile().isPresent()) {
+                    serverContext.getToscaFilesPath().put(filePath, serverContext.getCurrentToscaFile());
+                    serverContext.getImportedToscaFiles().put(serverContext.getCurrentToscaFile().profile().get().getValue(), serverContext.getCurrentToscaFile());
+                    serverContext.getClient().logMessage(new MessageParams(MessageType.Info, "the uri " + uri + "the profile " + serverContext.getCurrentToscaFile().profile().get().getValue()));
+                } //TODO revalidate the files that import this file
             }
         }
     }

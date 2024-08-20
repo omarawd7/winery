@@ -34,14 +34,14 @@ public class CapabilityTypeValidator implements DiagnosesHandler {
     }
 
     public ArrayList<DiagnosticsSetter> validateCapabilityTypes(Map<String, Object> capabilityTypesMap, Map<String, Mark> positions, String YamlContent, String[] lines) {
-        Set<String> validArtifactTypeKeywords = Set.of(
+        Set<String> validCapabilityTypeKeywords = Set.of(
             "derived_from", "version", "metadata", "description", "valid_source_node_types", "valid_relationship_types", "properties", "attributes"
         );
         for (String capabilityTypeKey : capabilityTypesMap.keySet()) {
             Object capabilityType = capabilityTypesMap.get(capabilityTypeKey);
             if (capabilityType instanceof Map) {
                 for (String key : ((Map<String, Object>) capabilityType).keySet()) {
-                    if (!validArtifactTypeKeywords.contains(key)) {
+                    if (!validCapabilityTypeKeywords.contains(key)) {
                         Mark mark = context.getContextDependentConstructorPositions().get("capability_types" + "." + capabilityTypeKey + "." + key);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
@@ -78,38 +78,38 @@ public class CapabilityTypeValidator implements DiagnosesHandler {
 
     @Override
     public void handleNotValidKeywords(String message, int line, int column, int endColumn) {
-        DiagnosticsSetter ArtifactTypeDiagnostic = new DiagnosticsSetter();
-        ArtifactTypeDiagnostic.setErrorMessage(message);
-        ArtifactTypeDiagnostic.setErrorContext("Not Valid Keywords");
-        ArtifactTypeDiagnostic.setErrorColumn(column);
-        ArtifactTypeDiagnostic.setErrorEndColumn(endColumn);
-        ArtifactTypeDiagnostic.setErrorLine(line);
-        diagnostics.add(ArtifactTypeDiagnostic);
+        DiagnosticsSetter capabilityTypeDiagnostic = new DiagnosticsSetter();
+        capabilityTypeDiagnostic.setErrorMessage(message);
+        capabilityTypeDiagnostic.setErrorContext("Not Valid Keywords");
+        capabilityTypeDiagnostic.setErrorColumn(column);
+        capabilityTypeDiagnostic.setErrorEndColumn(endColumn);
+        capabilityTypeDiagnostic.setErrorLine(line);
+        diagnostics.add(capabilityTypeDiagnostic);
     }
 
     @Override
     public void handleDiagnosticsError(String message, Path path) {
-        DiagnosticsSetter ArtifactTypeDiagnostic = new DiagnosticsSetter();
-        ArtifactTypeDiagnostic.setErrorMessage(message);
-        ArtifactTypeDiagnostic.setErrorContext("Parsing Error");
+        DiagnosticsSetter capabilityTypeDiagnostic = new DiagnosticsSetter();
+        capabilityTypeDiagnostic.setErrorMessage(message);
+        capabilityTypeDiagnostic.setErrorContext("Parsing Error");
         try {
             long lineCount = Files.lines(path).count();
-            ArtifactTypeDiagnostic.setErrorLine((int) lineCount);
+            capabilityTypeDiagnostic.setErrorLine((int) lineCount);
         } catch (IOException e) {
-            ArtifactTypeDiagnostic.setErrorLine(-1);
+            capabilityTypeDiagnostic.setErrorLine(-1);
         }
-        ArtifactTypeDiagnostic.setErrorColumn(1);
-        diagnostics.add(ArtifactTypeDiagnostic);
+        capabilityTypeDiagnostic.setErrorColumn(1);
+        diagnostics.add(capabilityTypeDiagnostic);
     }
 
     @Override
     public void handleDiagnosticsError(String message, String content) {
-        DiagnosticsSetter ArtifactTypeDiagnostic = new DiagnosticsSetter();
-        ArtifactTypeDiagnostic.setErrorMessage(message);
-        ArtifactTypeDiagnostic.setErrorContext("Parsing Error");
-        ArtifactTypeDiagnostic.setErrorLine(countLines(content));
-        ArtifactTypeDiagnostic.setErrorColumn(1);
-        diagnostics.add(ArtifactTypeDiagnostic);
+        DiagnosticsSetter capabilityTypeDiagnostic = new DiagnosticsSetter();
+        capabilityTypeDiagnostic.setErrorMessage(message);
+        capabilityTypeDiagnostic.setErrorContext("Parsing Error");
+        capabilityTypeDiagnostic.setErrorLine(countLines(content));
+        capabilityTypeDiagnostic.setErrorColumn(1);
+        diagnostics.add(capabilityTypeDiagnostic);
     }
 
     private int countLines(String content) {

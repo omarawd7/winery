@@ -15,12 +15,114 @@
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import com.google.common.collect.ImmutableMap;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeTemplate;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.*;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.*;
 
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class NodeTemplatesParser {
-    public static Map<String, NodeTemplate> parseNodeTemplate(Map<String, Object> nodeTemplates) { //TODO 
-    return ImmutableMap.of();
+    public static Map<String, NodeTemplate> parseNodeTemplates(Map<String, Object> nodeTemplates) {
+        if (nodeTemplates == null) {
+            return Collections.emptyMap();
+        }
+        return nodeTemplates.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                e -> {
+                    NodeTemplate nodeTemplate = new NodeTemplate(new ToscaString(""), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    if (e.getValue() instanceof Map) {
+                        nodeTemplate = parseNodeTemplate((Map<String, Object>) e.getValue());
+                    }
+                    return nodeTemplate;
+                }
+            ));
     }
+
+    public static NodeTemplate parseNodeTemplate(Map<String, Object> nodeTemplateMap) {
+        if (nodeTemplateMap == null) {
+            return null;
+        }
+
+        ToscaString type = new ToscaString("");
+        if (nodeTemplateMap.get("type") != null && nodeTemplateMap.get("type") instanceof String) {
+            type = new ToscaString((String) nodeTemplateMap.get("type"));
+        }
+
+        Optional<ToscaString> description  = Optional.empty();
+        if (nodeTemplateMap.get("description") != null && nodeTemplateMap.get("description") instanceof String) {
+            description = Optional.ofNullable(new ToscaString((String) nodeTemplateMap.get("description")));
+        }
+
+        Optional<ToscaMap<String, Object>> metadata  = Optional.empty();
+        if (nodeTemplateMap.get("metadata") != null && nodeTemplateMap.get("metadata") instanceof Map) {
+            metadata = Optional.ofNullable(new ToscaMap<>((Map<String, Object>) nodeTemplateMap.get("metadata")));
+        }
+
+        Optional<ToscaList<String>> directives = Optional.empty();
+        if (nodeTemplateMap.get("directives") != null && nodeTemplateMap.get("directives") instanceof List<?>) {
+            directives = Optional.ofNullable(new ToscaList((List) nodeTemplateMap.get("directives")));
+        }
+
+        Optional<Map<String, PropertyDefinition>> properties = Optional.empty();
+        if (nodeTemplateMap.get("properties") != null && nodeTemplateMap.get("properties") instanceof Map) {
+            properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) nodeTemplateMap.get("properties")));
+        }
+
+        Optional<ToscaMap<String, AttributeDefinition>> attributes = Optional.empty();
+        if (nodeTemplateMap.get("attributes") != null && nodeTemplateMap.get("attributes") instanceof Map) {
+            attributes = Optional.of(new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) nodeTemplateMap.get("attributes"))));
+        }
+
+        Optional<ToscaMap<String, CapabilityType>> capabilities = Optional.empty();
+        if (nodeTemplateMap.get("capability_types") != null && nodeTemplateMap.get("capability_types") instanceof Map) {
+            capabilities = Optional.of(new ToscaMap<>(CapabilityTypeParser.parseCapabilityTypes((Map<String, Object>) nodeTemplateMap.get("capability_types"))));
+        }
+
+        Optional<ToscaList<RequirementAssignment>> requirements = Optional.empty();
+        if (nodeTemplateMap.get("requirements") != null && nodeTemplateMap.get("requirements") instanceof List) {
+            requirements = Optional.of(new ToscaList<>(RequirementAssignmentParser.parseRequirementAssignment((List<Object>) nodeTemplateMap.get("requirements"))));
+        }
+
+        Optional<ToscaMap<String, InterfaceAssignment>> interfaces = Optional.empty();
+        if (nodeTemplateMap.get("interfaces") != null && nodeTemplateMap.get("interfaces") instanceof Map<?,?>) {
+            interfaces = Optional.of(new ToscaMap<>(InterfaceAssignmentParser.parseInterfaceAssignment((Map<String, Object>) nodeTemplateMap.get("interfaces"))));
+        }
+
+        Optional<ToscaMap<String, ArtifactDefinition>> artifacts = Optional.empty();
+        if (nodeTemplateMap.get("artifacts") != null && nodeTemplateMap.get("artifacts") instanceof Map<?,?>) {
+            artifacts = Optional.of(new ToscaMap<>(ArtifactDefinitionParser.parseArtifactDefinition((Map<String, Object>) nodeTemplateMap.get("artifacts"))));
+        }
+        
+        Optional<ToscaInteger> count = Optional.empty();
+        if (nodeTemplateMap.get("count") != null && nodeTemplateMap.get("count") instanceof Integer) {
+            count = Optional.of(new ToscaInteger((Integer) nodeTemplateMap.get("count")));
+        }
+
+        Optional<Object> node_filter = Optional.empty();
+        if (nodeTemplateMap.get("node_filter") != null) { //TODO
+            node_filter = Optional.of((nodeTemplateMap.get("node_filter")));
+        }
+
+        Optional<ToscaString> copy = Optional.empty();
+        if (nodeTemplateMap.get("copy") != null && nodeTemplateMap.get("copy") instanceof String) {
+            copy = Optional.of(new ToscaString((String) nodeTemplateMap.get("copy")));
+        }
+        
+        return new NodeTemplate(type,
+            description,
+            directives,
+            metadata,
+            properties,
+            attributes,
+            capabilities,
+            requirements,
+            interfaces,
+            artifacts,
+            count,
+            node_filter,
+            copy
+        );
+    }
+
 }

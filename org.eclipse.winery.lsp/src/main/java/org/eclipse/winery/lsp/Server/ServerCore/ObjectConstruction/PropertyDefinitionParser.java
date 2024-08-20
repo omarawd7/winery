@@ -76,14 +76,18 @@ public class PropertyDefinitionParser {
         }
         
         Optional<Stack<Map<String, List<String>>>> validation = Optional.empty(); //Constructed in the PropertyDefinition validation
+        
         Optional<SchemaDefinition> keySchema = Optional.empty();
-        Optional<SchemaDefinition> entrySchema = Optional.empty();
-        try {
+        if (propertyDefinitionMap.get("keySchema") != null && propertyDefinitionMap.get("keySchema") instanceof Map) {
             keySchema = Optional.ofNullable(SchemaDefinitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("key_schema",Optional.empty())));
-            entrySchema = Optional.ofNullable(SchemaDefinitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("entrySchema",Optional.empty())));
-        } catch (Exception e) {
-            System.err.println("Error parsing Schema");
         }
+
+        Optional<SchemaDefinition> entrySchema = Optional.empty();
+        if (propertyDefinitionMap.get("entrySchema") != null && propertyDefinitionMap.get("entrySchema") instanceof Map) {
+            entrySchema = Optional.ofNullable(SchemaDefinitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("entrySchema",Optional.empty())));
+
+        }
+   
         return new PropertyDefinition (
             type,
             description,

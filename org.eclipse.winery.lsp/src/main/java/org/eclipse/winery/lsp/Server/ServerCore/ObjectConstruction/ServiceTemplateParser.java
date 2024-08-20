@@ -43,7 +43,7 @@ public class ServiceTemplateParser {
 
         ToscaMap<String, NodeTemplate> nodeTemplates  =  new ToscaMap<>(ImmutableMap.of()) ;
         if (serviceTemplate.get("node_templates") != null && serviceTemplate.get("node_templates") instanceof Map) {
-            nodeTemplates = new ToscaMap<>(NodeTemplatesParser.parseNodeTemplate((Map<String, Object>) serviceTemplate.get("node_templates")));
+            nodeTemplates = new ToscaMap<>(NodeTemplatesParser.parseNodeTemplates((Map<String, Object>) serviceTemplate.get("node_templates")));
         }
 
         Optional<ToscaMap<String, RelationshipTemplate>> relationshipTemplate  = Optional.empty();
