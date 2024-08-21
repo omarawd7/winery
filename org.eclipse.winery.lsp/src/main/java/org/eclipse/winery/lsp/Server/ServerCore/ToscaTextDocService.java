@@ -90,7 +90,6 @@ public class ToscaTextDocService implements TextDocumentService {
                 if (serverContext.getCurrentToscaFile() != null && serverContext.getCurrentToscaFile().profile().isPresent()) {
                     serverContext.getToscaFilesPath().put(filePath, serverContext.getCurrentToscaFile());
                     serverContext.getImportedToscaFiles().put(serverContext.getCurrentToscaFile().profile().get().getValue(), serverContext.getCurrentToscaFile());
-                    serverContext.getClient().logMessage(new MessageParams(MessageType.Info, "the uri " + uri + "the profile " + serverContext.getCurrentToscaFile().profile().get().getValue()));
                 } //TODO revalidate the files that import this file
             }
         }

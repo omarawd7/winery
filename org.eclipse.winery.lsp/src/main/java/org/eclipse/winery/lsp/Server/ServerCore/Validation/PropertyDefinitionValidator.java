@@ -158,7 +158,6 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                         }
                     }
                 } catch (Exception e) {
-                    context.getClient().logMessage(new MessageParams(MessageType.Info, "OOOOOOOOO"));
                     Mark mark = context.getContextDependentConstructorPositions().get(path);
                     int line = mark != null ? mark.getLine() + 1 : -1;
                     int column = mark != null ? mark.getColumn() + 1 : -1;
@@ -206,7 +205,6 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 try {
                     setValidationStack(parent, PropertyDefinitionKey, functionParser , path);    
                 } catch (Exception e) {
-                    context.getClient().logMessage(new MessageParams(MessageType.Info, "ima herer: " + e));
                     throw new IllegalStateException("setValidationStack: " + e);
                 }
                 
