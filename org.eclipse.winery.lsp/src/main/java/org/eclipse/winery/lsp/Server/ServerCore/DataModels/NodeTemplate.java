@@ -34,4 +34,29 @@ public record NodeTemplate(ToscaString type,
                            Optional<ToscaMap<String, ArtifactDefinition>> artifacts,
                            Optional<ToscaInteger> count, //TODO must be non negative
                            Optional<Object> node_filter, //TODO look for TOSCA spec 8.8 condition_clause to replace the object type with a stack of functions or something
-                           Optional<ToscaString> copy) { }
+                           Optional<ToscaString> copy) {
+    
+    public NodeTemplate overridePropertyDefinition(String key, PropertyDefinition newPropertyDefinition) {
+        if (properties.isPresent()) {
+            Map<String, PropertyDefinition> updatedProperties = properties.get();
+            updatedProperties.put(key, newPropertyDefinition);
+            return new NodeTemplate(
+                type,
+                description,
+                directives,
+                metadata,
+                Optional.of(updatedProperties),
+                attributes,
+                capabilities,
+                requirements,
+                interfaces,
+                artifacts,
+                count,
+                node_filter,
+                copy
+            );
+        }
+        throw new RuntimeException("No property definition found for key " + key);
+
+    }
+}

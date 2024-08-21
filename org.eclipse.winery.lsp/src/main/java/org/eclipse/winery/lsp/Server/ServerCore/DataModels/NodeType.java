@@ -34,4 +34,24 @@ public record NodeType(Optional<NodeType> derivedFrom,
                        Optional<ToscaMap<String, CapabilityDefinition>> capabilities,
                        Optional<ToscaList<RequirementDefinition>> requirements,
                        Optional<ToscaMap<String,  InterfaceDefinition>> interfaces,
-                       Optional<ToscaMap<String, ArtifactDefinition>> artifacts) { }
+                       Optional<ToscaMap<String, ArtifactDefinition>> artifacts) {
+    public NodeType overridePropertyDefinition(String key, PropertyDefinition newPropertyDefinition) {
+            if (properties.isPresent()) {
+                Map<String, PropertyDefinition> updatedProperties = properties.get();
+                updatedProperties.put(key, newPropertyDefinition);
+                return new NodeType(
+                    derivedFrom,
+                    version,
+                    metadata,
+                    description,
+                    Optional.of(updatedProperties),
+                    attributes,
+                    capabilities,
+                    requirements,
+                    interfaces,
+                    artifacts
+                );
+            }
+            throw new RuntimeException("No property definition found for key " + key);
+    }
+}

@@ -25,48 +25,40 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.Set;
 
-public class NodeTypeValidator implements DiagnosesHandler {
+public class NodeTemplatesValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
     LSContext context;
-    
-    public NodeTypeValidator(LSContext context) {
-    this.context = context;
-    }
 
-    public ArrayList<DiagnosticsSetter> validateNodeTypes(Map<String, Object> nodeTypesMap, Map<String, Mark> positions, String yamlContent, String[] lines) {
-        Set<String> validNodeTypeKeywords = Set.of(
-            "derived_from", "version", "metadata", "description", "properties", "attributes", "capabilities", "requirements","interfaces", "artifacts"
+    public NodeTemplatesValidator(LSContext context) {
+        this.context = context;
+    }
+    
+    public ArrayList<DiagnosticsSetter> validateNodeTemplates(Map<String, Object> nodeTemplatesMap, Map<String, Mark> positions, String yamlContent, String[] lines, String parent) {
+        Set<String> validNodeTemplateKeywords = Set.of(
+            "type", "description", "metadata", "directives", "properties", "attributes", "requirements", "capabilities", "interfaces", "artifacts", "count", "node_filter", "copy"
         );
-        for (String nodeTypeKey : nodeTypesMap.keySet()) {
-            Object nodeType = nodeTypesMap.get(nodeTypeKey);
-            if (nodeType instanceof Map) {
-                for (String key : ((Map<String, Object>) nodeType).keySet()) {
-                    if (!validNodeTypeKeywords.contains(key)) {
-                        Mark mark = context.getContextDependentConstructorPositions().get("node_types" + "." + nodeTypeKey + "." + key);
+        String nodeTemplatePath = parent + "." + "node_templates";
+        for (String nodeTemplateKey : nodeTemplatesMap.keySet()) {
+            Object nodeTemplate = nodeTemplatesMap.get(nodeTemplateKey);
+            String nodeTemplatePathWithName = parent + "." + "node_templates" + "." + nodeTemplateKey;
+            validateRequiredKeys((Map<String, Object>) nodeTemplate,yamlContent, lines, nodeTemplatePathWithName);
+
+            if (nodeTemplate instanceof Map) {
+                for (String key : ((Map<String, Object>) nodeTemplate).keySet()) {
+                    if (!validNodeTemplateKeywords.contains(key)) {
+                        Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePathWithName + "." + key);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
 
-                        handleNotValidKeywords("Invalid node type keyword: " + key , line, column, endColumn);
+                        handleNotValidKeywords("Invalid node template keyword: " + key, line, column, endColumn);
                     }
-                    //Check if the derived_from keyword exists, that it contains a valid node type parent
-                    else if (key.equals("derived_from") && !nodeTypesMap.containsKey(((Map<?, ?>) nodeType).get(key))) {
-                        Mark mark = context.getContextDependentConstructorPositions().get("node_types" + "." + nodeTypeKey + "." + ((Map<?, ?>) nodeType).get(key));
-                        int line = mark != null ? mark.getLine() + 1 : -1;
-                        int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-
-                        handleNotValidKeywords("Invalid derived_from value, \"" + ((Map<?, ?>) nodeType).get(key) + "\" is not a parent type ", line, column,endColumn);
-                    } else if (key.equals("properties")) {
-                        Object PropertyDefinitions = ((Map<?, ?>) nodeType).get(key);
+                    else if (key.equals("properties")) {
+                        Object PropertyDefinitions = ((Map<?, ?>) nodeTemplate).get(key);
                         if (PropertyDefinitions instanceof Map) {
                             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
                             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
-                            if (((Map<?, ?>) nodeType).containsKey("derived_from")) {
-                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, nodeTypeKey, "node_types", (String) ((Map<?, ?>) nodeType).get("derived_from"));
-                            } else {
-                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, nodeTypeKey, "node_types", null);
-                            }
+                            PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, nodeTemplateKey, nodeTemplatePath, null);
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }
                     }
@@ -116,4 +108,14 @@ public class NodeTypeValidator implements DiagnosesHandler {
         return (int) content.lines().count();
     }
 
+    public void validateRequiredKeys(Map<String, Object> yamlMap, String content, String[] lines, String nodeTemplatePath) {
+        if (!yamlMap.containsKey("type")) {
+            Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePath);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumn(content, line, column, lines);
+            handleNotValidKeywords("Node template Missing required key: type ", line, column, endColumn);
+        }
+
+    }
 }

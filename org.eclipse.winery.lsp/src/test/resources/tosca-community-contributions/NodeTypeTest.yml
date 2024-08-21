@@ -1,21 +1,7 @@
-tosca_definitions_version: tosca_2_0
-
-metadata:
-  template_name: artifact_types.yaml
-  template_author: Oasis Open
-  template_version: 2.0
-
-description: >
-  TOSCA Simple Profile artifact type definitions
-
-profile: org.oasis-open.tosca.simple:2.0
-
-artifact_types:
-
-  Root:
-    description: >
-      The TOSCA base artifact type from which all other normative
-      TOSCA artifact types derive.
+tosca_definitions_version: 2.0
+node_types:
+  Database:
+    description: "An abstract node type for all databases"
     properties:
       testProperty:
         description: >-
@@ -23,13 +9,13 @@ artifact_types:
           image.
         type: integer
         validation: { $less_or_equal: [ $value, 500 ] }
-  
+
   File:
     description: >-
       The File artifact type is used when an artifact definition needs
       to have its associated file simply treated as a file without any
       special handling.
-    derived_from: Root
+    derived_from: Database
     properties:
       testProperty: 50
 
@@ -38,6 +24,7 @@ artifact_types:
       The File artifact type is used when an artifact definition needs
       to have its associated file simply treated as a file without any
       special handling.
-    derived_from: Root
+    derived_from: Database
     properties:
       testProperty: 5
+    

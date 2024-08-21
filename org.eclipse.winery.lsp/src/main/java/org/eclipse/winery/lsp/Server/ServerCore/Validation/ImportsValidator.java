@@ -100,7 +100,6 @@ public class ImportsValidator implements DiagnosesHandler {
                     if ( toscaFileParser.getToscaFile() != null && toscaFileParser.getToscaFile().profile().isPresent() && toscaFileParser.getToscaFile().profile().get().getValue().equals(profileValue)) {
                         context.getImportedToscaFiles().put(profileValue, toscaFileParser.getToscaFile());
                         isFileExist = true;
-                        context.getClient().logMessage(new MessageParams(MessageType.Info, "The profile val:" + profileValue + " the tosca file path: " + ToscaFilePath));
                         if (importElement.get("namespace") != null) {
                             if (importElement.get("namespace") instanceof String) {
                                 String namespace = (String) importElement.get("namespace");
