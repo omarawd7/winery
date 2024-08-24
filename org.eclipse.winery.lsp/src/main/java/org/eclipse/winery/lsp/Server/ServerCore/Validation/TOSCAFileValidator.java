@@ -58,12 +58,12 @@ public class TOSCAFileValidator implements DiagnosesHandler {
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumn("", line, column, lines);
                 handleNotValidKeywords("Invalid keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
+            } else if (key.equals("imports")) {
+                validateImports(yamlMap, positions, YamlContent, key, lines);
             } else if (key.equals("artifact_types")) {
                 validateArtifactTypes(yamlMap, positions, YamlContent, key, lines);
             } else if (key.equals("capability_types")) {
                 validateCapabilityTypes(yamlMap, positions, YamlContent, key, lines);
-            } else if (key.equals("imports")) {
-                validateImports(yamlMap, positions, YamlContent, key, lines);
             } else if (key.equals("node_types")) {
                 validateNodeTypes(yamlMap, positions, YamlContent, key, lines);
             } else if (key.equals("service_template")) {

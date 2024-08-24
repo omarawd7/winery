@@ -98,12 +98,12 @@ public class ImportsValidator implements DiagnosesHandler {
                     toscaFileParser.ParseTOSCAFile(ToscaFilePath,context.getClient());
 
                     if ( toscaFileParser.getToscaFile() != null && toscaFileParser.getToscaFile().profile().isPresent() && toscaFileParser.getToscaFile().profile().get().getValue().equals(profileValue)) {
-                        context.getImportedToscaFiles().put(profileValue, toscaFileParser.getToscaFile());
+                        context.getImportedToscaFiles().put(context.getCurrentToscaFilePath() ,Map.of(profileValue,toscaFileParser.getToscaFile()));
                         isFileExist = true;
                         if (importElement.get("namespace") != null) {
                             if (importElement.get("namespace") instanceof String) {
                                 String namespace = (String) importElement.get("namespace");
-                                context.getNamespaceDefinitions().put( namespace, toscaFileParser.getToscaFile());
+                                context.getNamespaceDefinitions().put(context.getCurrentToscaFilePath() ,Map.of(namespace, toscaFileParser.getToscaFile()));
                             }
                         }
                         break;
@@ -142,11 +142,12 @@ public class ImportsValidator implements DiagnosesHandler {
                 Path ImportedToscaFilePath = currentFilePath.getParent().resolve(url);
                 if (CommonUtils.isToscaFile(ImportedToscaFilePath)) {
                     toscaFileParser.ParseTOSCAFile(ImportedToscaFilePath,context.getClient());
-                context.getToscaFilesPath().put(currentFilePath, toscaFileParser.getToscaFile());
-                if (importElement.get("namespace") != null) {
+                    context.getToscaFilesPath().put(currentFilePath, toscaFileParser.getToscaFile());
+                    context.getImportedToscaFiles().put(currentFilePath ,Map.of(url,toscaFileParser.getToscaFile()));
+                    if (importElement.get("namespace") != null) {
                     if (importElement.get("namespace") instanceof String) {
                         String namespace = (String) importElement.get("namespace");
-                        context.getNamespaceDefinitions().put( namespace, toscaFileParser.getToscaFile());
+                        context.getNamespaceDefinitions().put(context.getCurrentToscaFilePath() ,Map.of(namespace, toscaFileParser.getToscaFile()));
                     }
                 }
                 }

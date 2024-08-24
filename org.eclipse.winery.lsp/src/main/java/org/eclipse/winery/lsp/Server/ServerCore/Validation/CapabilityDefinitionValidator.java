@@ -1,0 +1,179 @@
+/*******************************************************************************
+ * Copyright (c) 2024 Contributors to the Eclipse Foundation
+ *
+ * See the NOTICE file(s) distributed with this work for additional
+ * information regarding copyright ownership.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0, or the Apache Software License 2.0
+ * which is available at https://www.apache.org/licenses/LICENSE-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0 OR Apache-2.0
+ *******************************************************************************/
+
+package org.eclipse.winery.lsp.Server.ServerCore.Validation;
+
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
+import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
+import org.yaml.snakeyaml.error.Mark;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
+
+public class CapabilityDefinitionValidator implements DiagnosesHandler {
+    public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
+    private LSContext context;
+
+    public CapabilityDefinitionValidator(LSContext context) {
+        this.context = context;
+    }
+    
+    public ArrayList<DiagnosticsSetter> validateCapabilityDefinitions(Map<String, Object> capabilityDefinitionsMap, Map<String, Mark> positions, String yamlContent, String[] lines, String CapabilityDefinitionPath) {
+        
+        Set<String> validNodeTypeKeywords = Set.of(
+            "type", "description", "metadata", "properties", "attributes", "valid_source_node_types", "valid_relationship_types"
+        );
+        for (String capabilityDefinitionsKey : capabilityDefinitionsMap.keySet()) {
+            Object capabilityDefinition = capabilityDefinitionsMap.get(capabilityDefinitionsKey);
+            if (capabilityDefinition instanceof Map) {
+                String capabilityDefinitionPathWithName = CapabilityDefinitionPath + "." + capabilityDefinitionsKey;
+                validateRequiredKeys((Map<String, Object>) capabilityDefinition,yamlContent, lines, capabilityDefinitionPathWithName);
+
+                for (String key : ((Map<String, Object>) capabilityDefinition).keySet()) {
+                    if (!validNodeTypeKeywords.contains(key)) {
+                        Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + key);
+                        int line = mark != null ? mark.getLine() + 1 : -1;
+                        int column = mark != null ? mark.getColumn() + 1 : -1;
+                        int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
+
+                        handleNotValidKeywords("Invalid capability definition keyword: " + key , line, column, endColumn);
+                    }
+                    //Check if the type keyword exists, and contains existing capability type
+                    else if (key.equals("type")) {
+                        try {
+                            boolean validType = false;
+                            if (context.getCurrentToscaFile().capabilityTypes().isPresent() && context.getCurrentToscaFile().capabilityTypes().get().containsKey(((Map<String, Object>) capabilityDefinition).get(key))) {
+                                validType = true;
+                            }
+                            if (!validType && !context.getCurrentToscaFile().imports().isEmpty()) {
+                                Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+                                for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                                    for (TOSCAFile file : mapOfImportedFiles.values()) {
+                                        if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(((Map<String, Object>) capabilityDefinition).get(key))) {
+                                            validType = true;
+                                        }
+                                    }
+                                }
+                                if (!validType) {
+                                    Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
+                                    for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
+                                        for (String namespacesKey : mapOfNamespaces.keySet()) {
+                                            if ( ((Map<String, Object>) capabilityDefinition).get(key) instanceof String) {
+                                                String[] parts = ((String) ((Map<String, Object>) capabilityDefinition).get(key)).split(":");
+                                                if (parts.length == 2) {
+                                                    String typeWithoutNamespace = parts[1].trim();
+                                                    String namespace = parts[0].trim();
+                                                if (namespacesKey.equals(namespace)) {
+                                                    TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
+                                                    if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(typeWithoutNamespace)) {
+                                                        validType = true;
+                                                    }
+                                                }                                                
+                                            }
+                                            }
+
+                                        }
+                                    }
+                                }
+                                if (!validType) {
+                                    Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + ((Map<?, ?>) capabilityDefinition).get(key));
+                                    int line = mark != null ? mark.getLine() + 1 : -1;
+                                    int column = mark != null ? mark.getColumn() + 1 : -1;
+                                    int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                                    handleNotValidKeywords("Invalid capability type value, \"" + ((Map<?, ?>) capabilityDefinition).get(key) + "\" is not exist.", line, column,endColumn);
+                                }
+                            } else {
+                                Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + ((Map<?, ?>) capabilityDefinition).get(key));
+                                int line = mark != null ? mark.getLine() + 1 : -1;
+                                int column = mark != null ? mark.getColumn() + 1 : -1;
+                                int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                                handleNotValidKeywords("Invalid capability type value, \"" + ((Map<?, ?>) capabilityDefinition).get(key) + "\" is not exist.", line, column,endColumn);
+                            }
+                        } catch (Exception e) {
+                            Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + ((Map<?, ?>) capabilityDefinition).get(key));
+                            int line = mark != null ? mark.getLine() + 1 : -1;
+                            int column = mark != null ? mark.getColumn() + 1 : -1;
+                            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                            handleNotValidKeywords(e.getMessage(), line, column,endColumn);
+                        }
+                        
+                        }
+                }
+            }
+        }
+        return diagnostics;
+    }
+    
+    @Override
+    public void handleNotValidKeywords(String message, int line, int column, int endColumn) {
+        DiagnosticsSetter capabilityDefinitionDiagnostic = new DiagnosticsSetter();
+        capabilityDefinitionDiagnostic.setErrorMessage(message);
+        capabilityDefinitionDiagnostic.setErrorContext("Not Valid Keywords");
+        capabilityDefinitionDiagnostic.setErrorColumn(column);
+        capabilityDefinitionDiagnostic.setErrorEndColumn(endColumn);
+        capabilityDefinitionDiagnostic.setErrorLine(line);
+        diagnostics.add(capabilityDefinitionDiagnostic);
+    }
+
+    @Override
+    public void handleDiagnosticsError(String message, Path path) {
+        DiagnosticsSetter capabilityDefinitionDiagnostic = new DiagnosticsSetter();
+        capabilityDefinitionDiagnostic.setErrorMessage(message);
+        capabilityDefinitionDiagnostic.setErrorContext("Parsing Error");
+        try {
+            long lineCount = Files.lines(path).count();
+            capabilityDefinitionDiagnostic.setErrorLine((int) lineCount);
+        } catch (IOException e) {
+            capabilityDefinitionDiagnostic.setErrorLine(-1);
+        }
+        capabilityDefinitionDiagnostic.setErrorColumn(1);
+        diagnostics.add(capabilityDefinitionDiagnostic);
+    }
+
+    @Override
+    public void handleDiagnosticsError(String message, String content) {
+        DiagnosticsSetter capabilityDefinitionDiagnostic = new DiagnosticsSetter();
+        capabilityDefinitionDiagnostic.setErrorMessage(message);
+        capabilityDefinitionDiagnostic.setErrorContext("Parsing Error");
+        capabilityDefinitionDiagnostic.setErrorLine(countLines(content));
+        capabilityDefinitionDiagnostic.setErrorColumn(1);
+        diagnostics.add(capabilityDefinitionDiagnostic);
+    }
+
+    private int countLines(String content) {
+        return (int) content.lines().count();
+    }
+
+    public void validateRequiredKeys(Map<String, Object> yamlMap, String content, String[] lines, String nodeTemplatePath) {
+        if (!yamlMap.containsKey("type")) {
+            Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePath);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumn(content, line, column, lines);
+            handleNotValidKeywords("Capability definition Missing required key: type ", line, column, endColumn);
+        }
+    }
+
+}

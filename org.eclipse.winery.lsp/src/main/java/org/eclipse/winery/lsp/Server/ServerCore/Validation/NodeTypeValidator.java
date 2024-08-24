@@ -39,10 +39,11 @@ public class NodeTypeValidator implements DiagnosesHandler {
         );
         for (String nodeTypeKey : nodeTypesMap.keySet()) {
             Object nodeType = nodeTypesMap.get(nodeTypeKey);
+            String nodeTypePath = "node_types" + "." + nodeTypeKey;
             if (nodeType instanceof Map) {
                 for (String key : ((Map<String, Object>) nodeType).keySet()) {
                     if (!validNodeTypeKeywords.contains(key)) {
-                        Mark mark = context.getContextDependentConstructorPositions().get("node_types" + "." + nodeTypeKey + "." + key);
+                        Mark mark = context.getContextDependentConstructorPositions().get(nodeTypePath + "." + key);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
@@ -51,7 +52,7 @@ public class NodeTypeValidator implements DiagnosesHandler {
                     }
                     //Check if the derived_from keyword exists, that it contains a valid node type parent
                     else if (key.equals("derived_from") && !nodeTypesMap.containsKey(((Map<?, ?>) nodeType).get(key))) {
-                        Mark mark = context.getContextDependentConstructorPositions().get("node_types" + "." + nodeTypeKey + "." + ((Map<?, ?>) nodeType).get(key));
+                        Mark mark = context.getContextDependentConstructorPositions().get(nodeTypePath + "." + ((Map<?, ?>) nodeType).get(key));
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
@@ -69,10 +70,18 @@ public class NodeTypeValidator implements DiagnosesHandler {
                             }
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }
+                    } else if (key.equals("capabilities")) {
+                        Object capabilityDefinitions = ((Map<?, ?>) nodeType).get(key);
+                        if (capabilityDefinitions instanceof Map) {
+                            CapabilityDefinitionValidator capabilityDefinitionValidator = new CapabilityDefinitionValidator(context);
+                            ArrayList<DiagnosticsSetter> capabilityDefinitionDiagnostics;
+                            capabilityDefinitionDiagnostics = capabilityDefinitionValidator.validateCapabilityDefinitions((Map<String, Object>) capabilityDefinitions, positions, yamlContent, lines, nodeTypePath + "." + "capabilities");
+                            diagnostics.addAll(capabilityDefinitionDiagnostics);
+                        }
                     }
-                }
             }
         }
+    }
         return diagnostics;
     }
 

@@ -14,11 +14,17 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Utils;
 
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParser;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.BooleanLogicFunctions;
+import org.eclipse.winery.lsp.Server.ServerCore.Validation.DiagnosticsSetter;
+import org.yaml.snakeyaml.error.Mark;
+
 import java.lang.reflect.Method;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class ValidatingUtils {
     

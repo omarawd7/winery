@@ -1,5 +1,7 @@
 package org.eclipse.winery.lsp.Server.ServerCore;
 
+import com.google.common.collect.LinkedHashMultimap;
+import com.google.common.collect.Multimap;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
@@ -17,8 +19,8 @@ public class ToscaLSContentImpl implements LSContext {
     private ClientCapabilities clientCapabilities;
     private TOSCAFile currentToscaFile;
     private Path currentToscaFilePath;
-    private Map<String, TOSCAFile> namespaceDefinitions = new HashMap<>();
-    private Map<String, TOSCAFile> importedToscaFiles = new HashMap<>();
+    private Multimap<Path, Map<String, TOSCAFile>> namespaceDefinitions = LinkedHashMultimap.create();
+    private Multimap<Path, Map<String, TOSCAFile>> importedToscaFiles = LinkedHashMultimap.create();
     private Map<String, Path> profilePaths = new HashMap<>();
     private Map<String, Mark> contextDependentConstructorPositions;
     private Set<Path>  directoryFilePaths;
@@ -109,12 +111,12 @@ public class ToscaLSContentImpl implements LSContext {
     }
 
     @Override
-    public Map<String, TOSCAFile> getNamespaceDefinitions() {
+    public Multimap<Path, Map<String, TOSCAFile>> getNamespaceDefinitions() {
         return namespaceDefinitions;
     }
 
     @Override
-    public void setNamespaceDefinitions(Map<String, TOSCAFile> namespaceDefinitions) {
+    public void setNamespaceDefinitions(Multimap<Path, Map<String, TOSCAFile>> namespaceDefinitions) {
         this.namespaceDefinitions = namespaceDefinitions;
     }
 
@@ -129,12 +131,12 @@ public class ToscaLSContentImpl implements LSContext {
     }
 
     @Override
-    public Map<String, TOSCAFile> getImportedToscaFiles() {
+    public Multimap<Path, Map<String, TOSCAFile>> getImportedToscaFiles() {
         return importedToscaFiles;
     }
 
     @Override
-    public void setImportedToscaFiles(Map<String, TOSCAFile> importedToscaFiles) {
+    public void setImportedToscaFiles(Multimap<Path, Map<String, TOSCAFile>> importedToscaFiles) {
         this.importedToscaFiles = importedToscaFiles;
     }
 

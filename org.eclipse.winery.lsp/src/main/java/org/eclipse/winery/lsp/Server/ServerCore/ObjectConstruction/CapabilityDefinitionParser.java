@@ -16,6 +16,7 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.AttributeDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityDefinition;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
@@ -33,7 +34,7 @@ public class CapabilityDefinitionParser {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    CapabilityDefinition capabilityDefinition = new CapabilityDefinition(new ToscaString(""), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    CapabilityDefinition capabilityDefinition = new CapabilityDefinition(null, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
                     if (e.getValue() instanceof Map) {
                         capabilityDefinition = parseCapabilityDefinition((Map<String, Object>) e.getValue());
                     }
@@ -46,11 +47,8 @@ public class CapabilityDefinitionParser {
         if (capabilityDefinitionMap == null) {
             return null;
         }
-        
-        ToscaString type = new ToscaString("");
-        if (capabilityDefinitionMap.get("type") != null && capabilityDefinitionMap.get("type") instanceof String) {
-            type = new ToscaString((String) capabilityDefinitionMap.get("type"));
-        }
+
+        CapabilityType type = null; // will be handled in the validation
         
         Optional<ToscaMap<String, String>> metadata = Optional.empty();
         if (capabilityDefinitionMap.get("metadata") != null && capabilityDefinitionMap.get("metadata") instanceof String) {

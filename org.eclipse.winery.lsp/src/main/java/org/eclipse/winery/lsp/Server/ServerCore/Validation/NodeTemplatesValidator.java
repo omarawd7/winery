@@ -41,9 +41,8 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
         for (String nodeTemplateKey : nodeTemplatesMap.keySet()) {
             Object nodeTemplate = nodeTemplatesMap.get(nodeTemplateKey);
             String nodeTemplatePathWithName = parent + "." + "node_templates" + "." + nodeTemplateKey;
-            validateRequiredKeys((Map<String, Object>) nodeTemplate,yamlContent, lines, nodeTemplatePathWithName);
-
             if (nodeTemplate instanceof Map) {
+                validateRequiredKeys((Map<String, Object>) nodeTemplate,yamlContent, lines, nodeTemplatePathWithName);
                 for (String key : ((Map<String, Object>) nodeTemplate).keySet()) {
                     if (!validNodeTemplateKeywords.contains(key)) {
                         Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePathWithName + "." + key);
@@ -116,6 +115,5 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
             int endColumn = CommonUtils.getEndColumn(content, line, column, lines);
             handleNotValidKeywords("Node template Missing required key: type ", line, column, endColumn);
         }
-
     }
 }

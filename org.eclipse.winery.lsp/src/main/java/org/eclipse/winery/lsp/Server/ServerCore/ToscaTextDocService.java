@@ -89,7 +89,7 @@ public class ToscaTextDocService implements TextDocumentService {
                 // Update the edited file
                 if (serverContext.getCurrentToscaFile() != null && serverContext.getCurrentToscaFile().profile().isPresent()) {
                     serverContext.getToscaFilesPath().put(filePath, serverContext.getCurrentToscaFile());
-                    serverContext.getImportedToscaFiles().put(serverContext.getCurrentToscaFile().profile().get().getValue(), serverContext.getCurrentToscaFile());
+                    serverContext.getImportedToscaFiles().put(serverContext.getCurrentToscaFilePath() ,Map.of(serverContext.getCurrentToscaFile().profile().get().getValue(),serverContext.getCurrentToscaFile()));
                 } //TODO revalidate the files that import this file
             }
         }

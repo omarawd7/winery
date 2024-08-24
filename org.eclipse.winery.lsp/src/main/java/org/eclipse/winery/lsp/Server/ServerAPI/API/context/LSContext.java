@@ -10,6 +10,7 @@
  */
 package org.eclipse.winery.lsp.Server.ServerAPI.API.context;
 
+import com.google.common.collect.Multimap;
 import org.eclipse.lsp4j.ClientCapabilities;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
@@ -58,17 +59,17 @@ public interface LSContext {
     
     void setCurrentToscaFilePath(Path currentToscaFilePath);
 
-    Map<String, TOSCAFile> getNamespaceDefinitions();
+    Multimap<Path, Map<String, TOSCAFile>> getNamespaceDefinitions();
 
-    void setNamespaceDefinitions(Map<String, TOSCAFile> namespaceDefinitions);
+    void setNamespaceDefinitions(Multimap<Path, Map<String, TOSCAFile>> namespaceDefinitions);
     
     Map<String, Path> getProfilePaths();
 
     void setProfilePaths(Map<String, Path> profilePaths);
+
+    Multimap<Path, Map<String, TOSCAFile>> getImportedToscaFiles();
     
-    Map<String, TOSCAFile> getImportedToscaFiles();
-    
-    void setImportedToscaFiles(Map<String, TOSCAFile> importedToscaFiles);
+    void setImportedToscaFiles(Multimap<Path, Map<String, TOSCAFile>> importedToscaFiles);
 
     Map<Path, TOSCAFile> getToscaFilesPath();
 

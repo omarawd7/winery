@@ -21,7 +21,7 @@ import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 import java.util.Map;
 import java.util.Optional;
 
-public record CapabilityDefinition(ToscaString type,
+public record CapabilityDefinition(CapabilityType type,
                                    Optional<ToscaString> description,
                                    Optional<ToscaMap<String, String>> metadata,
                                    Optional<ToscaList<String>> valid_source_node_types,
