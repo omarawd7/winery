@@ -14,16 +14,18 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityDefinition;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityType;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class NodeTypeValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
@@ -75,8 +77,31 @@ public class NodeTypeValidator implements DiagnosesHandler {
                         if (capabilityDefinitions instanceof Map) {
                             CapabilityDefinitionValidator capabilityDefinitionValidator = new CapabilityDefinitionValidator(context);
                             ArrayList<DiagnosticsSetter> capabilityDefinitionDiagnostics;
-                            capabilityDefinitionDiagnostics = capabilityDefinitionValidator.validateCapabilityDefinitions((Map<String, Object>) capabilityDefinitions, positions, yamlContent, lines, nodeTypePath + "." + "capabilities");
+                            capabilityDefinitionDiagnostics = capabilityDefinitionValidator.validateCapabilityDefinitions((Map<String, Object>) capabilityDefinitions, yamlContent, lines, nodeTypePath + "." + "capabilities", nodeTypeKey );
                             diagnostics.addAll(capabilityDefinitionDiagnostics);
+                        } else if (capabilityDefinitions instanceof String capabilityType) {
+                            if (!context.getCurrentToscaFile().capabilityTypes().isEmpty() && context.getCurrentToscaFile().capabilityTypes().get().containsKey(capabilityType)) {
+                                // will name the capability definition the same as the provided capability name.
+                                CapabilityType capabilityTypeObject = context.getCurrentToscaFile().capabilityTypes().get().get(capabilityType);
+                                if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(nodeTypeKey) && context.getCurrentToscaFile().nodeTypes().get().getValue().get(nodeTypeKey).capabilities().isPresent()) {
+                                    context.getCurrentToscaFile().nodeTypes().get().getValue().get(nodeTypeKey).capabilities().get().getValue().put(capabilityType, new CapabilityDefinition(capabilityTypeObject, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())) ;
+                                }
+                            } //TODO check if it exists in another file
+                            else {
+                                Mark mark = context.getContextDependentConstructorPositions().get(nodeTypePath + "." + ((Map<?, ?>) nodeType).get(key));
+                                int line = mark != null ? mark.getLine() + 1 : -1;
+                                int column = mark != null ? mark.getColumn() + 1 : -1;
+                                int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                                handleNotValidKeywords("Invalid capability: " + ((Map<?, ?>) nodeType).get(key), line, column,endColumn);
+                            }
+                        } else {
+                            Mark mark = context.getContextDependentConstructorPositions().get(nodeTypePath + "." + ((Map<?, ?>) nodeType).get(key));
+                            int line = mark != null ? mark.getLine() + 1 : -1;
+                            int column = mark != null ? mark.getColumn() + 1 : -1;
+                            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                            handleNotValidKeywords("Invalid capability: " + ((Map<?, ?>) nodeType).get(key), line, column,endColumn);
                         }
                     }
             }

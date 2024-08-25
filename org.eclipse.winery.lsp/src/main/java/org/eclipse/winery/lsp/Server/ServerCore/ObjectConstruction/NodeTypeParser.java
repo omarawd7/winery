@@ -80,7 +80,7 @@ public class NodeTypeParser {
             attributes = Optional.of(new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) nodeTypeMap.get("attributes"))));
         }
 
-        Optional<ToscaMap<String, CapabilityDefinition>> capabilities = Optional.empty();
+        Optional<ToscaMap<String, CapabilityDefinition>> capabilities = Optional.of(new ToscaMap<>(new HashMap<>()));
         if (nodeTypeMap.get("capabilities") != null && nodeTypeMap.get("capabilities") instanceof Map) {
             capabilities = Optional.of(new ToscaMap<>(CapabilityDefinitionParser.parseCapabilityDefinitions((Map<String, Object>) nodeTypeMap.get("capabilities"))));
         }

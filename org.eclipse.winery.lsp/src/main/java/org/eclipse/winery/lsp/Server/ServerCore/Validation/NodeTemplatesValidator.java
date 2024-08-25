@@ -15,6 +15,7 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 
@@ -22,6 +23,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -52,6 +54,10 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
 
                         handleNotValidKeywords("Invalid node template keyword: " + key, line, column, endColumn);
                     }
+                    //Check if the type keyword exists, and contains existing node type
+                    else if (key.equals("type")) {
+                        validateType(yamlContent, lines, key, nodeTemplate, nodeTemplatePathWithName);
+                    }
                     else if (key.equals("properties")) {
                         Object PropertyDefinitions = ((Map<?, ?>) nodeTemplate).get(key);
                         if (PropertyDefinitions instanceof Map) {
@@ -65,6 +71,69 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
             }
         }
         return diagnostics;
+    }
+    
+    private void validateType(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName) {
+        try {
+            boolean validType = false;
+            if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
+                validType = true;
+            }
+            if (!validType && !context.getCurrentToscaFile().imports().isEmpty()) {
+                Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                    for (TOSCAFile file : mapOfImportedFiles.values()) {
+                        if (file != null && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
+                            validType = true;
+                        }
+                    }
+                }
+                if (!validType) {
+                    Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
+                    for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
+                        for (String namespacesKey : mapOfNamespaces.keySet()) {
+                            if ( ((Map<String, Object>) nodeTemplate).get(key) instanceof String) {
+                                String[] parts = ((String) ((Map<String, Object>) nodeTemplate).get(key)).split(":");
+                                if (parts.length == 2) {
+                                    String typeWithoutNamespace = parts[1].trim();
+                                    String namespace = parts[0].trim();
+                                    if (namespacesKey.equals(namespace)) {
+                                        TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
+                                        if (file != null && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(typeWithoutNamespace)) {
+                                            validType = true;
+                                        }
+                                    }
+                                }
+                            }
+
+                        }
+                    }
+                }
+                if (!validType) {
+                    Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePathWithName + "." + ((Map<?, ?>) nodeTemplate).get(key));
+                    int line = mark != null ? mark.getLine() + 1 : -1;
+                    int column = mark != null ? mark.getColumn() + 1 : -1;
+                    int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                    handleNotValidKeywords("Invalid node type value, \"" + ((Map<?, ?>) nodeTemplate).get(key) + "\" is not exist.", line, column,endColumn);
+                }
+            } else {
+                Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePathWithName + "." + ((Map<?, ?>) nodeTemplate).get(key));
+                int line = mark != null ? mark.getLine() + 1 : -1;
+                int column = mark != null ? mark.getColumn() + 1 : -1;
+                int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                handleNotValidKeywords("Invalid node type value, \"" + ((Map<?, ?>) nodeTemplate).get(key) + "\" is not exist.", line, column,endColumn);
+            }
+        } catch (Exception e) {
+            Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePathWithName + "." + ((Map<?, ?>) nodeTemplate).get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+            handleNotValidKeywords(e.getMessage(), line, column,endColumn);
+        }
+
     }
 
     @Override
