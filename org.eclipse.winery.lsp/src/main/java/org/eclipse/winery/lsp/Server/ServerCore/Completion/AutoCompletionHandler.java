@@ -14,8 +14,6 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Completion;
 
 import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.ToscaContext;
@@ -56,8 +54,24 @@ public class AutoCompletionHandler {
             if (nodeTemplateCompletion(line, position) != null && !nodeTemplateCompletion(line, position).isEmpty()) {
                 return nodeTemplateCompletion(line, position);
             }
+            // Capability definition auto-completion logic
+            if (capabilityDefinitionCompletion(line, position) != null && !capabilityDefinitionCompletion(line, position).isEmpty()) {
+                return capabilityDefinitionCompletion(line, position);
+            }
+            
             return List.of();
         }
+
+    private List<CompletionItem> capabilityDefinitionCompletion(String line, Position position) {
+        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("capabilities")) {
+            CompletionItemGetter completionItemGetter = new CompletionItemGetter();
+            return completionItemGetter.getAvailableCapabilityTypes(lsContext);
+        } else if (line.startsWith("    ") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("capabilities"))) {
+            CompletionItemGetter completionItemGetter = new CompletionItemGetter();
+            return completionItemGetter.getCapabilityDefinitionKeyWords(position);
+        }
+        return List.of();
+    }
 
     private List<CompletionItem> nodeTemplateCompletion(String line, Position position) {
         if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("node_templates")) {

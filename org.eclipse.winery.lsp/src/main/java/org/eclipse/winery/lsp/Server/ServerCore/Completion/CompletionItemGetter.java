@@ -137,5 +137,14 @@ public class CompletionItemGetter {
         }
         return new ArrayList<>();
     }
+
+    public List<CompletionItem> getCapabilityDefinitionKeyWords(Position position) {
+        List<String> keywords = List.of(
+            "type:", "description:", "metadata:", "properties:",
+            "attributes:", "valid_source_node_types:", "valid_relationship_types:"
+        );
+
+        return getCompletionItems(position, keywords);
+    }
 }
 
