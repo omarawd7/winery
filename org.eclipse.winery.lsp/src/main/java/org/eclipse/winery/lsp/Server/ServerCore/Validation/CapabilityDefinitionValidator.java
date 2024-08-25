@@ -73,14 +73,20 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
         try {
             boolean validType = false;
             if (context.getCurrentToscaFile().capabilityTypes().isPresent() && context.getCurrentToscaFile().capabilityTypes().get().containsKey(((Map<String, Object>) capabilityDefinition).get(key))) {
-                validType = true;
+                if (context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(parent) && context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).capabilities().get().getValue().containsKey(capabilityDefinitionsKey)) {
+                    context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).capabilities().get().getValue().get(capabilityDefinitionsKey).withType(context.getCurrentToscaFile().capabilityTypes().get().get(((Map<String, Object>) capabilityDefinition).get(key)));
+                }
+                return;
             }
             if (!validType && !context.getCurrentToscaFile().imports().isEmpty()) {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
                         if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(((Map<String, Object>) capabilityDefinition).get(key))) {
-                            validType = true;
+                            if (context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(parent) && context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).capabilities().get().getValue().containsKey(capabilityDefinitionsKey)) {
+                                context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).capabilities().get().getValue().get(capabilityDefinitionsKey).withType(file.capabilityTypes().get().get(((Map<String, Object>) capabilityDefinition).get(key)));
+                            }
+                            return;
                         }
                     }
                 }
@@ -96,11 +102,10 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
                                 if (namespacesKey.equals(namespace)) {
                                     TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
                                     if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(typeWithoutNamespace)) {
-                                        validType = true;
                                         if (context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(parent) && context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).capabilities().get().getValue().containsKey(capabilityDefinitionsKey)) {
                                             context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).capabilities().get().getValue().get(capabilityDefinitionsKey).withType(file.capabilityTypes().get().get(typeWithoutNamespace));    
                                         }
-                                        
+                                        return;
                                     }
                                 }                                                
                             }

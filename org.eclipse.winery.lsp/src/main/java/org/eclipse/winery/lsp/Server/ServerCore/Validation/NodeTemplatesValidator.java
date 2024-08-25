@@ -14,6 +14,8 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
@@ -77,14 +79,16 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
         try {
             boolean validType = false;
             if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
-                validType = true;
+                context.getClient().logMessage(new MessageParams(MessageType.Info, "the node type is found"));
+                return; //TODO construct the node template object with the found node type
             }
             if (!validType && !context.getCurrentToscaFile().imports().isEmpty()) {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
                         if (file != null && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
-                            validType = true;
+                            //TODO construct the node template object with the found node type
+                            return;
                         }
                     }
                 }
@@ -100,7 +104,7 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                                     if (namespacesKey.equals(namespace)) {
                                         TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
                                         if (file != null && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(typeWithoutNamespace)) {
-                                            validType = true;
+                                            return; //TODO construct the node template object with the found node type
                                         }
                                     }
                                 }

@@ -26,7 +26,7 @@ public class CompletionItemGetter {
     public List<CompletionItem> getAvailableArtifactTypes(LSContext lsContext) {
         List<String> artifactTypes = new ArrayList<>();
         
-        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().artifactTypes().get() != null) {
+        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().artifactTypes().isEmpty() && !lsContext.getCurrentToscaFile().artifactTypes().get().isEmpty() ) {
             for (String key : lsContext.getCurrentToscaFile().artifactTypes().get().keySet()) {
                 artifactTypes.add(" " + key);
             }
@@ -43,7 +43,7 @@ public class CompletionItemGetter {
     
     public List<CompletionItem> getAvailableCapabilityTypes(LSContext lsContext) {
         List<String> capabilityTypes = new ArrayList<>();
-        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().capabilityTypes().get() != null) {
+        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().capabilityTypes().isEmpty() && !lsContext.getCurrentToscaFile().capabilityTypes().get().isEmpty()) {
             for (String key : lsContext.getCurrentToscaFile().capabilityTypes().get().keySet()) {
                 capabilityTypes.add(" " + key);
             }
@@ -66,23 +66,8 @@ public class CompletionItemGetter {
             "relationship_types:", "node_types:", "group_types:", "policy_types:",
             "repositories:", "functions:", "profile:", "imports:", "service_template:"
         );
-        
-        return keywords.stream()
-            .map(keyword -> {
-                CompletionItem item = new CompletionItem(keyword);
-                item.setKind(CompletionItemKind.Keyword);
-                // Create a TextEdit to remove the trailing space
-                TextEdit textEdit = new TextEdit(
-                    new Range(
-                        new Position(position.getLine(), Math.max(0, position.getCharacter() - 1)), // Ensure character index is not negative
-                        new Position(position.getLine(), position.getCharacter())
-                    ),
-                    keyword
-                );
-                item.setTextEdit(Either.forLeft(textEdit));
-                return item;
-            })
-            .collect(toList());
+
+        return getCompletionItems(position, keywords);
     }
 
     public List<CompletionItem> getArtifactTypesKeyWords(Position position) {
@@ -91,22 +76,7 @@ public class CompletionItemGetter {
             "mime_type:", "file_ext:", "properties:"
         );
 
-        return keywords.stream()
-            .map(keyword -> {
-                CompletionItem item = new CompletionItem(keyword);
-                item.setKind(CompletionItemKind.Keyword);
-                // Create a TextEdit to remove the trailing space
-                TextEdit textEdit = new TextEdit(
-                    new Range(
-                        new Position(position.getLine(), Math.max(0, position.getCharacter() - 1)), // Ensure character index is not negative
-                        new Position(position.getLine(), position.getCharacter())
-                    ),
-                    keyword
-                );
-                item.setTextEdit(Either.forLeft(textEdit));
-                return item;
-            })
-            .collect(toList());
+        return getCompletionItems(position, keywords);
     }
 
     public List<CompletionItem> getCapabilityTypesKeyWords(Position position) {
@@ -115,6 +85,10 @@ public class CompletionItemGetter {
             "properties:", "attributes:", "valid_source_node_types:", "valid_relationship_types:"
         );
 
+        return getCompletionItems(position, keywords);
+    }
+
+    public List<CompletionItem> getCompletionItems(Position position, List<String> keywords) {
         return keywords.stream()
             .map(keyword -> {
                 CompletionItem item = new CompletionItem(keyword);
@@ -132,10 +106,24 @@ public class CompletionItemGetter {
             })
             .collect(toList());
     }
+    
+    public List<CompletionItem> getNodeTypesKeyWords(Position position) {
+        List<String> keywords = List.of(
+            "derived_from:", "version:", "metadata:", "description:", "properties:", "attributes:", "capabilities:", "requirements:","interfaces:", "artifacts:"
+        );
+        return getCompletionItems(position, keywords);
+    }
 
+    public List<CompletionItem> getNodeTemplateKeyWords(Position position) {
+        List<String> keywords = List.of(
+            "type:", "description:", "metadata:", "directives:", "properties:", "attributes:", "requirements:", "capabilities:","interfaces:", "artifacts:", "count:", "node_filter:", "copy:"
+        );
+        return getCompletionItems(position, keywords);
+    }
+    
     public List<CompletionItem> getAvailableNodeTypes(LSContext lsContext) {
         List<String> nodeTypes = new ArrayList<>();
-        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().nodeTypes().get() != null) {
+        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().nodeTypes().isEmpty() && lsContext.getCurrentToscaFile().nodeTypes().get() != null) {
             for (String key : lsContext.getCurrentToscaFile().nodeTypes().get().getValue().keySet()) {
                 nodeTypes.add(" " + key);
             }
@@ -148,29 +136,6 @@ public class CompletionItemGetter {
                 .collect(toList());
         }
         return new ArrayList<>();
-
-    }
-
-    public List<CompletionItem> getNodeTypesKeyWords(Position position) {
-        List<String> keywords = List.of(
-            "derived_from:", "version:", "metadata:", "description:", "properties:", "attributes:", "capabilities:", "requirements:","interfaces:", "artifacts:"
-        );
-        return keywords.stream()
-            .map(keyword -> {
-                CompletionItem item = new CompletionItem(keyword);
-                item.setKind(CompletionItemKind.Keyword);
-                // Create a TextEdit to remove the trailing space
-                TextEdit textEdit = new TextEdit(
-                    new Range(
-                        new Position(position.getLine(), Math.max(0, position.getCharacter() - 1)), // Ensure character index is not negative
-                        new Position(position.getLine(), position.getCharacter())
-                    ),
-                    keyword
-                );
-                item.setTextEdit(Either.forLeft(textEdit));
-                return item;
-            })
-            .collect(toList());
     }
 }
 
