@@ -5,10 +5,10 @@ capability_types:
     # properties:
       # more details ...
   mycompany.mytypes.myfeatures.myFirstCustomFeature:
-    derived_from: mycompany.mytypes.myfeatures.myGenericFeature
+    derived_from: mycompany.mytypes.myGenericFeature
     # properties:
       # more details ...
   mycompany.mytypes.myfeatures.transactSQL:
-    derived_from: mycompany.mytypes.myfeatures.myGenericFeature
+    derived_from: mycompany.mytypes.myGenericFeature
     # properties:
      # more details ...

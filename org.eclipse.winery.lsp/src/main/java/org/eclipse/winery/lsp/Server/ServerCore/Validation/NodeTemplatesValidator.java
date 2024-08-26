@@ -76,13 +76,17 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
     }
     
     private void validateType(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName) {
-        try {
-            boolean validType = false;
+            // checks if it exists in the same file or not
             if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
-                context.getClient().logMessage(new MessageParams(MessageType.Info, "the node type is found"));
                 return; //TODO construct the node template object with the found node type
             }
-            if (!validType && !context.getCurrentToscaFile().imports().isEmpty()) {
+        validateTypeInImportedFiles(yamlContent, lines, key, nodeTemplate, nodeTemplatePathWithName);
+
+    }
+
+    private void validateTypeInImportedFiles(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName) {
+        try {
+            if (!context.getCurrentToscaFile().imports().isEmpty()) {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
@@ -92,7 +96,6 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                         }
                     }
                 }
-                if (!validType) {
                     Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
                     for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
                         for (String namespacesKey : mapOfNamespaces.keySet()) {
@@ -104,7 +107,7 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                                     if (namespacesKey.equals(namespace)) {
                                         TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
                                         if (file != null && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(typeWithoutNamespace)) {
-                                            return; //TODO construct the node template object with the found node type
+                                            return;
                                         }
                                     }
                                 }
@@ -112,23 +115,13 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
 
                         }
                     }
-                }
-                if (!validType) {
-                    Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePathWithName + "." + ((Map<?, ?>) nodeTemplate).get(key));
-                    int line = mark != null ? mark.getLine() + 1 : -1;
-                    int column = mark != null ? mark.getColumn() + 1 : -1;
-                    int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-
-                    handleNotValidKeywords("Invalid node type value, \"" + ((Map<?, ?>) nodeTemplate).get(key) + "\" is not exist.", line, column,endColumn);
-                }
-            } else {
+            }
                 Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePathWithName + "." + ((Map<?, ?>) nodeTemplate).get(key));
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
 
                 handleNotValidKeywords("Invalid node type value, \"" + ((Map<?, ?>) nodeTemplate).get(key) + "\" is not exist.", line, column,endColumn);
-            }
         } catch (Exception e) {
             Mark mark = context.getContextDependentConstructorPositions().get(nodeTemplatePathWithName + "." + ((Map<?, ?>) nodeTemplate).get(key));
             int line = mark != null ? mark.getLine() + 1 : -1;
@@ -137,7 +130,6 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
 
             handleNotValidKeywords(e.getMessage(), line, column,endColumn);
         }
-
     }
 
     @Override

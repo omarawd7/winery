@@ -71,14 +71,13 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
 
     private void validateTypeFromNodeTypeParent(String yamlContent, String[] lines, String key, Object capabilityDefinition, String capabilityDefinitionPathWithName, String parent, String capabilityDefinitionsKey) {
         try {
-            boolean validType = false;
             if (context.getCurrentToscaFile().capabilityTypes().isPresent() && context.getCurrentToscaFile().capabilityTypes().get().containsKey(((Map<String, Object>) capabilityDefinition).get(key))) {
                 if (context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(parent) && context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).capabilities().get().getValue().containsKey(capabilityDefinitionsKey)) {
                     context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).capabilities().get().getValue().get(capabilityDefinitionsKey).withType(context.getCurrentToscaFile().capabilityTypes().get().get(((Map<String, Object>) capabilityDefinition).get(key)));
                 }
                 return;
             }
-            if (!validType && !context.getCurrentToscaFile().imports().isEmpty()) {
+            if ( !context.getCurrentToscaFile().imports().isEmpty()) {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
@@ -90,7 +89,6 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
                         }
                     }
                 }
-                if (!validType) {
                     Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
                     for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
                         for (String namespacesKey : mapOfNamespaces.keySet()) {
@@ -112,23 +110,14 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
                             }
                         }
                     }
-                }
-                if (!validType) {
-                    Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + ((Map<?, ?>) capabilityDefinition).get(key));
-                    int line = mark != null ? mark.getLine() + 1 : -1;
-                    int column = mark != null ? mark.getColumn() + 1 : -1;
-                    int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-
-                    handleNotValidKeywords("Invalid capability type value, \"" + ((Map<?, ?>) capabilityDefinition).get(key) + "\" is not exist.", line, column,endColumn);
-                }
-            } else {
+                
+            } 
                 Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + ((Map<?, ?>) capabilityDefinition).get(key));
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
 
                 handleNotValidKeywords("Invalid capability type value, \"" + ((Map<?, ?>) capabilityDefinition).get(key) + "\" is not exist.", line, column,endColumn);
-            }
         } catch (Exception e) {
             Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + ((Map<?, ?>) capabilityDefinition).get(key));
             int line = mark != null ? mark.getLine() + 1 : -1;

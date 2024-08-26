@@ -7,3 +7,4 @@ node_types:
   MyNode: {}
   SuperPod:
     derived_from: k8s:Pod
+  MyType: {}
