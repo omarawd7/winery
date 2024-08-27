@@ -54,13 +54,8 @@ public class NodeTypeValidator implements DiagnosesHandler {
                         handleNotValidKeywords("Invalid node type keyword: " + key , line, column, endColumn);
                     }
                     //Check if the derived_from keyword exists, that it contains a valid node type parent
-                    else if (key.equals("derived_from") && !nodeTypesMap.containsKey(((Map<?, ?>) nodeType).get(key))) {
-                        Mark mark = context.getContextDependentConstructorPositions().get(nodeTypePath + "." + ((Map<?, ?>) nodeType).get(key));
-                        int line = mark != null ? mark.getLine() + 1 : -1;
-                        int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-
-                        handleNotValidKeywords("Invalid derived_from value, \"" + ((Map<?, ?>) nodeType).get(key) + "\" is not a parent type ", line, column,endColumn);
+                    else if (key.equals("derived_from")) {
+                        validateDerivedFrom(nodeTypesMap, yamlContent, lines, nodeTypeKey, key, ((Map<String, Object>) nodeType));
                     } else if (key.equals("properties")) {
                         validateProperties(positions, yamlContent, lines, nodeTypeKey, key, (Map<?, ?>) nodeType);
                     } else if (key.equals("capabilities")) {
@@ -85,6 +80,60 @@ public class NodeTypeValidator implements DiagnosesHandler {
         }
     }
         return diagnostics;
+    }
+
+    private void validateDerivedFrom(Map<String, Object> nodeTypesMap, String yamlContent, String[] lines, String nodeTypeKey, String key, Map<String, Object> nodeType) {
+        try {
+            if (nodeTypesMap.containsKey(nodeType.get(key))) {
+                return;
+            }
+            else if (!context.getCurrentToscaFile().imports().isEmpty()) {
+                Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+                context.getClient().logMessage(new MessageParams(MessageType.Info, "the imported files: " + imports));
+                for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                    for (TOSCAFile file : mapOfImportedFiles.values()) {
+                        if (file != null && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey(nodeType.get(key))) {
+                            //TODO set the derived from value
+                            return;
+                        }
+                    }
+                }
+                Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
+                    for (String namespacesKey : mapOfNamespaces.keySet()) {
+                        if (nodeType.get(key) instanceof String) {
+                            String[] parts = ((String) nodeType.get(key)).split(":");
+                            if (parts.length == 2) {
+                                String typeWithoutNamespace = parts[1].trim();
+                                String namespace = parts[0].trim();
+                                if (namespacesKey.equals(namespace)) {
+                                    TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
+                                    if (file != null && !file.nodeTypes().isEmpty() && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey(typeWithoutNamespace)) {
+                                        //TODO set the derived from value
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            Mark mark = context.getContextDependentConstructorPositions().get("node_types" + "." + nodeTypeKey + "." + ((Map<?, ?>) nodeType).get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+            handleNotValidKeywords("Invalid derived_from value, \"" + ((Map<?, ?>) nodeType).get(key) + "\" is not a parent type ", line, column,endColumn);
+
+        } catch (Exception e) {
+            Mark mark = context.getContextDependentConstructorPositions().get("node_types" + "." + nodeTypeKey + "." + ((Map<?, ?>) nodeType).get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+            handleNotValidKeywords(e.getMessage(), line, column,endColumn);
+        }
     }
 
     private void validateProperties(Map<String, Mark> positions, String yamlContent, String[] lines, String nodeTypeKey, String key, Map<?, ?> nodeType) {

@@ -14,16 +14,17 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class CapabilityTypeValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
@@ -50,15 +51,10 @@ public class CapabilityTypeValidator implements DiagnosesHandler {
                         handleNotValidKeywords("Invalid capability type keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
                     }
                     //Check if the derived_from keyword exists, that it contains a valid capability type parent
-                    else if (key.equals("derived_from") && !capabilityTypesMap.containsKey(((Map<?, ?>) capabilityType).get(key))) {
-                        Mark mark = context.getContextDependentConstructorPositions().get("capability_types" + "." + capabilityTypeKey + "." + ((Map<?, ?>) capabilityType).get(key));
-                        int line = mark != null ? mark.getLine() + 1 : -1;
-                        int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-
-                        handleNotValidKeywords("Invalid derived_from value, \"" + ((Map<?, ?>) capabilityType).get(key) + "\" is not a parent type ", line, column,endColumn);
+                    else if (key.equals("derived_from")) {
+                        validateDerivedFrom(capabilityTypesMap, YamlContent, lines, capabilityTypeKey, key, ((Map<String, Object>) capabilityType));
                     } else if (key.equals("properties")) {
-                        Object PropertyDefinitions = ((Map<?, ?>) capabilityType).get(key);
+                        Object PropertyDefinitions = ((Map<String, Object>) capabilityType).get(key);
                         if (PropertyDefinitions instanceof Map) {
                             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
                             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
@@ -74,6 +70,58 @@ public class CapabilityTypeValidator implements DiagnosesHandler {
             }
         }
         return diagnostics;
+    }
+
+    private void validateDerivedFrom(Map<String, Object> capabilityTypesMap, String YamlContent, String[] lines, String capabilityTypeKey, String key, Map<String, Object> capabilityType) {
+        try {
+           if (capabilityTypesMap.containsKey(capabilityType.get(key))) {
+               return;
+           }
+           else if (!context.getCurrentToscaFile().imports().isEmpty()) {
+               Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+               for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                   for (TOSCAFile file : mapOfImportedFiles.values()) {
+                       if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(capabilityType.get(key))) {
+                           //TODO set the derived from value
+                           return;
+                       }
+                   }
+               }
+               Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
+               for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
+                   for (String namespacesKey : mapOfNamespaces.keySet()) {
+                       if (capabilityType.get(key) instanceof String) {
+                           String[] parts = ((String) capabilityType.get(key)).split(":");
+                           if (parts.length == 2) {
+                               String typeWithoutNamespace = parts[1].trim();
+                               String namespace = parts[0].trim();
+                               if (namespacesKey.equals(namespace)) {
+                                   TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
+                                   if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(typeWithoutNamespace)) {
+                                       //TODO set the derived from value
+                                       return;
+                                   }
+                               }
+                           }
+                       }
+                   }
+               }
+           }
+           Mark mark = context.getContextDependentConstructorPositions().get("capability_types" + "." + capabilityTypeKey + "." + capabilityType.get(key));
+           int line = mark != null ? mark.getLine() + 1 : -1;
+           int column = mark != null ? mark.getColumn() + 1 : -1;
+           int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+
+           handleNotValidKeywords("Invalid derived_from value, \"" + capabilityType.get(key) + "\" is not a parent type ", line, column,endColumn);
+
+       } catch (Exception e) {
+           Mark mark = context.getContextDependentConstructorPositions().get("capability_types" + "." + capabilityTypeKey + "." + capabilityType.get(key));
+           int line = mark != null ? mark.getLine() + 1 : -1;
+           int column = mark != null ? mark.getColumn() + 1 : -1;
+           int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+
+           handleNotValidKeywords(e.getMessage(), line, column,endColumn);
+       }
     }
 
     @Override

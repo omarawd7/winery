@@ -1,10 +1,14 @@
 tosca_definitions_version: 2.0
+imports:
+- url: capability_types.yaml
+  namespace: ct
+- url: node_types.yaml
+  namespace: nt
+
 capability_types:
-  mycompany.mytypes.myGenericFeature:
-    # properties:
-      # more details ...
+
   mycompany.mytypes.myfeatures.myFirstCustomFeature:
-    derived_from: mycompany.mytypes.myGenericFeature
+    derived_from: ct:mycompany.mytypes.myGenericFeature
     # properties:
       # more details ...
   mycompany.mytypes.myfeatures.transactSQL:
@@ -13,6 +17,7 @@ capability_types:
      # more details ...
 node_types:
   Database:
+    derived_from: nt:my_database_node_type
     description: "An abstract node type for all databases"
   WebApplication:
     description: "An abstract node type"
@@ -21,7 +26,3 @@ node_types:
     properties:
       my_port:
         type: integer
-  my_database_node_type:
-    derived_from: Database
-    capabilities:
-      mycompany.mytypes.myfeatures.transactSQL
