@@ -153,11 +153,11 @@ public class ImportsValidator implements DiagnosesHandler {
                 }
                 }
             } catch (Exception e) {
-                Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "url");
+                Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "url" + "." + url);
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-                handleNotValidKeywords(e.getMessage(), line, column, endColumn);
+                handleNotValidKeywords("File not found, " + e.getMessage(), line, column, endColumn);
             }
         }
     }
