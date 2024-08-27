@@ -44,7 +44,6 @@ public class ImportsValidator implements DiagnosesHandler {
         context.getImportedToscaFiles().get(context.getCurrentToscaFilePath()).clear();
         context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath()).clear();
         for (Object importElement: importsList) {
-            context.getClient().logMessage(new MessageParams(MessageType.Info, "importElement:" + importElement));
             if (importElement instanceof Map) {
                 for (String importsKey : ((Map<String, Object>) importElement).keySet()) {
                     if (!validImportsKeywords.contains(importsKey)) {

@@ -89,7 +89,6 @@ public class NodeTypeValidator implements DiagnosesHandler {
             }
             else if (!context.getCurrentToscaFile().imports().isEmpty()) {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
-                context.getClient().logMessage(new MessageParams(MessageType.Info, "the imported files: " + imports));
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
                         if (file != null && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey(nodeType.get(key))) {

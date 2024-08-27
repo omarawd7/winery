@@ -14,12 +14,14 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Map;
 import java.util.Set;
 
@@ -50,13 +52,8 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                         handleNotValidKeywords("Invalid artifact type keyword: " + key + " at line " + line + ", column " + column, line, column, endColumn);
                     }
                     //Check if the derived_from keyword exists, that it contains a valid Artifact type parent
-                    else if (key.equals("derived_from") && !artifactTypesMap.containsKey(((Map<?, ?>) artifactType).get(key))) {
-                        Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + artifactTypeKey + "." + ((Map<?, ?>) artifactType).get(key));
-                        int line = mark != null ? mark.getLine() + 1 : -1;
-                        int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-
-                        handleNotValidKeywords("Invalid derived_from value, \"" + ((Map<?, ?>) artifactType).get(key) + "\" is not a parent type ", line, column,endColumn);
+                    else if (key.equals("derived_from")) {
+                        validateDerivedFrom(artifactTypesMap, YamlContent, lines, artifactTypeKey, key, ((Map<String, Object>) artifactType));
                     } else if (key.equals("properties")) {
                         Object PropertyDefinitions = ((Map<?, ?>) artifactType).get(key);
                         if (PropertyDefinitions instanceof Map) {
@@ -74,6 +71,57 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
             }
         }
         return diagnostics;
+    }
+    
+    private void validateDerivedFrom(Map<String, Object> artifactTypesMap, String yamlContent, String[] lines, String artifactTypeKey, String key, Map<String, Object> artifactType) {
+        try {
+            if (artifactTypesMap.containsKey(artifactType.get(key))) {
+                return;
+            }
+            else if (!context.getCurrentToscaFile().imports().isEmpty()) {
+                Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                    for (TOSCAFile file : mapOfImportedFiles.values()) {
+                        if (file != null && !file.artifactTypes().isEmpty() && file.artifactTypes().get().containsKey(artifactType.get(key))) {
+                            //TODO set the derived from value
+                            return;
+                        }
+                    }
+                }
+                Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
+                    for (String namespacesKey : mapOfNamespaces.keySet()) {
+                        if (artifactType.get(key) instanceof String) {
+                            String[] parts = ((String) artifactType.get(key)).split(":");
+                            if (parts.length == 2) {
+                                String typeWithoutNamespace = parts[1].trim();
+                                String namespace = parts[0].trim();
+                                if (namespacesKey.equals(namespace)) {
+                                    TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
+                                    if (file != null && !file.artifactTypes().isEmpty() && file.artifactTypes().get().containsKey(typeWithoutNamespace)) {
+                                        //TODO set the derived from value
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + artifactTypeKey + "." + ((Map<?, ?>) artifactType).get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+            handleNotValidKeywords("Invalid derived_from value, \"" + ((Map<?, ?>) artifactType).get(key) + "\" is not a parent type ", line, column,endColumn);
+        } catch (Exception e) {
+            Mark mark = context.getContextDependentConstructorPositions().get("artifact_types" + "." + artifactTypeKey + "." + ((Map<?, ?>) artifactType).get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+            
+            handleNotValidKeywords(e.getMessage(), line, column,endColumn);
+        }
     }
     
     @Override
