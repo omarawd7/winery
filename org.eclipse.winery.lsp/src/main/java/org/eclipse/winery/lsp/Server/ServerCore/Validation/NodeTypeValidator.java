@@ -19,6 +19,7 @@ import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityType;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.RequirementDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
@@ -61,10 +62,7 @@ public class NodeTypeValidator implements DiagnosesHandler {
                     } else if (key.equals("capabilities")) {
                         Object capabilityDefinitions = ((Map<?, ?>) nodeType).get(key);
                         if (capabilityDefinitions instanceof Map) {
-                            CapabilityDefinitionValidator capabilityDefinitionValidator = new CapabilityDefinitionValidator(context);
-                            ArrayList<DiagnosticsSetter> capabilityDefinitionDiagnostics;
-                            capabilityDefinitionDiagnostics = capabilityDefinitionValidator.validateCapabilityDefinitions((Map<String, Object>) capabilityDefinitions, yamlContent, lines, nodeTypePath + "." + "capabilities", nodeTypeKey );
-                            diagnostics.addAll(capabilityDefinitionDiagnostics);
+                            validateCapabilityDefinitions(yamlContent, lines, nodeTypeKey, (Map<String, Object>) capabilityDefinitions, nodeTypePath);
                         } else if (capabilityDefinitions instanceof String capabilityType) {
                             validateCapabilityType(yamlContent, lines, nodeTypeKey, key, capabilityType, nodeTypePath, (Map<?, ?>) nodeType);
                         } else {
@@ -75,11 +73,30 @@ public class NodeTypeValidator implements DiagnosesHandler {
 
                             handleNotValidKeywords("Invalid capability: " + ((Map<?, ?>) nodeType).get(key), line, column,endColumn);
                         }
+                    } else if (key.equals("requirements")) {
+                        Object requirementDefinitions = ((Map<?, ?>) nodeType).get(key);
+                        if (requirementDefinitions instanceof List) {
+                            validateRequirementDefinitions(yamlContent, lines, nodeTypeKey, (List<?>) requirementDefinitions, nodeTypePath + "." + "requirements");
+                        }
                     }
-            }
+                }
         }
     }
         return diagnostics;
+    }
+
+    private void validateRequirementDefinitions(String yamlContent, String[] lines, String nodeTypeKey, List<?> RequirementDefinitions, String nodeTypePath) {
+        RequirementDefinitionValidator requirementDefinitionValidator = new RequirementDefinitionValidator(context);
+        ArrayList<DiagnosticsSetter> RequirementDefinitionDiagnostics;
+        RequirementDefinitionDiagnostics = requirementDefinitionValidator.validateRequirementDefinitions(RequirementDefinitions, yamlContent, lines, nodeTypePath, nodeTypeKey);
+        diagnostics.addAll(RequirementDefinitionDiagnostics);
+    }
+
+    private void validateCapabilityDefinitions(String yamlContent, String[] lines, String nodeTypeKey, Map<String, Object> capabilityDefinitions, String nodeTypePath) {
+        CapabilityDefinitionValidator capabilityDefinitionValidator = new CapabilityDefinitionValidator(context);
+        ArrayList<DiagnosticsSetter> capabilityDefinitionDiagnostics;
+        capabilityDefinitionDiagnostics = capabilityDefinitionValidator.validateCapabilityDefinitions(capabilityDefinitions, yamlContent, lines, nodeTypePath + "." + "capabilities", nodeTypeKey);
+        diagnostics.addAll(capabilityDefinitionDiagnostics);
     }
 
     private void validateDerivedFrom(Map<String, Object> nodeTypesMap, String yamlContent, String[] lines, String nodeTypeKey, String key, Map<String, Object> nodeType) {
@@ -134,7 +151,7 @@ public class NodeTypeValidator implements DiagnosesHandler {
             handleNotValidKeywords(e.getMessage(), line, column,endColumn);
         }
     }
-
+    
     private void validateProperties(Map<String, Mark> positions, String yamlContent, String[] lines, String nodeTypeKey, String key, Map<?, ?> nodeType) {
         Object PropertyDefinitions = nodeType.get(key);
         if (PropertyDefinitions instanceof Map) {

@@ -90,7 +90,7 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
-                        if (file != null && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
+                        if (file != null && !file.nodeTypes().isEmpty() && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
                             //TODO construct the node template object with the found node type
                             return;
                         }

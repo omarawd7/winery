@@ -32,5 +32,5 @@ public record CapabilityType(Optional<CapabilityType> derivedFrom,
                              Optional<ToscaList<String>> valid_source_node_types,
                              Optional<ToscaList<String>> valid_relationship_types,
                              Optional<Map<String, PropertyDefinition>> properties,
-                             Optional<Map<String, AttributeDefinition>> attributes) {
+                             Optional<ToscaMap<String, AttributeDefinition>> attributes) {
 }

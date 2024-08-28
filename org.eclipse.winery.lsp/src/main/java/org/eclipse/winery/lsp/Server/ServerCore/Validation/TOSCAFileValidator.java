@@ -68,9 +68,20 @@ public class TOSCAFileValidator implements DiagnosesHandler {
                 validateNodeTypes(yamlMap, positions, YamlContent, key, lines);
             } else if (key.equals("service_template")) {
                 validateServiceTemplates(yamlMap, positions, YamlContent, key, lines);
+            } else if (key.equals("relationship_types")) {
+                validateRelationshipTypes(yamlMap, positions, YamlContent, key, lines);
             }
         }
         
+    }
+
+    private void validateRelationshipTypes(Map<String, Object> yamlMap, Map<String, Mark> positions, String yamlContent, String key, String[] lines) {
+        Object RelationshipTypes = yamlMap.get(key);
+        if (RelationshipTypes instanceof Map) {
+            RelationshipTypeValidator relationshipTypeValidator = new RelationshipTypeValidator(context);
+            ArrayList<DiagnosticsSetter> nodeTypeDiagnostics = relationshipTypeValidator.validateRelationshipTypes((Map<String, Object>) RelationshipTypes, positions, yamlContent, lines);
+            diagnostics.addAll(nodeTypeDiagnostics);
+        }
     }
 
     private void validateServiceTemplates(Map<String, Object> yamlMap, Map<String, Mark> positions, String yamlContent, String key, String[] lines) {

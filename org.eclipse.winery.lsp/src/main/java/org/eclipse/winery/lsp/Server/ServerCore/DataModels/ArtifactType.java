@@ -34,25 +34,7 @@ public record ArtifactType(
     Optional<ToscaString> mimeType,
     Optional<ToscaList<String>> fileExt,
     Optional<Map<String, PropertyDefinition>> properties
-) { 
-    
-    public ArtifactType overridePropertyDefinition(String key, PropertyDefinition newDefinition) {
-        if (properties.isPresent()) {
-            Map<String, PropertyDefinition> updatedProperties = properties.get();
-            updatedProperties.put(key, newDefinition);
-            return new ArtifactType(
-                derivedFrom,
-                version,
-                metadata,
-                description,
-                mimeType,
-                fileExt,
-                Optional.of(updatedProperties)
-            );
-        }
-        throw new RuntimeException("No property definition found for key " + key);
-    }
-    
+) {
     public ArtifactType addOrOverridePropertyDefinition(String key, PropertyDefinition newDefinition) {
         
             Map<String, PropertyDefinition> updatedProperties = properties.get();

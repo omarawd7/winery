@@ -86,7 +86,10 @@ public class CapabilityTypeParser {
             properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) capabilityTypeMap.get("properties")));        
         }
 
-        Optional<Map<String, AttributeDefinition>> attributes = Optional.ofNullable((Map<String, AttributeDefinition>) capabilityTypeMap.get("attributes")); //TODO add the attribute definition parser
+        Optional<ToscaMap<String, AttributeDefinition>> attributes = Optional.empty();
+        if (capabilityTypeMap.get("attributes") != null && capabilityTypeMap.get("attributes") instanceof Map) {
+            attributes = Optional.of(new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) capabilityTypeMap.get("attributes"))));
+        }
 
         return new CapabilityType(
             derivedFrom,

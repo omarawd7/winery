@@ -4,7 +4,3 @@ description: TOSCA File B
 node_types:
   MyNode:
     derived_from: SoftwareComponent
-    properties:
-      # omitted here for brevity 
-    capabilities:
-      # omitted here for brevity

@@ -28,7 +28,8 @@ public class ToscaContext {
         contextSet.add("node_types:");
         contextSet.add("service_template:");
         contextSet.add("node_templates:");
-        contextSet.add("capabilities:");// TODO add more keynames
+        contextSet.add("capabilities:");
+        contextSet.add("relationship_types:"); // TODO add more keynames
     }
     
     public Stack<String> getContextStack() {

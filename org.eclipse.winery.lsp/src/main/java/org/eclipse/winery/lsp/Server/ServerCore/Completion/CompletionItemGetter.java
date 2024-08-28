@@ -146,5 +146,30 @@ public class CompletionItemGetter {
 
         return getCompletionItems(position, keywords);
     }
+
+    public List<CompletionItem> getAvailableRelationshipTypes(LSContext lsContext) {
+        List<String> relationshipTypes = new ArrayList<>();
+        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().relationshipTypes().isEmpty() && lsContext.getCurrentToscaFile().relationshipTypes().get() != null) {
+            for (String key : lsContext.getCurrentToscaFile().relationshipTypes().get().getValue().keySet()) {
+                relationshipTypes.add(" " + key);
+            }
+            return relationshipTypes.stream()
+                .map(type -> {
+                    CompletionItem item = new CompletionItem(type);
+                    item.setKind(CompletionItemKind.Value);
+                    return item;
+                })
+                .collect(toList());
+        }
+        return new ArrayList<>();
+    }
+
+    public List<CompletionItem> getRelationshipTypesKeyWords(Position position) {
+        List<String> keywords = List.of(
+            "derived_from", "version", "metadata", "description", "properties", "attributes", "interfaces", "valid_capability_types","valid_target_node_types", "valid_source_node_types"
+
+        );
+        return getCompletionItems(position, keywords);
+    }
 }
 

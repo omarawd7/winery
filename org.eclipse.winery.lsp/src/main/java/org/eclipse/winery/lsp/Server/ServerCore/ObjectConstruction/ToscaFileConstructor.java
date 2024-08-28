@@ -104,6 +104,11 @@ public class ToscaFileConstructor {
         if (yamlMap.get("service_template") instanceof Map) {
             serviceTemplate = Optional.of(Objects.requireNonNull(ServiceTemplateParser.parseServiceTemplate( (Map<String, Object>) yamlMap.get("service_template"))));
         }
+        
+        Optional<Map<String, RelationshipType>> relationshipType = Optional.empty();
+        if (yamlMap.get("relationship_types") != null && yamlMap.get("relationship_types") instanceof Map) {
+            relationshipType = Optional.of(RelationshipTypeParser.parseRelationshipTypes((Map<String, Object>) yamlMap.get("relationship_types")));
+        }
 
         return new TOSCAFile(
             toscaDefinitionsVersion,
