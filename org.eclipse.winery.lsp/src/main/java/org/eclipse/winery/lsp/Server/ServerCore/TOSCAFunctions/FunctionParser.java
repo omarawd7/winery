@@ -15,7 +15,9 @@ package org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions;
 
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.Yaml;
+
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class FunctionParser {
     private static final Yaml yaml = new Yaml();
@@ -40,7 +42,7 @@ public class FunctionParser {
             // Check if it's the only key in a YAML map using SnakeYAML
             Map<String, Object> map = yaml.load(key + ": " + value);
             if (map.size() == 1) {
-                arguments = parseArguments( value);
+                arguments = parseArguments(value);
                 functionStack.push(Map.of(key, arguments));
                 for (String argument : arguments) {
                     if (CommonUtils.isFunctionCall( argument)) {
@@ -63,7 +65,10 @@ public class FunctionParser {
             if (value.isEmpty()) {
                 return Collections.emptyList();
             }
-            return Arrays.asList(value.split(","));
+            // Split the string, trim each element, and return the list
+            return Arrays.stream(value.split(","))
+                .map(String::trim)
+                .collect(Collectors.toList());
         } else {
             throw new IllegalArgumentException("Malformed arguments: not a valid list");
         }
