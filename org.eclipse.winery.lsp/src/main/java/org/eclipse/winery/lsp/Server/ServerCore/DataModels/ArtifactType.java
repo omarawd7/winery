@@ -36,7 +36,6 @@ public record ArtifactType(
     Optional<Map<String, PropertyDefinition>> properties
 ) {
     public ArtifactType addOrOverridePropertyDefinition(String key, PropertyDefinition newDefinition) {
-        
             Map<String, PropertyDefinition> updatedProperties = properties.get();
             updatedProperties.put(key, newDefinition);
             return new ArtifactType(

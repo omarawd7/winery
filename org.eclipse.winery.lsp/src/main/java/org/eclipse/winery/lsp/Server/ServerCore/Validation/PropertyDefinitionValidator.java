@@ -109,14 +109,13 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     }
 
     private void validateDefaultValue(String YamlContent, String[] lines, String path , String key, Map<?, ?> propertyDefinition) {
-        String type = (String) propertyDefinition.get("type");
-        Object defaultValue = propertyDefinition.get(key);
-        if (!CommonUtils.isTypeMatch(type, defaultValue)) {
+        
+        if (propertyDefinition.containsKey("type") && propertyDefinition.get("type") instanceof String  &&  propertyDefinition.containsKey(key) && !CommonUtils.isTypeMatch((String) propertyDefinition.get("type"), propertyDefinition.get(key).toString())) {
             Mark mark = context.getContextDependentConstructorPositions().get(path  + "." + propertyDefinition.get(key));
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;
             int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-            handleNotValidKeywords("Default value type does not match type: " + type + " at line " + line + ", column " + column, line, column, endColumn);
+            handleNotValidKeywords("Default value type does not match type: " + propertyDefinition.get("type") + " at line " + line + ", column " + column, line, column, endColumn);
         }
     }
 

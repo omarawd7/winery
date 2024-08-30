@@ -39,22 +39,27 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
             if (requirementDefinitionElement instanceof Map) {
                 for (String requirementDefinition : ((Map<String, Object>) requirementDefinitionElement).keySet()) {
                     if (((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition) instanceof Map) {
-                        requirementDefinitionPath += "." + requirementDefinition;
-                        validateRequiredKeys((Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition),yamlContent, lines, requirementDefinitionPath);
+                        String requirementDefinitionPathWithName = requirementDefinitionPath + "." + requirementDefinition;
+                        
+                        validateRequiredKeys((Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition),yamlContent, lines, requirementDefinitionPathWithName);
                      for (String key : ((Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition)).keySet()) {
                          if (!validRequirementDefinitionKeywords.contains(key)) {
-                             Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPath + "." + key);
+                             Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPathWithName + "." + key);
                              int line = mark != null ? mark.getLine() + 1 : -1;
                              int column = mark != null ? mark.getColumn() + 1 : -1;
                              int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
                              handleNotValidKeywords("Invalid requirement definition keyword: " + requirementDefinition + " at line " + line + ", column " + column, line, column, endColumn);
                          } else if (key.equals("capability")) {
-                             if (requirementDefinitionPath.contains("node_types")) {
-                                 validateCapabilityFromNodeTypeParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPath, parent, requirementDefinition);
+                             if (requirementDefinitionPathWithName.contains("node_types")) {
+                                 validateCapabilityFromNodeTypeParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPathWithName, parent, requirementDefinition);
                              }
                          } else if (key.equals("relationship")) {
-                             if (requirementDefinitionPath.contains("node_types")) {
-                                 validateRelationshipFromNodeTypeParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPath, parent, requirementDefinition);
+                             if (requirementDefinitionPathWithName.contains("node_types")) {
+                                 validateRelationshipFromNodeTypeParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPathWithName, parent, requirementDefinition);
+                             }
+                         } else if (key.equals("node")) {
+                             if (requirementDefinitionPathWithName.contains("node_types")) {
+                                 validateNodeFromNodeTypeParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPathWithName, parent, requirementDefinition);
                              }
                          }
                      }   
@@ -68,7 +73,59 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
         return diagnostics;
     }
 
-    private void validateRelationshipFromNodeTypeParent(String yamlContent, String[] lines, String key, Map<String, Object> requirementDefinition, String requirementDefinitionPathWithName, String parent, String requirementDefinitionsKey) {
+    private void validateNodeFromNodeTypeParent(String yamlContent, String[] lines, String key, Map<String, Object> requirementDefinition, String requirementDefinitionPathWithName, String parent, String requirementDefinitionsKey) {
+        try {
+                if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey((requirementDefinition).get(key))) {
+                    //TODO set the found node type for the requirement
+                    return;
+                }
+                if ( !context.getCurrentToscaFile().imports().isEmpty()) {
+                    Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+                    for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                        for (TOSCAFile file : mapOfImportedFiles.values()) {
+                            if (file != null && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey((requirementDefinition).get(key))) {
+                                //TODO set the found node type for the requirement
+                                return;
+                            }
+                        }
+                    }
+                    Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
+                    for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
+                        for (String namespacesKey : mapOfNamespaces.keySet()) {
+                            if ( (requirementDefinition).get(key) instanceof String) {
+                                String[] parts = ((String) (requirementDefinition).get(key)).split(":");
+                                if (parts.length == 2) {
+                                    String typeWithoutNamespace = parts[1].trim();
+                                    String namespace = parts[0].trim();
+                                    if (namespacesKey.equals(namespace)) {
+                                        TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
+                                        if (file != null && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey(typeWithoutNamespace)) {
+                                            return;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+                Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPathWithName + "." + ((Map<?, ?>) requirementDefinition).get(key));
+                int line = mark != null ? mark.getLine() + 1 : -1;
+                int column = mark != null ? mark.getColumn() + 1 : -1;
+                int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                handleNotValidKeywords("Invalid node type value, \"" + ((Map<?, ?>) requirementDefinition).get(key) + "\" is not exist.", line, column,endColumn);
+            } catch (Exception e) {
+                Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPathWithName + "." + ((Map<?, ?>) requirementDefinition).get(key));
+                int line = mark != null ? mark.getLine() + 1 : -1;
+                int column = mark != null ? mark.getColumn() + 1 : -1;
+                int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+                handleNotValidKeywords(e.getMessage(), line, column,endColumn);
+            }
+        }
+    
+        private void validateRelationshipFromNodeTypeParent(String yamlContent, String[] lines, String key, Map<String, Object> requirementDefinition, String requirementDefinitionPathWithName, String parent, String requirementDefinitionsKey) {
         try {
             if (context.getCurrentToscaFile().relationshipTypes().isPresent() && context.getCurrentToscaFile().relationshipTypes().get().getValue().containsKey((requirementDefinition).get(key))) {
                 //TODO set the found relationship type for the requirement

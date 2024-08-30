@@ -69,8 +69,8 @@ public class CommonUtils {
     }
 
     private static boolean isString(Object value) {
-        return value instanceof String && ((String) value).trim().startsWith("\"") && ((String) value).trim().endsWith("\"");
-    }
+        return value instanceof String ;
+      }
 
     private static boolean isMap(Object value) {
         return value instanceof Map;

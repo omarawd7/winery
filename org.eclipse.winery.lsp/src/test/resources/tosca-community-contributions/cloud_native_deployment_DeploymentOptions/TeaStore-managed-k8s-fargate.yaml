@@ -1,4 +1,6 @@
 tosca_definitions_version: tosca_2_0
+imports: 
+- url: types/node_types.yaml 
 metadata:
   template_author: CNA modeling tool
   template_name: TeaStore-managed-k8s-fargate
