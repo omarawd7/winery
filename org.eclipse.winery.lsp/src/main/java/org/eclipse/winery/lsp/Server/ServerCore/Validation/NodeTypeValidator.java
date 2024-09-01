@@ -108,7 +108,7 @@ public class NodeTypeValidator implements DiagnosesHandler {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
-                        if (file != null && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey(nodeType.get(key))) {
+                        if (file != null && file.nodeTypes() != null && file.nodeTypes().getValue().containsKey(nodeType.get(key))) {
                             //TODO set the derived from value
                             return;
                         }
@@ -124,7 +124,7 @@ public class NodeTypeValidator implements DiagnosesHandler {
                                 String namespace = parts[0].trim();
                                 if (namespacesKey.equals(namespace)) {
                                     TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                    if (file != null && !file.nodeTypes().isEmpty() && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey(typeWithoutNamespace)) {
+                                    if (file != null && file.nodeTypes() != null && file.nodeTypes() != null && file.nodeTypes().getValue().containsKey(typeWithoutNamespace)) {
                                         //TODO set the derived from value
                                         return;
                                     }
@@ -168,11 +168,11 @@ public class NodeTypeValidator implements DiagnosesHandler {
 
     private void validateCapabilityType(String yamlContent, String[] lines, String nodeTypeKey, String key, String capabilityType, String nodeTypePath, Map<?, ?> nodeType) {
         // checks if it exists in the same file
-        if (!context.getCurrentToscaFile().capabilityTypes().isEmpty() && context.getCurrentToscaFile().capabilityTypes().get().containsKey(capabilityType)) {
+        if (!context.getCurrentToscaFile().capabilityTypes().isEmpty() && context.getCurrentToscaFile().capabilityTypes().containsKey(capabilityType)) {
             //the capability definition name is the same as the provided capability type name.
-            CapabilityType capabilityTypeObject = context.getCurrentToscaFile().capabilityTypes().get().get(capabilityType);
-            if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(nodeTypeKey) && context.getCurrentToscaFile().nodeTypes().get().getValue().get(nodeTypeKey).capabilities().isPresent()) {
-                context.getCurrentToscaFile().nodeTypes().get().getValue().get(nodeTypeKey).capabilities().get().getValue().put(capabilityType, new CapabilityDefinition(capabilityTypeObject, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())) ;
+            CapabilityType capabilityTypeObject = context.getCurrentToscaFile().capabilityTypes().get(capabilityType);
+            if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(nodeTypeKey) && context.getCurrentToscaFile().nodeTypes().getValue().get(nodeTypeKey).capabilities() != null) {
+                context.getCurrentToscaFile().nodeTypes().getValue().get(nodeTypeKey).capabilities().getValue().put(capabilityType, new CapabilityDefinition(capabilityTypeObject, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new HashMap<>())) ;
             }
             return;
         } try {
@@ -180,11 +180,11 @@ public class NodeTypeValidator implements DiagnosesHandler {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
-                        if (file != null && !file.capabilityTypes().isEmpty() && !file.capabilityTypes().get().isEmpty() && file.capabilityTypes().get().containsKey(capabilityType)) {
+                        if (file != null && file.capabilityTypes() != null && file.capabilityTypes() != null && file.capabilityTypes().containsKey(capabilityType)) {
                             //the capability definition name is the same as the provided capability type name.
-                            CapabilityType capabilityTypeObject = file.capabilityTypes().get().get(capabilityType);
-                            if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(nodeTypeKey) && context.getCurrentToscaFile().nodeTypes().get().getValue().get(nodeTypeKey).capabilities().isPresent()) {
-                                context.getCurrentToscaFile().nodeTypes().get().getValue().get(nodeTypeKey).capabilities().get().getValue().put(capabilityType, new CapabilityDefinition(capabilityTypeObject, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())) ;
+                            CapabilityType capabilityTypeObject = file.capabilityTypes().get(capabilityType);
+                            if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(nodeTypeKey) && context.getCurrentToscaFile().nodeTypes().getValue().get(nodeTypeKey).capabilities() != null) {
+                                context.getCurrentToscaFile().nodeTypes().getValue().get(nodeTypeKey).capabilities().getValue().put(capabilityType, new CapabilityDefinition(capabilityTypeObject, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new HashMap<>())) ;
                             }
                             return;
                         }
@@ -200,11 +200,11 @@ public class NodeTypeValidator implements DiagnosesHandler {
                                 String namespace = parts[0].trim();
                                 if (namespacesKey.equals(namespace)) {
                                     TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                    if (file != null && !file.capabilityTypes().isEmpty() && !file.capabilityTypes().get().isEmpty() && file.capabilityTypes().get().containsKey(typeWithoutNamespace)) {
+                                    if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes() != null && file.capabilityTypes().containsKey(typeWithoutNamespace)) {
                                         //the capability definition name is the same as the provided capability type name.
-                                        CapabilityType capabilityTypeObject = file.capabilityTypes().get().get(typeWithoutNamespace);
-                                        if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(nodeTypeKey) && context.getCurrentToscaFile().nodeTypes().get().getValue().get(nodeTypeKey).capabilities().isPresent()) {
-                                            context.getCurrentToscaFile().nodeTypes().get().getValue().get(nodeTypeKey).capabilities().get().getValue().put(capabilityType, new CapabilityDefinition(capabilityTypeObject, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty())) ;
+                                        CapabilityType capabilityTypeObject = file.capabilityTypes().get(typeWithoutNamespace);
+                                        if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(nodeTypeKey) && context.getCurrentToscaFile().nodeTypes().getValue().get(nodeTypeKey).capabilities() != null) {
+                                            context.getCurrentToscaFile().nodeTypes().getValue().get(nodeTypeKey).capabilities().getValue().put(capabilityType, new CapabilityDefinition(capabilityTypeObject, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new HashMap<>())) ;
                                         }
                                         return; 
                                     }

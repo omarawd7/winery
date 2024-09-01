@@ -26,23 +26,23 @@ public record RelationshipType(
     Optional<ToscaString> version,
     Optional<ToscaMap<String, String>> metadata,
     Optional<ToscaString> description,
-    Optional<Map<String, PropertyDefinition>> properties,
-    Optional<ToscaMap<String, AttributeDefinition>> attributes,
-    Optional<ToscaMap<String,  InterfaceDefinition>> interfaces,
+    Map<String, PropertyDefinition> properties,
+    ToscaMap<String, AttributeDefinition> attributes,
+    ToscaMap<String,  InterfaceDefinition> interfaces,
     Optional<ToscaList<String>> valid_capability_types,
     Optional<ToscaList<String>> valid_target_node_types,
     Optional<ToscaList<String>> valid_source_node_types
 ) {
     public RelationshipType addOrOverridePropertyDefinition(String key, PropertyDefinition newDefinition) {
         if (!properties.isEmpty()) {
-        Map<String, PropertyDefinition> updatedProperties = properties.get();
+        Map<String, PropertyDefinition> updatedProperties = properties;
         updatedProperties.put(key, newDefinition);
         return new RelationshipType(
             derivedFrom,
             version,
             metadata,
             description,
-            Optional.of(updatedProperties),
+            updatedProperties,
             attributes,
             interfaces,
             valid_capability_types,

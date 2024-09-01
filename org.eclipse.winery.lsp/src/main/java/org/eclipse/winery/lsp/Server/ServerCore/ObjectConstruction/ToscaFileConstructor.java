@@ -41,58 +41,53 @@ public class ToscaFileConstructor {
         
         Optional<Object> dslDefinitions = Optional.ofNullable(yamlMap.get("dsl_definitions"));
         
-        Optional<Map<String, ArtifactType>> artifactTypes = Optional.empty();
+        Map<String, ArtifactType> artifactTypes = new HashMap<>();
         if (yamlMap.get("artifact_types") != null && yamlMap.get("artifact_types") instanceof Map) {
-            artifactTypes = Optional.ofNullable(ArtifactTypeParser.parseArtifactTypes((Map<String, Object>) yamlMap.get("artifact_types")));
+            artifactTypes = ArtifactTypeParser.parseArtifactTypes((Map<String, Object>) yamlMap.get("artifact_types"));
         }
         
-        Optional<ToscaMap<String, Object>> dataTypes = Optional.empty();
+        ToscaMap<String, Object> dataTypes = new ToscaMap<>(new HashMap<>());
         if (yamlMap.get("data_types") != null && yamlMap.get("data_types") instanceof Map) {
-            dataTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("data_types")));;
+            dataTypes = new ToscaMap<>((Map<String, Object>) yamlMap.get("data_types"));
         }
         
-        Optional<Map<String, CapabilityType>> capabilityTypes = Optional.empty();
+        Map<String, CapabilityType> capabilityTypes = new HashMap<>();
         if (yamlMap.get("capability_types") != null && yamlMap.get("capability_types") instanceof Map) { 
-            capabilityTypes = Optional.of(CapabilityTypeParser.parseCapabilityTypes((Map<String, Object>) yamlMap.get("capability_types")));
+            capabilityTypes = CapabilityTypeParser.parseCapabilityTypes((Map<String, Object>) yamlMap.get("capability_types"));
         }
         
-        Optional<ToscaMap<String, Object>> interfaceTypes = Optional.empty();
+        ToscaMap<String, Object> interfaceTypes = new ToscaMap<>(new HashMap<>());
         if (yamlMap.get("interface_types") != null && yamlMap.get("interface_types") instanceof Map) {
-            interfaceTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("interface_types")));        
+            interfaceTypes = new ToscaMap<>((Map<String, Object>) yamlMap.get("interface_types"));        
         }
         
-        Optional<ToscaMap<String, Object>> relationshipTypes  = Optional.empty();
-        if (yamlMap.get("relationship_types") != null && yamlMap.get("relationship_types") instanceof Map) {
-            relationshipTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("relationship_types")));       
-        }
-        
-        Optional<ToscaMap<String, NodeType>> nodeTypes = Optional.empty();
+        ToscaMap<String, NodeType> nodeTypes = new ToscaMap<>(new HashMap<>());
         if (yamlMap.get("node_types") != null && yamlMap.get("node_types") instanceof Map) {
         try {
-            nodeTypes = Optional.of(new ToscaMap<>(NodeTypeParser.parseNodeTypes((Map<String, Object>) yamlMap.get("node_types"))));
+            nodeTypes = new ToscaMap<>(NodeTypeParser.parseNodeTypes((Map<String, Object>) yamlMap.get("node_types")));
         } catch (Exception e) {
             System.err.println(e.getMessage());
         }
         }
 
-        Optional<ToscaMap<String, Object>> groupTypes = Optional.empty();
+        ToscaMap<String, Object> groupTypes = new ToscaMap<>(new HashMap<>());
         if (yamlMap.get("group_types") != null && yamlMap.get("group_types") instanceof Map) {
-            groupTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("group_types")));
+            groupTypes = new ToscaMap<>((Map<String, Object>) yamlMap.get("group_types"));
         }
 
-        Optional<ToscaMap<String, Object>> policyTypes = Optional.empty();
+        ToscaMap<String, Object> policyTypes = new ToscaMap<>(new HashMap<>());
         if (yamlMap.get("policy_types") != null && yamlMap.get("policy_types") instanceof Map) {
-            policyTypes = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("policy_types")));
+            policyTypes = new ToscaMap<>((Map<String, Object>) yamlMap.get("policy_types"));
         }
 
-        Optional<ToscaMap<String, Object>> repositories = Optional.empty();
+        ToscaMap<String, Object> repositories = new ToscaMap<>(new HashMap<>());
         if (yamlMap.get("repositories") != null && yamlMap.get("repositories") instanceof Map) {
-            repositories = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("repositories")));
+            repositories = new ToscaMap<>((Map<String, Object>) yamlMap.get("repositories"));
         }
 
-        Optional<ToscaMap<String, Object>> functions  = Optional.empty();
+        ToscaMap<String, Object> functions  = new ToscaMap<>(new HashMap<>());
         if (yamlMap.get("repositories") != null && yamlMap.get("repositories") instanceof Map) {
-            functions = Optional.of(new ToscaMap<>((Map<String, Object>) yamlMap.get("functions")));
+            functions = new ToscaMap<>((Map<String, Object>) yamlMap.get("functions"));
         }
 
         Optional<ToscaList<ImportDefinition>> imports = Optional.empty();
@@ -105,9 +100,9 @@ public class ToscaFileConstructor {
             serviceTemplate = Optional.of(Objects.requireNonNull(ServiceTemplateParser.parseServiceTemplate( (Map<String, Object>) yamlMap.get("service_template"))));
         }
         
-        Optional<Map<String, RelationshipType>> relationshipType = Optional.empty();
+        ToscaMap<String, RelationshipType> relationshipTypes = new ToscaMap<>(new HashMap<>());
         if (yamlMap.get("relationship_types") != null && yamlMap.get("relationship_types") instanceof Map) {
-            relationshipType = Optional.of(RelationshipTypeParser.parseRelationshipTypes((Map<String, Object>) yamlMap.get("relationship_types")));
+            relationshipTypes = new ToscaMap<>(RelationshipTypeParser.parseRelationshipTypes((Map<String, Object>) yamlMap.get("relationship_types")));
         }
 
         return new TOSCAFile(

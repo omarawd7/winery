@@ -70,9 +70,9 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 }
             }  
             else {
-                //Handle refines property from derived type
+                //Handle  property assignment
                 try {
-                    refinePropertyFromDerivedType(positions, YamlContent, lines, parentName, derivedFrom, PropertyDefinitionKey, propertyDefinition , propertyPath);
+                    handlePropertyAssignment(positions, YamlContent, lines, parentName, derivedFrom, PropertyDefinitionKey, propertyDefinition , propertyPath);
                 } catch (Exception e) {
                     Mark mark = context.getContextDependentConstructorPositions().get(propertyPath);
                     int line = mark != null ? mark.getLine() + 1 : -1;
@@ -109,7 +109,6 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     }
 
     private void validateDefaultValue(String YamlContent, String[] lines, String path , String key, Map<?, ?> propertyDefinition) {
-        
         if (propertyDefinition.containsKey("type") && propertyDefinition.get("type") instanceof String  &&  propertyDefinition.containsKey(key) && !CommonUtils.isTypeMatch((String) propertyDefinition.get("type"), propertyDefinition.get(key).toString())) {
             Mark mark = context.getContextDependentConstructorPositions().get(path  + "." + propertyDefinition.get(key));
             int line = mark != null ? mark.getLine() + 1 : -1;
@@ -119,87 +118,76 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         }
     }
 
-    private void refinePropertyFromDerivedType(Map<String, Mark> positions, String YamlContent, String[] lines, String parent, String derivedFrom, String PropertyDefinitionKey, Object propertyDefinition, String path) {
-        if (derivedFrom == null ) {
-            Mark mark = context.getContextDependentConstructorPositions().get(path);
-            int line = mark != null ? mark.getLine() + 1 : -1;
-            int column = mark != null ? mark.getColumn() + 1 : -1;
-            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-            handleNotValidKeywords("The property " + PropertyDefinitionKey + " is not found" , line, column, endColumn);
-        } else if (getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey, path).type().getValue().isEmpty()) {
-            Mark mark = context.getContextDependentConstructorPositions().get(path);
-            int line = mark != null ? mark.getLine() + 1 : -1;
-            int column = mark != null ? mark.getColumn() + 1 : -1;
-            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-            handleNotValidKeywords("The type of the property " + PropertyDefinitionKey + " is not found" , line, column, endColumn);
-        }
-        else { 
-            //handle if the property has a fixed value
-            if (getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey, path).value().isPresent()) {
+    private void handlePropertyAssignment(Map<String, Mark> positions, String YamlContent, String[] lines, String parent, String derivedFrom, String PropertyDefinitionKey, Object propertyValue, String path) {
+        handleNodeTemplateAssignment(YamlContent, lines, parent, PropertyDefinitionKey, propertyValue, path);
+    }
+
+    private void handleNodeTemplateAssignment(String YamlContent, String[] lines, String parent, String PropertyDefinitionKey, Object propertyValue, String path) {
+        if (path.contains("node_templates")) {
+            if (context.getCurrentToscaFile() != null && context.getCurrentToscaFile().serviceTemplate().isPresent() && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates() != null && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().containsKey(parent) && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).type().properties().containsKey(PropertyDefinitionKey)) {
+                PropertyDefinition derivedProperty = context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).type().properties().get(PropertyDefinitionKey);
+                if (derivedProperty != null && derivedProperty.value().isEmpty()) {
+                    PropertyDefinition newProperty = new PropertyDefinition(derivedProperty.type(), derivedProperty.description(),derivedProperty.metadata(), derivedProperty.required(), derivedProperty.Default(), Optional.ofNullable(propertyValue),derivedProperty.validation(), derivedProperty.keySchema(), derivedProperty.entrySchema());
+                    context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).properties().put(PropertyDefinitionKey,newProperty);
+                    if (!newProperty.type().equals("")) {
+                        //TODO validate the value
+                    } else {
+                        Mark mark = context.getContextDependentConstructorPositions().get(path);
+                        int line = mark != null ? mark.getLine() + 1 : -1;
+                        int column = mark != null ? mark.getColumn() + 1 : -1;
+                        int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+                        handleNotValidKeywords("The type of the property " + PropertyDefinitionKey + " is not found" , line, column, endColumn);
+
+                    }
+                } else if (derivedProperty != null && !derivedProperty.value().isPresent()) {
+                    //handle if the property has a fixed value
+                        Mark mark = context.getContextDependentConstructorPositions().get(path);
+                        int line = mark != null ? mark.getLine() + 1 : -1;
+                        int column = mark != null ? mark.getColumn() + 1 : -1;
+                        int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+                    handleNotValidKeywords("This property has a fixed value of " + derivedProperty.value().get() , line, column, endColumn);
+                }
+            } else {
                 Mark mark = context.getContextDependentConstructorPositions().get(path);
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-                handleNotValidKeywords("This property has a fixed value of " + getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey, path).value().get() , line, column, endColumn);              
-            } else { 
-                // Search for the property in the derived type
-                try { 
-                    // get a copy from the derived property and add the value 
-                    PropertyDefinition newPropertyDefinitionObject = setNewPropertyValue(parent, PropertyDefinitionKey, propertyDefinition, derivedFrom, path);
-                    // Validate the value
-                    if (newPropertyDefinitionObject.validation().isPresent()) {
-                        if (isValidPropertyDefinitionsValue(newPropertyDefinitionObject.validation().get(), propertyDefinition, newPropertyDefinitionObject.type().getValue(), positions, YamlContent, lines, parent, PropertyDefinitionKey, path)) {
-                            Mark mark = context.getContextDependentConstructorPositions().get(path);
-                            int line = mark != null ? mark.getLine() + 1 : -1;
-                            int column = mark != null ? mark.getColumn() + 1 : -1;
-                            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-                            handleNotValidKeywords("The value " + propertyDefinition + " did not pass the validation " , line, column, endColumn);
-                        }
-                    }
-                } catch (Exception e) {
-                    Mark mark = context.getContextDependentConstructorPositions().get(path);
-                    int line = mark != null ? mark.getLine() + 1 : -1;
-                    int column = mark != null ? mark.getColumn() + 1 : -1;
-                    int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-                    handleNotValidKeywords(e.getMessage(), line, column, endColumn);
-                }
-            } 
+                handleNotValidKeywords("This property is not found" , line, column, endColumn);
+            }
         }
-    } 
- 
+    }
+
     private PropertyDefinition setNewPropertyValue(String parent, String PropertyDefinitionKey, Object newValue, String derivedFrom, String path) {
         PropertyDefinition newPropertyDefinitionObject ;
         if (path.contains("artifact_types")) {
             newPropertyDefinitionObject = getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey, path).clone();
             newPropertyDefinitionObject = newPropertyDefinitionObject.withValue(newValue);
-            ArtifactType newArtifactType = context.getCurrentToscaFile().artifactTypes().get().get(parent).addOrOverridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinitionObject);
+            ArtifactType newArtifactType = context.getCurrentToscaFile().artifactTypes().get(parent).addOrOverridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinitionObject);
             TOSCAFile toscaFile = context.getCurrentToscaFile().updateArtifactTypes(parent , newArtifactType);
             context.setCurrentToscaFile(toscaFile);
             return newPropertyDefinitionObject;
         } else if (path.contains("node_types")) {
             newPropertyDefinitionObject = getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey, path).clone();
             newPropertyDefinitionObject = newPropertyDefinitionObject.withValue(newValue);
-            NodeType nodeType = context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).overridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinitionObject);
+            NodeType nodeType = context.getCurrentToscaFile().nodeTypes().getValue().get(parent).overridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinitionObject);
             TOSCAFile toscaFile = context.getCurrentToscaFile().updateNodeTypes(parent , nodeType);
             context.setCurrentToscaFile(toscaFile);
             return newPropertyDefinitionObject;
-        } /*else if (path.contains("node_templates")) {
+        } else if (path.contains("relationship_types")) {
             newPropertyDefinitionObject = getPropertyDefinitionObject(derivedFrom, PropertyDefinitionKey, path).clone();
             newPropertyDefinitionObject = newPropertyDefinitionObject.withValue(newValue);
-            ArtifactType newArtifactType = context.getCurrentToscaFile().artifactTypes().get().get(parent).addOrOverridePropertyDefinition(PropertyDefinitionKey , newPropertyDefinitionObject);
-            TOSCAFile toscaFile = context.getCurrentToscaFile().updateArtifactTypes(parent , newArtifactType);
-            context.setCurrentToscaFile(toscaFile);
-            return newPropertyDefinitionObject;            
-        }*/
+            context.getCurrentToscaFile().relationshipTypes().getValue().get(parent).properties().put(PropertyDefinitionKey , newPropertyDefinitionObject);
+            return newPropertyDefinitionObject;
+        }
         throw new IllegalArgumentException("The propertyDefinition " + derivedFrom + "." + PropertyDefinitionKey + " does not exist");
     }
 
-    private void checkValidation(Map<String, Mark> positions, String YamlContent, String[] lines, String parent, String PropertyDefinitionKey, String key, Map<?, ?> propertyDefinition, String path) {
+    private void checkValidation(Map<String, Mark> positions, String YamlContent, String[] lines, String parent, String PropertyDefinitionKey, String key, Map<?, ?> propertyValue, String path) {
         FunctionParser functionParser = new FunctionParser();
         //parsing the validation function
         try {
-            if (CommonUtils.isFunction(String.valueOf(propertyDefinition.get(key)))) {
-                functionParser.parseFunctionCall(String.valueOf(propertyDefinition.get(key)));
+            if (CommonUtils.isFunction(String.valueOf(propertyValue.get(key)))) {
+                functionParser.parseFunctionCall(String.valueOf(propertyValue.get(key)));
                 //setting the validation variable in Tosca object
                 try {
                     setValidationStack(parent, PropertyDefinitionKey, functionParser , path);    
@@ -208,13 +196,13 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 }
                 
                 //validating the property definition fixed value by applying the validation functions entered by the user
-                if (propertyDefinition.containsKey("value") && propertyDefinition.containsKey("type") ) {
-                    if (isValidPropertyDefinitionsValue(functionParser.getFunctionStack(), propertyDefinition.get("value"), (String) propertyDefinition.get("type"), positions, YamlContent, lines, parent, PropertyDefinitionKey, path)) {
+                if (propertyValue.containsKey("value") && propertyValue.containsKey("type") ) {
+                    if (isValidPropertyDefinitionsValue(functionParser.getFunctionStack(), propertyValue.get("value"), (String) propertyValue.get("type"), positions, YamlContent, lines, parent, PropertyDefinitionKey, path)) {
                         Mark mark = context.getContextDependentConstructorPositions().get(path + "."  + "value");
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-                        handleNotValidKeywords("The value " + propertyDefinition.get("value") + " did not pass the validation ", line, column, endColumn);
+                        handleNotValidKeywords("The value " + propertyValue.get("value") + " did not pass the validation ", line, column, endColumn);
                     }
                 }
             }    
@@ -229,19 +217,19 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     
     private PropertyDefinition getPropertyDefinitionObject(String derivedFrom, String PropertyDefinitionKey, String path) {
        if (path.contains("artifact_types")) {
-           PropertyDefinition propertyDefinition = context.getCurrentToscaFile().artifactTypes().get().get(derivedFrom).properties().get().get(PropertyDefinitionKey);
+           PropertyDefinition propertyDefinition = context.getCurrentToscaFile().artifactTypes().get(derivedFrom).properties().get(PropertyDefinitionKey);
            if (propertyDefinition != null) {
            return propertyDefinition;
            }
        } else if (path.contains("node_types")) {
-            PropertyDefinition propertyDefinition = context.getCurrentToscaFile().nodeTypes().get().getValue().get(derivedFrom).properties().get().get(PropertyDefinitionKey);
+            PropertyDefinition propertyDefinition = context.getCurrentToscaFile().nodeTypes().getValue().get(derivedFrom).properties().get(PropertyDefinitionKey);
             if (propertyDefinition != null) {
             return propertyDefinition;
             }
-       } else if (path.contains("node_templates")) {
-           PropertyDefinition propertyDefinition = context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(derivedFrom).properties().get().get(PropertyDefinitionKey);
+       } else if (path.contains("relationship_types")) {
+           PropertyDefinition propertyDefinition = context.getCurrentToscaFile().relationshipTypes().getValue().get(derivedFrom).properties().get(PropertyDefinitionKey);
            if (propertyDefinition != null) {
-           return propertyDefinition;
+               return propertyDefinition;
            }
        }
         throw new IllegalArgumentException("The propertyDefinition " + derivedFrom + "." + PropertyDefinitionKey + " does not exist");
@@ -249,15 +237,15 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
 
     private void setValidationStack(String parent, String PropertyDefinitionKey, FunctionParser functionParser, String path) {
         if (path.contains("artifact_types")) {
-            PropertyDefinition newPropertyDefinition = context.getCurrentToscaFile().artifactTypes().get().get(parent).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
-            context.getCurrentToscaFile().artifactTypes().get().get(parent).properties().get().put(PropertyDefinitionKey, newPropertyDefinition);
+            PropertyDefinition newPropertyDefinition = context.getCurrentToscaFile().artifactTypes().get(parent).properties().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
+            context.getCurrentToscaFile().artifactTypes().get(parent).properties().put(PropertyDefinitionKey, newPropertyDefinition);
         } else if (path.contains("node_types")) {
-            PropertyDefinition newPropertyDefinition = context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
-            context.getCurrentToscaFile().nodeTypes().get().getValue().get(parent).properties().get().put(PropertyDefinitionKey, newPropertyDefinition);
+            PropertyDefinition newPropertyDefinition = context.getCurrentToscaFile().nodeTypes().getValue().get(parent).properties().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
+            context.getCurrentToscaFile().nodeTypes().getValue().get(parent).properties().put(PropertyDefinitionKey, newPropertyDefinition);
         }
-         else if (path.contains("node_templates")) {
-            PropertyDefinition newPropertyDefinition = context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).properties().get().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
-            context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).properties().get().put(PropertyDefinitionKey , newPropertyDefinition);
+         else if (path.contains("relationship_types")) {
+            PropertyDefinition newPropertyDefinition = context.getCurrentToscaFile().relationshipTypes().getValue().get(parent).properties().get(PropertyDefinitionKey).withValidation(functionParser.getFunctionStack());
+            context.getCurrentToscaFile().relationshipTypes().getValue().get(parent).properties().put(PropertyDefinitionKey, newPropertyDefinition);
         }
     }
     
@@ -313,8 +301,8 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         }
     }
 
-    public void ValidateSchemaDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> propertyDefinition, String path  , String key) {
-        Object entrySchema = propertyDefinition.get("entry_schema");
+    public void ValidateSchemaDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> propertyValue, String path  , String key) {
+        Object entrySchema = propertyValue.get("entry_schema");
         try {
             if (entrySchema instanceof Map) {
                 SchemaDefinitionValidator schemaDefinitionValidator = new SchemaDefinitionValidator(context);

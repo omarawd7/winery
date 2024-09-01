@@ -1,6 +1,8 @@
 
 tosca_definitions_version: tosca_2_0
-
+imports:
+- url: capability_types.yaml
+- url: relationship_types.yaml
 metadata:
   template_name: node_types.yaml
   template_author: Distributed Systems Group

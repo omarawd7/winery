@@ -14,7 +14,6 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
-import com.google.common.collect.ImmutableBiMap;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ImportDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;

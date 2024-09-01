@@ -31,7 +31,7 @@ public class NodeTypeParser {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    NodeType nodeType = new NodeType( Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    NodeType nodeType = new NodeType( Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>()), new ToscaList<>(new ArrayList<>()), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>()));
                     if (e.getValue() instanceof Map) {
                         nodeType = parseNodeType((Map<String, Object>) e.getValue());
                         NodeTypeNamesMap.put(e.getKey(), nodeType);
@@ -46,14 +46,6 @@ public class NodeTypeParser {
             return null;
         }
         
-        Optional<NodeType> derivedFrom = Optional.empty();
-        if (nodeTypeMap.get("derived_from") != null && nodeTypeMap.get("derived_from")  instanceof String) {
-            NodeType derivedFromValue = getNodeType((String) nodeTypeMap.get("derived_from"));
-
-            if (derivedFromValue != null) {
-                derivedFrom = Optional.of(derivedFromValue);
-            }
-        } 
         
         Optional<ToscaString> version  = Optional.empty();
         if (nodeTypeMap.get("version") != null && nodeTypeMap.get("version") instanceof String) {
@@ -70,36 +62,47 @@ public class NodeTypeParser {
             description = Optional.of(new ToscaString((String) nodeTypeMap.get("description")));
         }
 
-        Optional<Map<String, PropertyDefinition>> properties = Optional.empty();
+        Map<String, PropertyDefinition> properties = new HashMap<>();
         if (nodeTypeMap.get("properties") != null && nodeTypeMap.get("properties") instanceof Map) {
-            properties = Optional.of(PropertyDefinitionParser.parseProperties((Map<String, Object>) nodeTypeMap.get("properties")));
+            properties = PropertyDefinitionParser.parseProperties((Map<String, Object>) nodeTypeMap.get("properties"));
         }
         
-        Optional<ToscaMap<String, AttributeDefinition>> attributes = Optional.empty();
+        ToscaMap<String, AttributeDefinition> attributes = new ToscaMap<>(new HashMap<>());
         if (nodeTypeMap.get("attributes") != null && nodeTypeMap.get("attributes") instanceof Map) {
-            attributes = Optional.of(new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) nodeTypeMap.get("attributes"))));
+            attributes = new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) nodeTypeMap.get("attributes")));
         }
 
-        Optional<ToscaMap<String, CapabilityDefinition>> capabilities = Optional.of(new ToscaMap<>(new HashMap<>()));
+        ToscaMap<String, CapabilityDefinition> capabilities = new ToscaMap<>(new HashMap<>());
         if (nodeTypeMap.get("capabilities") != null && nodeTypeMap.get("capabilities") instanceof Map) {
-            capabilities = Optional.of(new ToscaMap<>(CapabilityDefinitionParser.parseCapabilityDefinitions((Map<String, Object>) nodeTypeMap.get("capabilities"))));
+            capabilities = new ToscaMap<>(CapabilityDefinitionParser.parseCapabilityDefinitions((Map<String, Object>) nodeTypeMap.get("capabilities")));
         }
 
-        Optional<ToscaList<RequirementDefinition>> requirements = Optional.empty();
+        ToscaList<RequirementDefinition> requirements = new ToscaList<>(new ArrayList<>());
         if (nodeTypeMap.get("requirements") != null && nodeTypeMap.get("requirements") instanceof List) {
-            requirements = Optional.of(new ToscaList<>(RequirementDefinitionParser.parseRequirementDefinitions((List<Object>) nodeTypeMap.get("requirements"))));
+            requirements = new ToscaList<>(RequirementDefinitionParser.parseRequirementDefinitions((List<Object>) nodeTypeMap.get("requirements")));
         }
 
-        Optional<ToscaMap<String, InterfaceDefinition>> interfaces = Optional.empty();
+        ToscaMap<String, InterfaceDefinition> interfaces = new ToscaMap<>(new HashMap<>());
         if (nodeTypeMap.get("interfaces") != null && nodeTypeMap.get("interfaces") instanceof Map<?,?>) {
-            interfaces = Optional.of(new ToscaMap<>(InterfaceDefinitionParser.parseInterfaceDefinitions((Map<String, Object>) nodeTypeMap.get("interfaces"))));
+            interfaces = new ToscaMap<>(InterfaceDefinitionParser.parseInterfaceDefinitions((Map<String, Object>) nodeTypeMap.get("interfaces")));
         }
 
-        Optional<ToscaMap<String, ArtifactDefinition>> artifacts = Optional.empty();
+        ToscaMap<String, ArtifactDefinition> artifacts = new ToscaMap<>(new HashMap<>());
         if (nodeTypeMap.get("artifacts") != null && nodeTypeMap.get("artifacts") instanceof Map<?,?>) {
-            artifacts = Optional.of(new ToscaMap<>(ArtifactDefinitionParser.parseArtifactDefinition((Map<String, Object>) nodeTypeMap.get("artifacts"))));
+            artifacts = new ToscaMap<>(ArtifactDefinitionParser.parseArtifactDefinition((Map<String, Object>) nodeTypeMap.get("artifacts")));
         }
         
+        Optional<NodeType> derivedFrom = Optional.empty();
+        if (nodeTypeMap.get("derived_from") != null && nodeTypeMap.get("derived_from")  instanceof String) {
+            NodeType derivedFromValue = getNodeType((String) nodeTypeMap.get("derived_from"));
+
+            if (derivedFromValue != null) {
+                derivedFrom = Optional.of(derivedFromValue);
+                properties.putAll(derivedFromValue.properties());
+            }
+        }
+
+
         return new NodeType(derivedFrom,
             version,
             metadata,
@@ -114,6 +117,7 @@ public class NodeTypeParser {
     }
 
     public static NodeType getNodeType(String derivedFrom) {
+        
         return NodeTypeNamesMap.getOrDefault(derivedFrom, null);
     }
 

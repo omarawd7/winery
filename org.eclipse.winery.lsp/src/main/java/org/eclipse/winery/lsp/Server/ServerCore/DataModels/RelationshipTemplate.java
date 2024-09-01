@@ -26,9 +26,9 @@ import java.util.Optional;
 
 public record RelationshipTemplate(Optional<ToscaString> description,
                                    Optional<ToscaMap<String, Object>> metadata,
-                                   Optional<Map<String, PropertyDefinition>> relationship,
+                                   Map<String, PropertyDefinition> relationship,
                                    Optional<ToscaString> capability,
                                    ToscaString node,
-                                   Optional<ToscaMap<String, AttributeDefinition>> attributes,
-                                   Optional<ToscaMap<String, InterfaceAssignment>> interfaces,
+                                   ToscaMap<String, AttributeDefinition> attributes,
+                                   ToscaMap<String, InterfaceAssignment> interfaces,
                                    Optional<ToscaString> copy) { }

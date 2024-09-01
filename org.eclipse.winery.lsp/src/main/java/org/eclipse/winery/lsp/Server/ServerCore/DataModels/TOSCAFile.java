@@ -30,30 +30,29 @@ public record TOSCAFile(ToscaString toscaDefinitionsVersion,
                         Optional<ToscaString> description,
                         Optional <ToscaMap<String, Object>> metadata,
                         Optional<Object> dslDefinitions,
-                        Optional<Map<String, ArtifactType>> artifactTypes,
-                        Optional<ToscaMap<String, Object>> dataTypes,//TODO Replace the objects with the real object representation
-                        Optional<Map<String, CapabilityType>> capabilityTypes,
-                        Optional<ToscaMap<String, Object>> interfaceTypes,
-                        Optional<ToscaMap<String, Object>> relationshipTypes,
-                        Optional<ToscaMap<String, NodeType>> nodeTypes,
-                        Optional<ToscaMap<String, Object>> groupTypes,
-                        Optional<ToscaMap<String, Object>> policyTypes,
-                        Optional<ToscaMap<String, Object>> repositories,
-                        Optional<ToscaMap<String, Object>> functions,
+                        Map<String, ArtifactType> artifactTypes,
+                        ToscaMap<String, Object> dataTypes,//TODO Replace the objects with the real object representation
+                        Map<String, CapabilityType> capabilityTypes,
+                        ToscaMap<String, Object> interfaceTypes,
+                        ToscaMap<String, RelationshipType> relationshipTypes,
+                        ToscaMap<String, NodeType> nodeTypes,
+                        ToscaMap<String, Object> groupTypes,
+                        ToscaMap<String, Object> policyTypes,
+                        ToscaMap<String, Object> repositories,
+                        ToscaMap<String, Object> functions,
                         Optional<ToscaString> profile,
                         Optional<ToscaList<ImportDefinition>> imports,
                         Optional<ServiceTemplate> serviceTemplate) {
     
     public TOSCAFile updateArtifactTypes(String key, ArtifactType newArtifactType) {
-        if (artifactTypes.isPresent()) {
-            Map<String, ArtifactType> updatedArtifactTypes = artifactTypes.get();
+            Map<String, ArtifactType> updatedArtifactTypes = artifactTypes;
             updatedArtifactTypes.put(key, newArtifactType);
             return new TOSCAFile(
                 toscaDefinitionsVersion,
                  description,
                  metadata,
                  dslDefinitions,
-                 Optional.of(updatedArtifactTypes),
+                 updatedArtifactTypes,
                  dataTypes,
                  capabilityTypes,
                  interfaceTypes,
@@ -67,13 +66,10 @@ public record TOSCAFile(ToscaString toscaDefinitionsVersion,
                  imports,
                  serviceTemplate
             );
-        }
-        throw new RuntimeException("No property definition found for key " + key);
     }
 
     public TOSCAFile updateNodeTypes(String key, NodeType nodeType) {
-        if (nodeTypes.isPresent()) {
-            Map<String, NodeType> updatedNodeTypes = nodeTypes.get().getValue();
+            Map<String, NodeType> updatedNodeTypes = nodeTypes.getValue();
             updatedNodeTypes.put(key, nodeType);
             return new TOSCAFile(
                 toscaDefinitionsVersion,
@@ -85,7 +81,7 @@ public record TOSCAFile(ToscaString toscaDefinitionsVersion,
                 capabilityTypes,
                 interfaceTypes,
                 relationshipTypes,
-                Optional.of(new ToscaMap<>(updatedNodeTypes)),
+                new ToscaMap<>(updatedNodeTypes),
                 groupTypes,
                 policyTypes,
                 repositories,
@@ -95,6 +91,4 @@ public record TOSCAFile(ToscaString toscaDefinitionsVersion,
                 serviceTemplate
             );
         }
-        throw new RuntimeException("No property definition found for key " + key);
-    }
 } 

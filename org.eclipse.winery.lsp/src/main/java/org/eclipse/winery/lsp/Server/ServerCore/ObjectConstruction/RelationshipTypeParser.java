@@ -32,7 +32,7 @@ public class RelationshipTypeParser {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    RelationshipType relationshipType = new RelationshipType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(),  Optional.empty());
+                    RelationshipType relationshipType = new RelationshipType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>()), Optional.empty(), Optional.empty(),  Optional.empty());
                     if (e.getValue() instanceof Map) {
                         relationshipType = parseRelationshipType((Map<String, Object>) e.getValue());
                         relationshipTypesNamesMap.put(e.getKey(), relationshipType);
@@ -69,19 +69,19 @@ public class RelationshipTypeParser {
             description = Optional.of(new ToscaString((String) relationshipTypeMap.get("description")));
         }
         
-        Optional<Map<String, PropertyDefinition>> properties  = Optional.empty();
+        Map<String, PropertyDefinition> properties  = new HashMap<>();
         if (relationshipTypeMap.get("properties") != null && relationshipTypeMap.get("properties") instanceof Map) {
-            properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) relationshipTypeMap.get("properties")));
+            properties = PropertyDefinitionParser.parseProperties((Map<String, Object>) relationshipTypeMap.get("properties"));
         }
 
-        Optional<ToscaMap<String, AttributeDefinition>> attributes = Optional.empty();
+        ToscaMap<String, AttributeDefinition> attributes = new ToscaMap<>(new HashMap<>());
         if (relationshipTypeMap.get("attributes") != null && relationshipTypeMap.get("attributes") instanceof Map) {
-            attributes = Optional.of(new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) relationshipTypeMap.get("attributes"))));
+            attributes = new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) relationshipTypeMap.get("attributes")));
         }
 
-        Optional<ToscaMap<String, InterfaceDefinition>> interfaces = Optional.empty();
+        ToscaMap<String, InterfaceDefinition> interfaces = new ToscaMap<>(new HashMap<>());
         if (relationshipTypeMap.get("interfaces") != null && relationshipTypeMap.get("interfaces") instanceof Map<?,?>) {
-            interfaces = Optional.of(new ToscaMap<>(InterfaceDefinitionParser.parseInterfaceDefinitions((Map<String, Object>) relationshipTypeMap.get("interfaces"))));
+            interfaces = new ToscaMap<>(InterfaceDefinitionParser.parseInterfaceDefinitions((Map<String, Object>) relationshipTypeMap.get("interfaces")));
         }
         
         Optional<ToscaList<String>> valid_source_node_types = Optional.empty();

@@ -19,9 +19,8 @@ import org.eclipse.winery.lsp.Server.ServerCore.DataModels.*;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+
+import java.util.*;
 
 public class ServiceTemplateParser {
     public static ServiceTemplate parseServiceTemplate(Map<String, Object> serviceTemplate) { 
@@ -35,9 +34,9 @@ public class ServiceTemplateParser {
             metadata = Optional.of(new ToscaMap<>((Map<String, Object>) serviceTemplate.get("metadata")));
         }
 
-        Optional<ToscaMap<String, ParameterDefinition>> inputs  = Optional.empty();
+        ToscaMap<String, ParameterDefinition> inputs  = new ToscaMap<>(new HashMap<>());
         if (serviceTemplate.get("inputs") != null && serviceTemplate.get("inputs") instanceof Map) {
-            inputs = Optional.of(new ToscaMap<>(ParameterDefinitionParser.parseParameterDefinition((Map<String, Object>) serviceTemplate.get("inputs"))));
+            inputs = new ToscaMap<>(ParameterDefinitionParser.parseParameterDefinition((Map<String, Object>) serviceTemplate.get("inputs")));
         }
 
         ToscaMap<String, NodeTemplate> nodeTemplates  =  new ToscaMap<>(ImmutableMap.of()) ;
@@ -45,29 +44,29 @@ public class ServiceTemplateParser {
             nodeTemplates = new ToscaMap<>(NodeTemplatesParser.parseNodeTemplates((Map<String, Object>) serviceTemplate.get("node_templates")));
         }
 
-        Optional<ToscaMap<String, RelationshipTemplate>> relationshipTemplate  = Optional.empty();
+        ToscaMap<String, RelationshipTemplate> relationshipTemplate  = new ToscaMap<>(new HashMap<>());
         if (serviceTemplate.get("relationship_templates") != null && serviceTemplate.get("relationship_templates") instanceof Map) {
-            relationshipTemplate = Optional.of(new ToscaMap<>(RelationshipTemplateParser.parseRelationshipTemplate((Map<String, Object>) serviceTemplate.get("relationship_templates"))));
+            relationshipTemplate = new ToscaMap<>(RelationshipTemplateParser.parseRelationshipTemplate((Map<String, Object>) serviceTemplate.get("relationship_templates")));
         }
 
-        Optional<ToscaMap<String, GroupDefinition>> groups  = Optional.empty();
+        ToscaMap<String, GroupDefinition> groups  = new ToscaMap<>(new HashMap<>());
         if (serviceTemplate.get("groups") != null && serviceTemplate.get("groups") instanceof Map) {
-            groups = Optional.of(new ToscaMap<>(GroupDefinitionParser.parseGroupDefinition((Map<String, Object>) serviceTemplate.get("groups"))));
+            groups = new ToscaMap<>(GroupDefinitionParser.parseGroupDefinition((Map<String, Object>) serviceTemplate.get("groups")));
         }
 
-        Optional<ToscaMap<String, WorkflowDefinitions>> workflows  = Optional.empty();
+        ToscaMap<String, WorkflowDefinitions> workflows  = new ToscaMap<>(new HashMap<>());
         if (serviceTemplate.get("workflows") != null && serviceTemplate.get("workflows") instanceof Map) {
-            workflows = Optional.of(new ToscaMap<>(WorkflowsDefinitionParser.parseWorkflowsDefinition((Map<String, Object>) serviceTemplate.get("workflows"))));
+            workflows = new ToscaMap<>(WorkflowsDefinitionParser.parseWorkflowsDefinition((Map<String, Object>) serviceTemplate.get("workflows")));
         }
 
-        Optional<ToscaList<PolicyDefinition>> policies  = Optional.empty();
+        ToscaList<PolicyDefinition> policies  = new ToscaList<>(new ArrayList<>());
         if (serviceTemplate.get("policies") != null && serviceTemplate.get("policies") instanceof List<?>) {
-            policies = Optional.of(new ToscaList<>(PolicyDefinitionParser.parsePolicyDefinition((Map<String, Object>) serviceTemplate.get("policies"))));
+            policies = new ToscaList<>(PolicyDefinitionParser.parsePolicyDefinition((Map<String, Object>) serviceTemplate.get("policies")));
         }
 
-        Optional<ToscaMap<String, ParameterDefinition>> outputs  = Optional.empty();
-        if (serviceTemplate.get("outputs") != null && serviceTemplate.get("outputs") instanceof List<?>) {
-            outputs = Optional.of(new ToscaMap<>(ParameterDefinitionParser.parseParameterDefinition((Map<String, Object>) serviceTemplate.get("outputs"))));
+        ToscaMap<String, ParameterDefinition> outputs  = new ToscaMap<>(new HashMap<>());
+        if (serviceTemplate.get("outputs") != null && serviceTemplate.get("outputs") instanceof Map) {
+            outputs = new ToscaMap<>(ParameterDefinitionParser.parseParameterDefinition((Map<String, Object>) serviceTemplate.get("outputs")));
         }
 
         Optional<SubstitutionMapping> substitutionMappings  = Optional.empty();

@@ -26,11 +26,11 @@ import java.util.Optional;
 public record ServiceTemplate(
                               Optional<ToscaString> description,
                               Optional <ToscaMap<String, Object>> metadata,
-                              Optional<ToscaMap<String, ParameterDefinition>> inputs,
+                              ToscaMap<String, ParameterDefinition> inputs,
                               ToscaMap<String, NodeTemplate> nodeTemplates,
-                              Optional<ToscaMap<String, RelationshipTemplate>> relationshipTemplate,
-                              Optional<ToscaMap<String, GroupDefinition>> groups,
-                              Optional<ToscaMap<String, WorkflowDefinitions>> workflows,
-                              Optional<ToscaList<PolicyDefinition>> policies,
-                              Optional<ToscaMap<String, ParameterDefinition>> outputs,
+                              ToscaMap<String, RelationshipTemplate> relationshipTemplate,
+                              ToscaMap<String, GroupDefinition> groups,
+                              ToscaMap<String, WorkflowDefinitions> workflows,
+                              ToscaList<PolicyDefinition> policies,
+                              ToscaMap<String, ParameterDefinition> outputs,
                               Optional<SubstitutionMapping> substitutionMappings) { }

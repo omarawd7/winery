@@ -34,7 +34,7 @@ public class CapabilityDefinitionParser {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    CapabilityDefinition capabilityDefinition = new CapabilityDefinition(null, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    CapabilityDefinition capabilityDefinition = new CapabilityDefinition(null, Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Map.of(), Map.of());
                     if (e.getValue() instanceof Map) {
                         capabilityDefinition = parseCapabilityDefinition((Map<String, Object>) e.getValue());
                     }
@@ -70,12 +70,12 @@ public class CapabilityDefinitionParser {
             valid_relationship_types = Optional.of(new ToscaList<>((List<String>) capabilityDefinitionMap.get("valid_relationship_types")));
         }
 
-        Optional<Map<String, PropertyDefinition>> properties  = Optional.empty();
+        Map<String, PropertyDefinition> properties  = new HashMap<>();
         if (capabilityDefinitionMap.get("properties") != null && capabilityDefinitionMap.get("properties") instanceof Map) {
-            properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) capabilityDefinitionMap.get("properties")));
+            properties = PropertyDefinitionParser.parseProperties((Map<String, Object>) capabilityDefinitionMap.get("properties"));
         }
 
-        Optional<Map<String, AttributeDefinition>> attributes = Optional.ofNullable((Map<String, AttributeDefinition>) capabilityDefinitionMap.get("attributes")); //TODO add the attribute definition parser
+        Map<String, AttributeDefinition> attributes = (Map<String, AttributeDefinition>) capabilityDefinitionMap.get("attributes"); //TODO add the attribute definition parser
 
         return new CapabilityDefinition( type,
             description,

@@ -81,7 +81,7 @@ public class CapabilityTypeValidator implements DiagnosesHandler {
                Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                    for (TOSCAFile file : mapOfImportedFiles.values()) {
-                       if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(capabilityType.get(key))) {
+                       if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().containsKey(capabilityType.get(key))) {
                            //TODO set the derived from value
                            return;
                        }
@@ -97,7 +97,7 @@ public class CapabilityTypeValidator implements DiagnosesHandler {
                                String namespace = parts[0].trim();
                                if (namespacesKey.equals(namespace)) {
                                    TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                   if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(typeWithoutNamespace)) {
+                                   if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().containsKey(typeWithoutNamespace)) {
                                        //TODO set the derived from value
                                        return;
                                    }

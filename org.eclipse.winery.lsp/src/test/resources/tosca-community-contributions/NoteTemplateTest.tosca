@@ -10,5 +10,5 @@ service_template:
             Identifies the virtualization environments (e.g. hypervisor) compatible with this software
             image.
           type: integer
-          value: 5000
+          value: 500
           validation: { $less_or_equal: [ $value, 500 ] }

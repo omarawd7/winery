@@ -30,7 +30,7 @@ public class NodeTemplatesParser {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    NodeTemplate nodeTemplate = new NodeTemplate(new ToscaString(""), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    NodeTemplate nodeTemplate = new NodeTemplate(  new NodeType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>()), new ToscaList<>(new ArrayList<>()), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>())), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>()), new ToscaList<>(new ArrayList<>()), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>()), Optional.empty(), Optional.empty(), Optional.empty());
                     if (e.getValue() instanceof Map) {
                         nodeTemplate = parseNodeTemplate((Map<String, Object>) e.getValue());
                     }
@@ -44,10 +44,7 @@ public class NodeTemplatesParser {
             return null;
         }
 
-        ToscaString type = new ToscaString("");
-        if (nodeTemplateMap.get("type") != null && nodeTemplateMap.get("type") instanceof String) {
-            type = new ToscaString((String) nodeTemplateMap.get("type"));
-        }
+        NodeType type = new NodeType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>()), new ToscaList<>(new ArrayList<>()), new ToscaMap<>(new HashMap<>()), new ToscaMap<>(new HashMap<>())); // will be assigned in the validation
 
         Optional<ToscaString> description  = Optional.empty();
         if (nodeTemplateMap.get("description") != null && nodeTemplateMap.get("description") instanceof String) {
@@ -64,34 +61,34 @@ public class NodeTemplatesParser {
             directives = Optional.ofNullable(new ToscaList((List) nodeTemplateMap.get("directives")));
         }
 
-        Optional<Map<String, PropertyDefinition>> properties = Optional.empty();
+        Map<String, PropertyDefinition> properties = new HashMap<>();
         if (nodeTemplateMap.get("properties") != null && nodeTemplateMap.get("properties") instanceof Map) {
-            properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) nodeTemplateMap.get("properties")));
+            properties = PropertyDefinitionParser.parseProperties((Map<String, Object>) nodeTemplateMap.get("properties"));
         }
 
-        Optional<ToscaMap<String, AttributeDefinition>> attributes = Optional.empty();
+        ToscaMap<String, AttributeDefinition> attributes = new ToscaMap<>(new HashMap<>());
         if (nodeTemplateMap.get("attributes") != null && nodeTemplateMap.get("attributes") instanceof Map) {
-            attributes = Optional.of(new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) nodeTemplateMap.get("attributes"))));
+            attributes = new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) nodeTemplateMap.get("attributes")));
         }
 
-        Optional<ToscaMap<String, CapabilityType>> capabilities = Optional.empty();
+        ToscaMap<String, CapabilityType> capabilities = new ToscaMap<>(new HashMap<>());
         if (nodeTemplateMap.get("capability_types") != null && nodeTemplateMap.get("capability_types") instanceof Map) {
-            capabilities = Optional.of(new ToscaMap<>(CapabilityTypeParser.parseCapabilityTypes((Map<String, Object>) nodeTemplateMap.get("capability_types"))));
+            capabilities = new ToscaMap<>(CapabilityTypeParser.parseCapabilityTypes((Map<String, Object>) nodeTemplateMap.get("capability_types")));
         }
 
-        Optional<ToscaList<RequirementAssignment>> requirements = Optional.empty();
+        ToscaList<RequirementAssignment> requirements = new ToscaList<>(new ArrayList<>());
         if (nodeTemplateMap.get("requirements") != null && nodeTemplateMap.get("requirements") instanceof List) {
-            requirements = Optional.of(new ToscaList<>(RequirementAssignmentParser.parseRequirementAssignment((List<Object>) nodeTemplateMap.get("requirements"))));
+            requirements = new ToscaList<>(RequirementAssignmentParser.parseRequirementAssignment((List<Object>) nodeTemplateMap.get("requirements")));
         }
 
-        Optional<ToscaMap<String, InterfaceAssignment>> interfaces = Optional.empty();
+        ToscaMap<String, InterfaceAssignment> interfaces = new ToscaMap<>(new HashMap<>());
         if (nodeTemplateMap.get("interfaces") != null && nodeTemplateMap.get("interfaces") instanceof Map<?,?>) {
-            interfaces = Optional.of(new ToscaMap<>(InterfaceAssignmentParser.parseInterfaceAssignment((Map<String, Object>) nodeTemplateMap.get("interfaces"))));
+            interfaces = new ToscaMap<>(InterfaceAssignmentParser.parseInterfaceAssignment((Map<String, Object>) nodeTemplateMap.get("interfaces")));
         }
 
-        Optional<ToscaMap<String, ArtifactDefinition>> artifacts = Optional.empty();
+        ToscaMap<String, ArtifactDefinition> artifacts = new ToscaMap<>(new HashMap<>());
         if (nodeTemplateMap.get("artifacts") != null && nodeTemplateMap.get("artifacts") instanceof Map<?,?>) {
-            artifacts = Optional.of(new ToscaMap<>(ArtifactDefinitionParser.parseArtifactDefinition((Map<String, Object>) nodeTemplateMap.get("artifacts"))));
+            artifacts = new ToscaMap<>(ArtifactDefinitionParser.parseArtifactDefinition((Map<String, Object>) nodeTemplateMap.get("artifacts")));
         }
         
         Optional<ToscaInteger> count = Optional.empty();

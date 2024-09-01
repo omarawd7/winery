@@ -29,22 +29,22 @@ public record NodeType(Optional<NodeType> derivedFrom,
                        Optional<ToscaString> version,
                        Optional<ToscaMap<String, String>> metadata,
                        Optional<ToscaString> description,
-                       Optional<Map<String, PropertyDefinition>> properties,
-                       Optional<ToscaMap<String, AttributeDefinition>> attributes,
-                       Optional<ToscaMap<String, CapabilityDefinition>> capabilities,
-                       Optional<ToscaList<RequirementDefinition>> requirements,
-                       Optional<ToscaMap<String,  InterfaceDefinition>> interfaces,
-                       Optional<ToscaMap<String, ArtifactDefinition>> artifacts) {
+                       Map<String, PropertyDefinition> properties,
+                       ToscaMap<String, AttributeDefinition> attributes,
+                       ToscaMap<String, CapabilityDefinition> capabilities,
+                       ToscaList<RequirementDefinition> requirements,
+                       ToscaMap<String,  InterfaceDefinition> interfaces,
+                       ToscaMap<String, ArtifactDefinition> artifacts) {
     public NodeType overridePropertyDefinition(String key, PropertyDefinition newPropertyDefinition) {
-            if (properties.isPresent()) {
-                Map<String, PropertyDefinition> updatedProperties = properties.get();
+            if (!properties.isEmpty()) {
+                Map<String, PropertyDefinition> updatedProperties = properties;
                 updatedProperties.put(key, newPropertyDefinition);
                 return new NodeType(
                     derivedFrom,
                     version,
                     metadata,
                     description,
-                    Optional.of(updatedProperties),
+                    updatedProperties,
                     attributes,
                     capabilities,
                     requirements,

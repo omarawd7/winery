@@ -34,7 +34,7 @@ public class CapabilityTypeParser {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    CapabilityType capabilityType = new CapabilityType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    CapabilityType capabilityType = new CapabilityType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), new HashMap<>(), new ToscaMap<>(new HashMap<>()));
                     if (e.getValue() instanceof Map) {
                          capabilityType = CapabilityTypeParser.parseCapabilityType((Map<String, Object>) e.getValue());
                          CapabilityTypesNamesMap.put(e.getKey(), capabilityType);
@@ -81,14 +81,14 @@ public class CapabilityTypeParser {
             valid_relationship_types = Optional.of(new ToscaList<>((List<String>) capabilityTypeMap.get("valid_relationship_types")));
         }
 
-        Optional<Map<String, PropertyDefinition>> properties  = Optional.empty();
+        Map<String, PropertyDefinition> properties  = new HashMap<>();
         if (capabilityTypeMap.get("properties") != null && capabilityTypeMap.get("properties") instanceof Map) {
-            properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) capabilityTypeMap.get("properties")));        
+            properties = PropertyDefinitionParser.parseProperties((Map<String, Object>) capabilityTypeMap.get("properties"));        
         }
 
-        Optional<ToscaMap<String, AttributeDefinition>> attributes = Optional.empty();
+        ToscaMap<String, AttributeDefinition> attributes = new ToscaMap<>(new HashMap<>());
         if (capabilityTypeMap.get("attributes") != null && capabilityTypeMap.get("attributes") instanceof Map) {
-            attributes = Optional.of(new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) capabilityTypeMap.get("attributes"))));
+            attributes = new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) capabilityTypeMap.get("attributes")));
         }
 
         return new CapabilityType(

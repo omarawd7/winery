@@ -22,30 +22,30 @@ import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.*;
 import java.util.Map;
 import java.util.Optional;
 
-public record NodeTemplate(ToscaString type,
+public record NodeTemplate(NodeType type,
                            Optional<ToscaString> description,
                            Optional<ToscaList<String>> directives,
                            Optional<ToscaMap<String, Object>> metadata,
-                           Optional<Map<String, PropertyDefinition>> properties,
-                           Optional<ToscaMap<String, AttributeDefinition>> attributes,
-                           Optional<ToscaMap<String, CapabilityType>> capabilities,
-                           Optional<ToscaList<RequirementAssignment>> requirements,
-                           Optional<ToscaMap<String, InterfaceAssignment>> interfaces,
-                           Optional<ToscaMap<String, ArtifactDefinition>> artifacts,
+                           Map<String, PropertyDefinition> properties,
+                           ToscaMap<String, AttributeDefinition> attributes,
+                           ToscaMap<String, CapabilityType> capabilities,
+                           ToscaList<RequirementAssignment> requirements,
+                           ToscaMap<String, InterfaceAssignment> interfaces,
+                           ToscaMap<String, ArtifactDefinition> artifacts,
                            Optional<ToscaInteger> count, //TODO must be non negative
                            Optional<Object> node_filter, //TODO look for TOSCA spec 8.8 condition_clause to replace the object type with a stack of functions or something
                            Optional<ToscaString> copy) {
     
     public NodeTemplate overridePropertyDefinition(String key, PropertyDefinition newPropertyDefinition) {
-        if (properties.isPresent()) {
-            Map<String, PropertyDefinition> updatedProperties = properties.get();
+        if (!properties.isEmpty()) {
+            Map<String, PropertyDefinition> updatedProperties = properties;
             updatedProperties.put(key, newPropertyDefinition);
             return new NodeTemplate(
                 type,
                 description,
                 directives,
                 metadata,
-                Optional.of(updatedProperties),
+                updatedProperties,
                 attributes,
                 capabilities,
                 requirements,
@@ -58,5 +58,23 @@ public record NodeTemplate(ToscaString type,
         }
         throw new RuntimeException("No property definition found for key " + key);
 
+    }
+
+    public NodeTemplate withType(NodeType nodeType) {
+        return new NodeTemplate(
+            nodeType,
+            description,
+            directives,
+            metadata,
+            properties,
+            attributes,
+            capabilities,
+            requirements,
+            interfaces,
+            artifacts,
+            count,
+            node_filter,
+            copy
+        );
     }
 }

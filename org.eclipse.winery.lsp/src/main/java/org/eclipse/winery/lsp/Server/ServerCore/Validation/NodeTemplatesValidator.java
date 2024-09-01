@@ -14,9 +14,8 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeTemplate;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
@@ -58,7 +57,7 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                     }
                     //Check if the type keyword exists, and contains existing node type
                     else if (key.equals("type")) {
-                        validateType(yamlContent, lines, key, nodeTemplate, nodeTemplatePathWithName);
+                        validateType(yamlContent, lines, key, nodeTemplate, nodeTemplatePathWithName, nodeTemplateKey);
                     }
                     else if (key.equals("properties")) {
                         Object PropertyDefinitions = ((Map<?, ?>) nodeTemplate).get(key);
@@ -75,23 +74,24 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
         return diagnostics;
     }
     
-    private void validateType(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName) {
+    private void validateType(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName, String nodeTemplateKey) {
             // checks if it exists in the same file or not
-            if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
-                return; //TODO construct the node template object with the found node type
+            if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
+                return;
             }
-        validateTypeInImportedFiles(yamlContent, lines, key, nodeTemplate, nodeTemplatePathWithName);
-
+        validateTypeInImportedFiles(yamlContent, lines, key, nodeTemplate, nodeTemplatePathWithName, nodeTemplateKey);
     }
 
-    private void validateTypeInImportedFiles(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName) {
+    private void validateTypeInImportedFiles(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName, String nodeTemplateKey) {
         try {
             if (!context.getCurrentToscaFile().imports().isEmpty()) {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
-                        if (file != null && !file.nodeTypes().isEmpty() && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
-                            //TODO construct the node template object with the found node type
+                        if (file != null && file.nodeTypes() != null && !file.nodeTypes().getValue().isEmpty() && file.nodeTypes().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key)) && context.getCurrentToscaFile().serviceTemplate().isPresent()) {
+                            NodeTemplate nodeTemplateObject;
+                             nodeTemplateObject = context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(nodeTemplateKey).withType(file.nodeTypes().getValue().get(((Map<String, Object>) nodeTemplate).get(key)));
+                            context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().put(nodeTemplateKey, nodeTemplateObject);
                             return;
                         }
                     }
@@ -106,7 +106,9 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                                     String namespace = parts[0].trim();
                                     if (namespacesKey.equals(namespace)) {
                                         TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                        if (file != null && !file.nodeTypes().get().getValue().isEmpty() && file.nodeTypes().get().getValue().containsKey(typeWithoutNamespace)) {
+                                        if (file != null && !file.nodeTypes().getValue().isEmpty() && file.nodeTypes().getValue().containsKey(typeWithoutNamespace)) {
+                                            NodeTemplate  nodeTemplateObject = context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(nodeTemplateKey).withType(file.nodeTypes().getValue().get(file.nodeTypes().getValue().get(typeWithoutNamespace)));
+                                            context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().put(nodeTemplateKey, nodeTemplateObject);
                                             return;
                                         }
                                     }

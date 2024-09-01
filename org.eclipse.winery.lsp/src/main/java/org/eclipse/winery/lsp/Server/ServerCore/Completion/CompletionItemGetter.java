@@ -26,8 +26,8 @@ public class CompletionItemGetter {
     public List<CompletionItem> getAvailableArtifactTypes(LSContext lsContext) {
         List<String> artifactTypes = new ArrayList<>();
         
-        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().artifactTypes().isEmpty() && !lsContext.getCurrentToscaFile().artifactTypes().get().isEmpty() ) {
-            for (String key : lsContext.getCurrentToscaFile().artifactTypes().get().keySet()) {
+        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().artifactTypes().isEmpty() && !lsContext.getCurrentToscaFile().artifactTypes().isEmpty() ) {
+            for (String key : lsContext.getCurrentToscaFile().artifactTypes().keySet()) {
                 artifactTypes.add(" " + key);
             }
             return artifactTypes.stream()
@@ -43,8 +43,8 @@ public class CompletionItemGetter {
     
     public List<CompletionItem> getAvailableCapabilityTypes(LSContext lsContext) {
         List<String> capabilityTypes = new ArrayList<>();
-        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().capabilityTypes().isEmpty() && !lsContext.getCurrentToscaFile().capabilityTypes().get().isEmpty()) {
-            for (String key : lsContext.getCurrentToscaFile().capabilityTypes().get().keySet()) {
+        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().capabilityTypes().isEmpty() && !lsContext.getCurrentToscaFile().capabilityTypes().isEmpty()) {
+            for (String key : lsContext.getCurrentToscaFile().capabilityTypes().keySet()) {
                 capabilityTypes.add(" " + key);
             }
             return capabilityTypes.stream()
@@ -123,8 +123,8 @@ public class CompletionItemGetter {
     
     public List<CompletionItem> getAvailableNodeTypes(LSContext lsContext) {
         List<String> nodeTypes = new ArrayList<>();
-        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().nodeTypes().isEmpty() && lsContext.getCurrentToscaFile().nodeTypes().get() != null) {
-            for (String key : lsContext.getCurrentToscaFile().nodeTypes().get().getValue().keySet()) {
+        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().nodeTypes() != null && lsContext.getCurrentToscaFile().nodeTypes() != null) {
+            for (String key : lsContext.getCurrentToscaFile().nodeTypes().getValue().keySet()) {
                 nodeTypes.add(" " + key);
             }
             return nodeTypes.stream()
@@ -149,8 +149,8 @@ public class CompletionItemGetter {
 
     public List<CompletionItem> getAvailableRelationshipTypes(LSContext lsContext) {
         List<String> relationshipTypes = new ArrayList<>();
-        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().relationshipTypes().isEmpty() && lsContext.getCurrentToscaFile().relationshipTypes().get() != null) {
-            for (String key : lsContext.getCurrentToscaFile().relationshipTypes().get().getValue().keySet()) {
+        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().relationshipTypes() != null && lsContext.getCurrentToscaFile().relationshipTypes() != null) {
+            for (String key : lsContext.getCurrentToscaFile().relationshipTypes().getValue().keySet()) {
                 relationshipTypes.add(" " + key);
             }
             return relationshipTypes.stream()

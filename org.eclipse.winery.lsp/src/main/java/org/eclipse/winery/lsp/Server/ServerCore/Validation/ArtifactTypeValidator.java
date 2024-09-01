@@ -82,7 +82,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
-                        if (file != null && !file.artifactTypes().isEmpty() && file.artifactTypes().get().containsKey(artifactType.get(key))) {
+                        if (file != null && !file.artifactTypes().isEmpty() && file.artifactTypes().containsKey(artifactType.get(key))) {
                             //TODO set the derived from value
                             return;
                         }
@@ -98,7 +98,7 @@ public class ArtifactTypeValidator implements DiagnosesHandler {
                                 String namespace = parts[0].trim();
                                 if (namespacesKey.equals(namespace)) {
                                     TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                    if (file != null && !file.artifactTypes().isEmpty() && file.artifactTypes().get().containsKey(typeWithoutNamespace)) {
+                                    if (file != null && !file.artifactTypes().isEmpty() && file.artifactTypes().containsKey(typeWithoutNamespace)) {
                                         //TODO set the derived from value
                                         return;
                                     }

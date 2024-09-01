@@ -33,10 +33,10 @@ public record ArtifactType(
     Optional<ToscaString> description,
     Optional<ToscaString> mimeType,
     Optional<ToscaList<String>> fileExt,
-    Optional<Map<String, PropertyDefinition>> properties
+    Map<String, PropertyDefinition> properties
 ) {
     public ArtifactType addOrOverridePropertyDefinition(String key, PropertyDefinition newDefinition) {
-            Map<String, PropertyDefinition> updatedProperties = properties.get();
+            Map<String, PropertyDefinition> updatedProperties = properties;
             updatedProperties.put(key, newDefinition);
             return new ArtifactType(
                 derivedFrom,
@@ -45,7 +45,7 @@ public record ArtifactType(
                 description,
                 mimeType,
                 fileExt,
-                Optional.of(updatedProperties)
+                updatedProperties
             );
         }
 }

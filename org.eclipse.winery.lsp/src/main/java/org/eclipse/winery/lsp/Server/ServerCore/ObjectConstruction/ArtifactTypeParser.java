@@ -15,6 +15,7 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
+import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaBoolean;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
@@ -31,7 +32,7 @@ public class ArtifactTypeParser {
             .collect(Collectors.toMap(
                 Map.Entry::getKey,
                 e -> {
-                    ArtifactType artifactType  = new ArtifactType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty());
+                    ArtifactType artifactType  = new ArtifactType(Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), Map.of());
                     if (e.getValue() != null && e.getValue() instanceof Map) {
                         artifactType = ArtifactTypeParser.parseArtifactType((Map<String, Object>) e.getValue());
                         artifactTypesNamesMap.put(e.getKey(), artifactType);
@@ -77,9 +78,9 @@ public class ArtifactTypeParser {
             fileExt = Optional.of(new ToscaList<>((List<String>) artifactTypeMap.get("file_ext")));
         }
 
-        Optional<Map<String, PropertyDefinition>> properties = Optional.empty();
+        Map<String, PropertyDefinition> properties = new HashMap<>();
         if (artifactTypeMap.get("properties") != null && artifactTypeMap.get("properties") instanceof Map) {
-            properties = Optional.ofNullable(PropertyDefinitionParser.parseProperties((Map<String, Object>) artifactTypeMap.get("properties")));
+            properties = PropertyDefinitionParser.parseProperties((Map<String, Object>) artifactTypeMap.get("properties"));
         }
 
         return new ArtifactType(

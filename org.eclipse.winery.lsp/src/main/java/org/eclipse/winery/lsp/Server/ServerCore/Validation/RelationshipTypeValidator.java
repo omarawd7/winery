@@ -73,7 +73,7 @@ public class RelationshipTypeValidator implements DiagnosesHandler {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
-                        if (file != null && !file.relationshipTypes().isEmpty() && file.relationshipTypes().get().getValue().containsKey(relationshipType.get(key))) {
+                        if (file != null && file.relationshipTypes() != null && file.relationshipTypes().getValue().containsKey(relationshipType.get(key))) {
                             //TODO set the derived from value
                             return;
                         }
@@ -89,7 +89,7 @@ public class RelationshipTypeValidator implements DiagnosesHandler {
                                 String namespace = parts[0].trim();
                                 if (namespacesKey.equals(namespace)) {
                                     TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                    if (file != null && !file.relationshipTypes().isEmpty() && !file.relationshipTypes().isEmpty() && file.relationshipTypes().get().getValue().containsKey(typeWithoutNamespace)) {
+                                    if (file != null && file.relationshipTypes() != null && file.relationshipTypes() != null && file.relationshipTypes().getValue().containsKey(typeWithoutNamespace)) {
                                         //TODO set the derived from value
                                         return;
                                     }

@@ -75,7 +75,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
 
     private void validateNodeFromNodeTypeParent(String yamlContent, String[] lines, String key, Map<String, Object> requirementDefinition, String requirementDefinitionPathWithName, String parent, String requirementDefinitionsKey) {
         try {
-                if (context.getCurrentToscaFile().nodeTypes().isPresent() && context.getCurrentToscaFile().nodeTypes().get().getValue().containsKey((requirementDefinition).get(key))) {
+                if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey((requirementDefinition).get(key))) {
                     //TODO set the found node type for the requirement
                     return;
                 }
@@ -83,7 +83,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                     Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                     for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                         for (TOSCAFile file : mapOfImportedFiles.values()) {
-                            if (file != null && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey((requirementDefinition).get(key))) {
+                            if (file != null && file.nodeTypes() != null && file.nodeTypes().getValue().containsKey((requirementDefinition).get(key))) {
                                 //TODO set the found node type for the requirement
                                 return;
                             }
@@ -99,7 +99,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                                     String namespace = parts[0].trim();
                                     if (namespacesKey.equals(namespace)) {
                                         TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                        if (file != null && !file.nodeTypes().isEmpty() && file.nodeTypes().get().getValue().containsKey(typeWithoutNamespace)) {
+                                        if (file != null && file.nodeTypes() != null && file.nodeTypes().getValue().containsKey(typeWithoutNamespace)) {
                                             return;
                                         }
                                     }
@@ -127,7 +127,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
     
         private void validateRelationshipFromNodeTypeParent(String yamlContent, String[] lines, String key, Map<String, Object> requirementDefinition, String requirementDefinitionPathWithName, String parent, String requirementDefinitionsKey) {
         try {
-            if (context.getCurrentToscaFile().relationshipTypes().isPresent() && context.getCurrentToscaFile().relationshipTypes().get().getValue().containsKey((requirementDefinition).get(key))) {
+            if (context.getCurrentToscaFile().relationshipTypes() != null && context.getCurrentToscaFile().relationshipTypes().getValue().containsKey((requirementDefinition).get(key))) {
                 //TODO set the found relationship type for the requirement
                 return;
             }
@@ -135,7 +135,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
-                        if (file != null && !file.relationshipTypes().isEmpty() && file.relationshipTypes().get().getValue().containsKey((requirementDefinition).get(key))) {
+                        if (file != null && file.relationshipTypes() != null && file.relationshipTypes().getValue().containsKey((requirementDefinition).get(key))) {
                             //TODO set the found relationship type for the requirement
                             return;
                         }
@@ -151,7 +151,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                                 String namespace = parts[0].trim();
                                 if (namespacesKey.equals(namespace)) {
                                     TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                    if (file != null && !file.relationshipTypes().isEmpty() && file.relationshipTypes().get().getValue().containsKey(typeWithoutNamespace)) {
+                                    if (file != null && file.relationshipTypes() != null && file.relationshipTypes().getValue().containsKey(typeWithoutNamespace)) {
                                         return;
                                     }
                                 }
@@ -179,7 +179,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
 
     private void validateCapabilityFromNodeTypeParent(String yamlContent, String[] lines, String key, Map<String, Object> requirementDefinition, String requirementDefinitionPathWithName, String parent, String requirementDefinitionsKey) {
         try {
-            if (context.getCurrentToscaFile().capabilityTypes().isPresent() && context.getCurrentToscaFile().capabilityTypes().get().containsKey((requirementDefinition).get(key))) {
+            if (context.getCurrentToscaFile().capabilityTypes() != null && context.getCurrentToscaFile().capabilityTypes().containsKey((requirementDefinition).get(key))) {
                 //TODO set the found capability type for the requirement
                 return;
             }
@@ -187,7 +187,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
-                        if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey((requirementDefinition).get(key))) {
+                        if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().containsKey((requirementDefinition).get(key))) {
                             //TODO set the found capability type for the requirement
                             return;
                         }
@@ -203,7 +203,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                                 String namespace = parts[0].trim();
                                 if (namespacesKey.equals(namespace)) {
                                     TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
-                                    if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().get().containsKey(typeWithoutNamespace)) {
+                                    if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().containsKey(typeWithoutNamespace)) {
                                         return;
                                     }
                                 }

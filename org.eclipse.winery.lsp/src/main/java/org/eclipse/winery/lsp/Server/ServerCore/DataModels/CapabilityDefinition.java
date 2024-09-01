@@ -26,8 +26,8 @@ public record CapabilityDefinition(CapabilityType type,
                                    Optional<ToscaMap<String, String>> metadata,
                                    Optional<ToscaList<String>> valid_source_node_types,
                                    Optional<ToscaList<String>> valid_relationship_types,
-                                   Optional<Map<String, PropertyDefinition>> properties,
-                                   Optional<Map<String, AttributeDefinition>> attributes
+                                   Map<String, PropertyDefinition> properties,
+                                   Map<String, AttributeDefinition> attributes
 ) {   
     public CapabilityDefinition withType(CapabilityType newType) {
     return new CapabilityDefinition(
