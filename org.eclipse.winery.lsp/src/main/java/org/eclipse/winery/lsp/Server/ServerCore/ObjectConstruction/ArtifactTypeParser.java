@@ -14,6 +14,7 @@
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaBoolean;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
@@ -47,13 +48,7 @@ public class ArtifactTypeParser {
         if (artifactTypeMap == null) {
             return null;
         }
-
-        Optional<ArtifactType> derivedFrom = Optional.empty();
-        try {
-            derivedFrom = Optional.ofNullable(getArtifactType((String) artifactTypeMap.get("derived_from")));
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
+        
         Optional<ToscaString> version = Optional.empty();
         if (artifactTypeMap.get("version") != null && artifactTypeMap.get("version") instanceof String) {
             version = Optional.of(new ToscaString((String) artifactTypeMap.get("version")));
@@ -83,6 +78,19 @@ public class ArtifactTypeParser {
             properties = PropertyDefinitionParser.parseProperties((Map<String, Object>) artifactTypeMap.get("properties"));
         }
 
+        Optional<ArtifactType> derivedFrom = Optional.empty();
+        try {
+            if (artifactTypeMap.get("derived_from") != null && artifactTypeMap.get("derived_from")  instanceof String) {
+                ArtifactType derivedFromValue = getArtifactType((String) artifactTypeMap.get("derived_from"));
+
+                if (derivedFromValue != null) {
+                    derivedFrom = Optional.of(derivedFromValue);
+                    properties.putAll(derivedFromValue.properties());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
         return new ArtifactType(
             derivedFrom,
             version,

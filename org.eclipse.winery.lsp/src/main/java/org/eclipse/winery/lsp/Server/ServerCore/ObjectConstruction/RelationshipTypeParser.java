@@ -47,13 +47,6 @@ public class RelationshipTypeParser {
             return null;
         }
 
-        Optional<RelationshipType> derivedFrom = Optional.empty();
-        try {
-            derivedFrom = Optional.ofNullable(getRelationshipType((String) relationshipTypeMap.get("derived_from")));
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
-
         Optional<ToscaString> version = Optional.empty();
         if (relationshipTypeMap.get("version") != null && relationshipTypeMap.get("version") instanceof String) {
             version = Optional.of(new ToscaString((String) relationshipTypeMap.get("version")));
@@ -99,6 +92,20 @@ public class RelationshipTypeParser {
             valid_target_node_types = Optional.of(new ToscaList<>((List<String>) relationshipTypeMap.get("valid_target_node_types")));
         }
 
+        Optional<RelationshipType> derivedFrom = Optional.empty();
+        try {
+            if (relationshipTypeMap.get("derived_from") != null && relationshipTypeMap.get("derived_from")  instanceof String) {
+                RelationshipType derivedFromValue = getRelationshipType((String) relationshipTypeMap.get("derived_from"));
+
+                if (derivedFromValue != null) {
+                    derivedFrom = Optional.of(derivedFromValue);
+                    properties.putAll(derivedFromValue.properties());
+                }
+            }
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+        
         return new RelationshipType(
             derivedFrom,
             version,

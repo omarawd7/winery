@@ -42,35 +42,12 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             String propertyPath =  prevPath + "." + parentName + "." + "properties" + "." + PropertyDefinitionKey;
             Object propertyDefinition = propertyDefinitionsMap.get(PropertyDefinitionKey);
             if (propertyDefinition instanceof Map) {
-                validateRequiredKeys((Map<String, Object>) propertyDefinition, YamlContent, lines, propertyPath );
-                if (((Map<?, ?>) propertyDefinition).containsKey("type") && ((Map<?, ?>) propertyDefinition).get("type").equals("map")) {
-                    ValidateEntrySchema(YamlContent, lines, PropertyDefinitionKey, propertyPath);
-                    validateKeySchema(YamlContent, lines, PropertyDefinitionKey, propertyPath);
-                } else if (((Map<?, ?>) propertyDefinition).containsKey("type") && ((Map<?, ?>) propertyDefinition).get("type").equals("list")) {
-                    ValidateEntrySchema(YamlContent, lines, PropertyDefinitionKey, propertyPath);
-                }
-                for (String key : ((Map<String, Object>) propertyDefinition).keySet()) {
-                    if (!validPropertyDefinitionKeywords.contains(key)) {
-                     try {
-                         handelInvalidPropertyDefinitionKeyword(YamlContent, lines, key, propertyPath); 
-                     } catch (Exception e) {
-                         context.getClient().logMessage(new MessageParams(MessageType.Info,"the error message: " + e.getMessage()));
-                     }
-                    } else if (key.equals("default")) {
-                        validateDefaultValue(YamlContent, lines, propertyPath, key, (Map<?, ?>) propertyDefinition);
-                    } else if (key.equals("entry_schema")) {
-                        ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition, propertyPath,key);
-                    } else if (key.equals("key_schema")) {
-                        ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition, propertyPath,key);
-                    } else if (key.equals("validation") ) {
-                        checkValidation(positions, YamlContent, lines, parentName, PropertyDefinitionKey, key, (Map<?, ?>) propertyDefinition, propertyPath);
-                    } else if (key.equals("value")) {
-                        validateFixedValue(YamlContent, lines, propertyPath, key, (Map<?, ?>) propertyDefinition);
-                    }
-                }
+                if (propertyPath.contains("artifact_types") || propertyPath.contains( "capability_types") ||  propertyPath.contains( "node_types") || propertyPath.contains( "relationship_types")) {
+                    handlePropertyDefinition(positions, YamlContent, lines, parentName, PropertyDefinitionKey, propertyDefinition, propertyPath, validPropertyDefinitionKeywords);
+                } 
             }  
             else {
-                //Handle  property assignment
+                //Handle property assignment
                 try {
                     handlePropertyAssignment(positions, YamlContent, lines, parentName, derivedFrom, PropertyDefinitionKey, propertyDefinition , propertyPath);
                 } catch (Exception e) {
@@ -83,6 +60,35 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             }
         }
         return diagnostics;
+    }
+
+    private void handlePropertyDefinition(Map<String, Mark> positions, String YamlContent, String[] lines, String parentName, String PropertyDefinitionKey, Object propertyDefinition, String propertyPath, Set<String> validPropertyDefinitionKeywords) {
+        validateRequiredKeys((Map<String, Object>) propertyDefinition, YamlContent, lines, propertyPath);
+        if (((Map<?, ?>) propertyDefinition).containsKey("type") && ((Map<?, ?>) propertyDefinition).get("type").equals("map")) {
+            ValidateEntrySchema(YamlContent, lines, PropertyDefinitionKey, propertyPath);
+            validateKeySchema(YamlContent, lines, PropertyDefinitionKey, propertyPath);
+        } else if (((Map<?, ?>) propertyDefinition).containsKey("type") && ((Map<?, ?>) propertyDefinition).get("type").equals("list")) {
+            ValidateEntrySchema(YamlContent, lines, PropertyDefinitionKey, propertyPath);
+        }
+        for (String key : ((Map<String, Object>) propertyDefinition).keySet()) {
+            if (!validPropertyDefinitionKeywords.contains(key)) {
+             try {
+                 handelInvalidPropertyDefinitionKeyword(YamlContent, lines, key, propertyPath); 
+             } catch (Exception e) {
+                 context.getClient().logMessage(new MessageParams(MessageType.Info,"the error message: " + e.getMessage()));
+             }
+            } else if (key.equals("default")) {
+                validateDefaultValue(YamlContent, lines, propertyPath, key, (Map<?, ?>) propertyDefinition);
+            } else if (key.equals("entry_schema")) {
+                ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition, propertyPath,key);
+            } else if (key.equals("key_schema")) {
+                ValidateSchemaDefinition(positions, YamlContent, lines, (Map<?, ?>) propertyDefinition, propertyPath,key);
+            } else if (key.equals("validation") ) {
+                checkValidation(positions, YamlContent, lines, parentName, PropertyDefinitionKey, key, (Map<?, ?>) propertyDefinition, propertyPath);
+            } else if (key.equals("value")) {
+                validateFixedValue(YamlContent, lines, propertyPath, key, (Map<?, ?>) propertyDefinition);
+            }
+        }
     }
 
     private void validateFixedValue(String yamlContent, String[] lines, String path, String key, Map<?,?> propertyDefinition) {
@@ -197,13 +203,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 
                 //validating the property definition fixed value by applying the validation functions entered by the user
                 if (propertyValue.containsKey("value") && propertyValue.containsKey("type") ) {
-                    if (isValidPropertyDefinitionsValue(functionParser.getFunctionStack(), propertyValue.get("value"), (String) propertyValue.get("type"), positions, YamlContent, lines, parent, PropertyDefinitionKey, path)) {
-                        Mark mark = context.getContextDependentConstructorPositions().get(path + "."  + "value");
-                        int line = mark != null ? mark.getLine() + 1 : -1;
-                        int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-                        handleNotValidKeywords("The value " + propertyValue.get("value") + " did not pass the validation ", line, column, endColumn);
-                    }
+                    validateValueBasedOnValidationStack(positions, YamlContent, lines, parent, PropertyDefinitionKey, propertyValue, path, functionParser);
                 }
             }    
         } catch (Exception e) {
@@ -214,7 +214,17 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             handleNotValidKeywords(e.getMessage() , line, column, endColumn);
         }
     }
-    
+
+    private void validateValueBasedOnValidationStack(Map<String, Mark> positions, String YamlContent, String[] lines, String parent, String PropertyDefinitionKey, Map<?, ?> propertyValue, String path, FunctionParser functionParser) {
+        if (isValidPropertyDefinitionsValue(functionParser.getFunctionStack(), propertyValue.get("value"), (String) propertyValue.get("type"), positions, YamlContent, lines, parent, PropertyDefinitionKey, path)) {
+            Mark mark = context.getContextDependentConstructorPositions().get(path + "."  + "value");
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+            handleNotValidKeywords("The value " + propertyValue.get("value") + " did not pass the validation ", line, column, endColumn);
+        }
+    }
+
     private PropertyDefinition getPropertyDefinitionObject(String derivedFrom, String PropertyDefinitionKey, String path) {
        if (path.contains("artifact_types")) {
            PropertyDefinition propertyDefinition = context.getCurrentToscaFile().artifactTypes().get(derivedFrom).properties().get(PropertyDefinitionKey);

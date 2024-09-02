@@ -99,10 +99,10 @@ public class NodeTypeParser {
             if (derivedFromValue != null) {
                 derivedFrom = Optional.of(derivedFromValue);
                 properties.putAll(derivedFromValue.properties());
+                capabilities.getValue().putAll(derivedFromValue.capabilities().getValue());
             }
         }
-
-
+        
         return new NodeType(derivedFrom,
             version,
             metadata,

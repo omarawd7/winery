@@ -40,23 +40,16 @@ public class CommonUtils {
     }
 
     public static boolean isTypeMatch(String type, Object value) {
-        switch (type.toLowerCase()) {
-            case "integer":
-                return isInteger(value);
-            case "string":
-                return isString(value);
-            case "map":
-                return isMap(value);
-            case "list":
-                return isList(value);
-            case "float":
-                return isFloat(value);
-            case "boolean":
-                return isBoolean(value);
-                //TODO support more types
-            default:
-                return false;
-        }
+        return switch (type.toLowerCase()) {
+            case "integer" -> isInteger(value);
+            case "string" -> isString(value);
+            case "map" -> isMap(value);
+            case "list" -> isList(value);
+            case "float" -> isFloat(value);
+            case "boolean" -> isBoolean(value);
+            //TODO support more types
+            default -> true;
+        };
     }
 
     private static boolean isInteger(Object value) {

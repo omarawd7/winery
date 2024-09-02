@@ -16,6 +16,7 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.AttributeDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityType;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
@@ -48,14 +49,7 @@ public class CapabilityTypeParser {
         if (capabilityTypeMap == null) {
             return null;
         }
-
-        Optional<CapabilityType> derivedFrom = Optional.empty();
-        try {
-            derivedFrom = Optional.ofNullable(getCapabilityType((String) capabilityTypeMap.get("derived_from")));
-        } catch (Exception e) {
-            System.err.println(e.getMessage());
-        }
-
+        
         Optional<ToscaString> version = Optional.empty();
         if (capabilityTypeMap.get("version") != null && capabilityTypeMap.get("version") instanceof String) {
             version = Optional.of(new ToscaString((String) capabilityTypeMap.get("version")));
@@ -89,6 +83,21 @@ public class CapabilityTypeParser {
         ToscaMap<String, AttributeDefinition> attributes = new ToscaMap<>(new HashMap<>());
         if (capabilityTypeMap.get("attributes") != null && capabilityTypeMap.get("attributes") instanceof Map) {
             attributes = new ToscaMap<>(AttributeDefinitionParser.parseAttributeDefinition( (Map<String, Object>) capabilityTypeMap.get("attributes")));
+        }
+        
+        Optional<CapabilityType> derivedFrom = Optional.empty();
+        try {
+            if (capabilityTypeMap.get("derived_from") != null && capabilityTypeMap.get("derived_from")  instanceof String) {
+                CapabilityType derivedFromValue = getCapabilityType((String) capabilityTypeMap.get("derived_from"));
+
+                if (derivedFromValue != null) {
+                    derivedFrom = Optional.of(derivedFromValue);
+                    properties.putAll(derivedFromValue.properties());
+                }
+            }
+            derivedFrom = Optional.ofNullable(getCapabilityType((String) capabilityTypeMap.get("derived_from")));
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
         }
 
         return new CapabilityType(
