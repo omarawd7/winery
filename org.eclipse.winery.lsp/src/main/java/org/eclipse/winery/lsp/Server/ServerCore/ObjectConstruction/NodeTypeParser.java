@@ -46,7 +46,6 @@ public class NodeTypeParser {
             return null;
         }
         
-        
         Optional<ToscaString> version  = Optional.empty();
         if (nodeTypeMap.get("version") != null && nodeTypeMap.get("version") instanceof String) {
             version = Optional.of(new ToscaString((String) nodeTypeMap.get("version")));
@@ -79,7 +78,7 @@ public class NodeTypeParser {
 
         ToscaList<RequirementDefinition> requirements = new ToscaList<>(new ArrayList<>());
         if (nodeTypeMap.get("requirements") != null && nodeTypeMap.get("requirements") instanceof List) {
-            requirements = new ToscaList<>(RequirementDefinitionParser.parseRequirementDefinitions((List<Object>) nodeTypeMap.get("requirements")));
+            requirements = new ToscaList<>(RequirementDefinitionParser.parseRequirementDefinitions(nodeTypeMap.get("requirements")));
         }
 
         ToscaMap<String, InterfaceDefinition> interfaces = new ToscaMap<>(new HashMap<>());
@@ -100,6 +99,7 @@ public class NodeTypeParser {
                 derivedFrom = Optional.of(derivedFromValue);
                 properties.putAll(derivedFromValue.properties());
                 capabilities.getValue().putAll(derivedFromValue.capabilities().getValue());
+                requirements.getValue().addAll(derivedFromValue.requirements().getValue());
             }
         }
         

@@ -1,4 +1,7 @@
 tosca_definitions_version: 2.0
+imports:
+- url: NodeTypeTest.yml
+
 service_template:
   node_templates:
     my_application:
@@ -12,3 +15,9 @@ service_template:
           type: integer
           value: 500
           validation: { $less_or_equal: [ $value, 500 ] }
+      
+      requirements:
+        - provides_endpoint:
+            capability: Endpoint
+            node: sql
+            relationship: cna-modeling.relationships.Provides.Endpoint

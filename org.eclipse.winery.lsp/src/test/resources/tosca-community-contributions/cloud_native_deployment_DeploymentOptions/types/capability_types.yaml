@@ -10,6 +10,8 @@ description: >-
   This TOSCA definitions document contains the CNA Modeling capability types.
 
 capability_types:
+  Endpoint:
+    description: When included, the Node is able to act as a proxy. This covers all communication to the endpoints of the proxied component.
 
   cna-modeling.capabilities.Proxy:
     derived_from: Node

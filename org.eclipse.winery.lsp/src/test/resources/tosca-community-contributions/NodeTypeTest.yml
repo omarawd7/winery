@@ -10,21 +10,25 @@ node_types:
         type: integer
         validation: { $less_or_equal: [ $value, 500 ] }
 
-  File:
+  WebApplication:
     description: >-
       The File artifact type is used when an artifact definition needs
       to have its associated file simply treated as a file without any
       special handling.
     derived_from: Database
-    properties:
-      testProperty: 50
-
+    requirements: 
+      - provides_endpoint:
+            capability: Endpoint
+            node: add_service_location
+            relationship: cna-modeling.relationships.Provides.Endpoint
+      - provides_endpoint11:
+            capability: Endpoint
+            node: add_service_location
+            relationship: cna-modeling.relationships.Provides.Endpoint
+   
   File1:
     description: >-
       The File artifact type is used when an artifact definition needs
       to have its associated file simply treated as a file without any
       special handling.
     derived_from: Database
-    properties:
-      testProperty: 5
-    

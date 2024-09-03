@@ -18,10 +18,10 @@ import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;
 import java.util.Optional;
 
-public record RequirementDefinition(
+public record RequirementDefinition(String RequirementDefinitionName,
                                     Optional<ToscaString> description,
                                     Optional<ToscaMap<String, Object>> metadata,
-                                    ToscaMap<String, RequirementDefinition> relationship,
+                                    ToscaString relationship,
                                     Optional<ToscaString> node,
                                     ToscaString capability,
                                     Optional<Object> count_range, //TODO must be minimum required and maximum allowed number of relationships created by the requirement. 

@@ -23,10 +23,7 @@ import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class NodeTemplatesValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
@@ -67,13 +64,25 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                             PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, nodeTemplateKey, nodeTemplatePath, null);
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }
+                    } else if (key.equals("requirements")) {
+                        Object requirementDefinitions = ((Map<?, ?>) nodeTemplate).get(key);
+                        if (requirementDefinitions instanceof List) {
+                            validateRequirementDefinitions(yamlContent, lines, nodeTemplateKey, (List<?>) requirementDefinitions, nodeTemplatePathWithName + "." + "requirements");
+                        }
                     }
                 }
             }
         }
         return diagnostics;
     }
-    
+
+    private void validateRequirementDefinitions(String yamlContent, String[] lines, String nodeTemplateKey, List<?> RequirementDefinitions, String nodeTemplatePath) {
+        RequirementDefinitionValidator requirementDefinitionValidator = new RequirementDefinitionValidator(context);
+        ArrayList<DiagnosticsSetter> RequirementDefinitionDiagnostics;
+        RequirementDefinitionDiagnostics = requirementDefinitionValidator.validateRequirementDefinitions(RequirementDefinitions, yamlContent, lines, nodeTemplatePath, nodeTemplateKey);
+        diagnostics.addAll(RequirementDefinitionDiagnostics);
+    }
+
     private void validateType(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName, String nodeTemplateKey) {
             // checks if it exists in the same file or not
             if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {

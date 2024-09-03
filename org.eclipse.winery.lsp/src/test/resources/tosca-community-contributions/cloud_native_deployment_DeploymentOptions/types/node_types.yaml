@@ -87,6 +87,12 @@ node_types:
     description: Node Type to model Service entities
 
   cna-modeling.entities.BackingService:
+    requirements: 
+    - provides_endpoint:
+            capability: Endpoint
+            node: add_service_location
+            relationship: cna-modeling.relationships.Provides.Endpoint
+        
     derived_from: cna-modeling.entities.Component
     description: Node Type to model Backing Service entities
     properties:
