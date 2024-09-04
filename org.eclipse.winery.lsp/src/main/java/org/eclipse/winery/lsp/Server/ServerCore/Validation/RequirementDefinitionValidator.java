@@ -39,13 +39,16 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> validateRequirementDefinitions(List<?> requirementDefinitions, String yamlContent, String[] lines, String requirementDefinitionPath, String parent) {
         Set<String> validRequirementDefinitionKeywords = Set.of(
             "description", "metadata", "relationship", "node", "capability", "node_filter", "count_range");
+        int i = 0;
         for (Object requirementDefinitionElement: requirementDefinitions) {
+           String requirementPath = requirementDefinitionPath + "[" + i + "]";
+           i++;
             if (requirementDefinitionElement instanceof Map) {
                 for (String requirementDefinition : ((Map<String, Object>) requirementDefinitionElement).keySet()) {
                     if (((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition) instanceof Map) {
-                        String requirementDefinitionPathWithName = requirementDefinitionPath + "." + requirementDefinition;
+                        String requirementDefinitionPathWithName = requirementPath + "." + requirementDefinition;
                         // check if this is a valid node template refinement 
-                        if (checkIfParentIsNodeTemplateThatItIsValidRefinment(yamlContent, lines, requirementDefinitionPath, parent, requirementDefinition, requirementDefinitionPathWithName))
+                        if (checkIfParentIsNodeTemplateThatItIsValidRefinment(yamlContent, lines, requirementPath, parent, requirementDefinition, requirementDefinitionPathWithName))
                             continue;
                         validateRequiredKeys((Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition),yamlContent, lines, requirementDefinitionPathWithName);
                      
@@ -76,7 +79,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                          }
                      }   
                     } else {
-                        handleRequirementAssignmentFromNodeTemplateParent(yamlContent, lines, requirementDefinitionPath, parent, (Map<String, Object>) requirementDefinitionElement, requirementDefinition);
+                        handleRequirementAssignmentFromNodeTemplateParent(yamlContent, lines, requirementPath, parent, (Map<String, Object>) requirementDefinitionElement, requirementDefinition);
                     }
                     
                 }

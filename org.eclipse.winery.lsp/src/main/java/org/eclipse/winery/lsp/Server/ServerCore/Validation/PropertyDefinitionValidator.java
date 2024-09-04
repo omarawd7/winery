@@ -20,6 +20,7 @@ import org.eclipse.winery.lsp.Server.ServerCore.DataModels.*;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.ValidatingUtils;
+import org.tinylog.Logger;
 import org.yaml.snakeyaml.error.Mark;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -75,7 +76,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
              try {
                  handelInvalidPropertyDefinitionKeyword(YamlContent, lines, key, propertyPath); 
              } catch (Exception e) {
-                 context.getClient().logMessage(new MessageParams(MessageType.Info,"the error message: " + e.getMessage()));
+                 context.getClient().logMessage(new MessageParams(MessageType.Error,"the error message: " + e.getMessage()));
              }
             } else if (key.equals("default")) {
                 validateDefaultValue(YamlContent, lines, propertyPath, key, (Map<?, ?>) propertyDefinition);
@@ -207,11 +208,8 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 }
             }    
         } catch (Exception e) {
-            Mark mark = context.getContextDependentConstructorPositions().get(path + "." + "validation");
-            int line = mark != null ? mark.getLine() + 1 : -1;
-            int column = mark != null ? mark.getColumn() + 1 : -1;
-            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
-            handleNotValidKeywords(e.getMessage() , line, column, endColumn);
+            context.getClient().logMessage(new MessageParams(MessageType.Error, "" + e));
+            Logger.error("Could not parese the validation", e);
         }
     }
 

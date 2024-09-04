@@ -14,8 +14,6 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
@@ -43,36 +41,39 @@ public class ImportsValidator implements DiagnosesHandler {
         );
         context.getImportedToscaFiles().get(context.getCurrentToscaFilePath()).clear();
         context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath()).clear();
+        int i = 0;
         for (Object importElement: importsList) {
+            String importsPath = "imports[" + i  + "]";
+            i++;
             if (importElement instanceof Map) {
                 for (String importsKey : ((Map<String, Object>) importElement).keySet()) {
                     if (!validImportsKeywords.contains(importsKey)) {
-                        Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + importsKey);
+                        Mark mark = context.getContextDependentConstructorPositions().get(importsPath + "." + importsKey);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
                         handleNotValidKeywords("Invalid imports keyword: " + importsKey + " at line " + line + ", column " + column, line, column, endColumn);
                     }
                     if (((Map<?, ?>) importElement).containsKey("url") && ((Map<?, ?>) importElement).containsKey("profile") ) {
-                        Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "url");
+                        Mark mark = context.getContextDependentConstructorPositions().get(importsPath + "." + "url");
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
                         int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
                         handleNotValidKeywords("Import statement must include either a url or a profile, but not both.", line, column, endColumn);
     
-                        mark = context.getContextDependentConstructorPositions().get("imports" + "." + "profile");
+                        mark = context.getContextDependentConstructorPositions().get(importsPath + "." + "profile");
                         line = mark != null ? mark.getLine() + 1 : -1;
                         column = mark != null ? mark.getColumn() + 1 : -1;
                         endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
                         handleNotValidKeywords("Import statement must include either a url or a profile, but not both.", line, column, endColumn);
                      } else if (((Map<?, ?>) importElement).get(importsKey) != null && importsKey.equals("url")) {
-                        validateURL(yamlContent, lines, (Map<?, ?>) importElement, importsKey);
+                        validateURL(yamlContent, lines, (Map<?, ?>) importElement, importsKey, importsPath);
                     } else if (((Map<?, ?>) importElement).get(importsKey) != null && importsKey.equals("profile")) {
-                        validateProfile(yamlContent, lines, (Map<?, ?>) importElement, importsKey);
+                        validateProfile(yamlContent, lines, (Map<?, ?>) importElement, importsKey, importsPath);
                     }
                 }
                 if (((Map<?, ?>) importElement).containsKey("repository") && !((Map<?, ?>) importElement).containsKey("url") ) {
-                    Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "repository");
+                    Mark mark = context.getContextDependentConstructorPositions().get(importsPath + "." + "repository");
                     int line = mark != null ? mark.getLine() + 1 : -1;
                     int column = mark != null ? mark.getColumn() + 1 : -1;
                     int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
@@ -89,7 +90,7 @@ public class ImportsValidator implements DiagnosesHandler {
         return diagnostics;
     }
 
-    private void validateProfile(String yamlContent, String[] lines, Map<?, ?> importElement, String importsKey) {
+    private void validateProfile(String yamlContent, String[] lines, Map<?, ?> importElement, String importsKey, String importsPath) {
         if (importElement.get(importsKey) instanceof String) {
             String profileValue = ((String) importElement.get(importsKey));
             TOSCAFileParser toscaFileParser = new TOSCAFileParser();
@@ -113,21 +114,21 @@ public class ImportsValidator implements DiagnosesHandler {
                 }
                 }
                 if (!isFileExist) {
-                    Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "profile" + "." + importElement.get(importsKey));
+                    Mark mark = context.getContextDependentConstructorPositions().get(importsPath + "." + "profile" + "." + importElement.get(importsKey));
                     int line = mark != null ? mark.getLine() + 1 : -1;
                     int column = mark != null ? mark.getColumn() + 1 : -1;
                     int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
                     handleNotValidKeywords("Tosca File not found.", line, column, endColumn); 
                 }
             } catch (Exception e) {
-                Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "profile");
+                Mark mark = context.getContextDependentConstructorPositions().get(importsPath + "." + "profile");
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
                 handleNotValidKeywords(e.getMessage(), line, column, endColumn);
             }
         } else {
-            Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "profile");
+            Mark mark = context.getContextDependentConstructorPositions().get(importsPath + "." + "profile");
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;
             int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
@@ -135,7 +136,7 @@ public class ImportsValidator implements DiagnosesHandler {
         }
     }
 
-    private void validateURL(String yamlContent, String[] lines, Map<?, ?> importElement, String importsKey) {
+    private void validateURL(String yamlContent, String[] lines, Map<?, ?> importElement, String importsKey, String importsPath) {
         if (importElement.get(importsKey) instanceof String url) {
             Path currentFilePath = context.getCurrentToscaFilePath();
             TOSCAFileParser toscaFileParser = new TOSCAFileParser();
@@ -153,7 +154,7 @@ public class ImportsValidator implements DiagnosesHandler {
                 }
                 }
             } catch (Exception e) {
-                Mark mark = context.getContextDependentConstructorPositions().get("imports" + "." + "url" + "." + url);
+                Mark mark = context.getContextDependentConstructorPositions().get(importsPath + "." + "url" + "." + url);
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);

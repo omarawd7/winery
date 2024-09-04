@@ -17,6 +17,7 @@ import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParser;
+import org.tinylog.Logger;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.IOException;
@@ -47,14 +48,9 @@ public class DiagnosticsPublisher {
     }
     
     public void publishDiagnostics(LSContext context, Path path) {
-        TOSCAFileParser toscaFileParser = new TOSCAFileParser();
         TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();
         try {
-            Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(path,client);
-            context.setCurrentToscaFile(toscaFileParser.getToscaFile());
-            context.setCotextDependentPositions(toscaFileParser.getContextDependentConstructorPositions());
-            toscaFileValidator.validate(yamlMap, context, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions() );
-            List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
+            List<Diagnostic> diagnostics = getDiagnostics(context, path, toscaFileValidator);
             client.publishDiagnostics(new PublishDiagnosticsParams(path.toUri().toString(), diagnostics));
         }
         catch (IOException e) {
@@ -74,7 +70,17 @@ public class DiagnosticsPublisher {
         }
 
     }
-  
+
+    private List<Diagnostic> getDiagnostics(LSContext context, Path path, TOSCAFileValidator toscaFileValidator) throws IOException {
+        TOSCAFileParser toscaFileParser = new TOSCAFileParser();
+        Map<String, Object> yamlMap = toscaFileParser.ParseTOSCAFile(path,client);
+        context.setCurrentToscaFile(toscaFileParser.getToscaFile());
+        context.setCotextDependentPositions(toscaFileParser.getContextDependentConstructorPositions());
+        toscaFileValidator.validate(yamlMap, context, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions());
+        List<Diagnostic> diagnostics = setDiagnostics(toscaFileValidator.diagnostics);
+        return diagnostics;
+    }
+
     public void publishDiagnostics(LSContext context, Path path, String content) {
         TOSCAFileParser toscaFileParser = new TOSCAFileParser();
         TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();

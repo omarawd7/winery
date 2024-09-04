@@ -13,6 +13,8 @@
     val recordBuilderVersion = "42"
     
     dependencies {
+        implementation("org.tinylog:tinylog-api:2.7.0")
+        implementation("org.tinylog:tinylog-impl:2.7.0")
         testImplementation(platform("org.junit:junit-bom:5.10.0"))
         testImplementation("org.junit.jupiter:junit-jupiter")
         implementation("org.eclipse.lsp4j:org.eclipse.lsp4j:0.12.0")

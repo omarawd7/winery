@@ -60,6 +60,8 @@ public class ToscaTextDocService implements TextDocumentService {
     public void didChange(DidChangeTextDocumentParams params) {
         String uri = params.getTextDocument().getUri();
         Path filePath = CommonUtils.uriToPath(uri);
+        serverContext.setCurrentToscaFilePath(filePath);
+
         // Get the directory path and list all files in it
         Path directoryPath = filePath.getParent();
         // Determine all parent directories of all files

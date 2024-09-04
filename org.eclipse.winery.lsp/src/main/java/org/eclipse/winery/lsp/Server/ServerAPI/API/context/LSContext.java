@@ -12,6 +12,8 @@ package org.eclipse.winery.lsp.Server.ServerAPI.API.context;
 
 import com.google.common.collect.Multimap;
 import org.eclipse.lsp4j.ClientCapabilities;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.yaml.snakeyaml.error.Mark;
@@ -31,8 +33,13 @@ public interface LSContext {
 
     <V> V get(Class<V> clazz);
 
-    void setClient(LanguageClient client);
+    // void log(MessageType messageType, String message);
 
+    /** TODO --> move this to implementing class -- and activate above interface **/
+    default void log(MessageType messageType, String message) {
+        this.getClient().logMessage(new MessageParams(messageType,message));
+    }
+    void setClient(LanguageClient client);
     LanguageClient getClient();
 
     void setClientCapabilities(ClientCapabilities capabilities);
@@ -76,5 +83,4 @@ public interface LSContext {
     void setToscaFilesPath(Map<Path, TOSCAFile> toscaFilesPath);
     
     class Key<K> { }
-
 }

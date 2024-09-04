@@ -21,3 +21,9 @@ service_template:
             capability: Endpoint
             node: sql
             relationship: cna-modeling.relationships.Provides.Endpoint
+            
+        - provides_endpoint11:
+            capability: Endpoint
+            node: sql
+            relationship: cna-modeling.relationships.Provides.Endpoint
+        

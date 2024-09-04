@@ -37,6 +37,8 @@ public class ToscaFileContextDependentConstructor extends Constructor {
             positions.put(key, scalarNode.getStartMark());
         } else if (node instanceof MappingNode) {
             processMappingNode((MappingNode) node);
+        } else if (node instanceof SequenceNode) {
+            processSequenceNode((SequenceNode) node);
         }
         return super.constructObject(node);
     }
@@ -59,6 +61,15 @@ public class ToscaFileContextDependentConstructor extends Constructor {
         }
     }
 
+    private void processSequenceNode(SequenceNode node) {
+        String parentPath = currentPath.toString();
+        for (int i = 0; i < node.getValue().size(); i++) {
+            currentPath.append("[").append(i).append("]");
+            constructObject(node.getValue().get(i));
+            currentPath.setLength(parentPath.length());
+        }
+    }
+
     public Map<String, Mark> getPositions() {
         return positions;
     }
@@ -69,6 +80,8 @@ public class ToscaFileContextDependentConstructor extends Constructor {
             String parentPath = currentPath.toString();
             if (node instanceof MappingNode) {
                 processMappingNode((MappingNode) node);
+            } else if (node instanceof SequenceNode) {
+                processSequenceNode((SequenceNode) node);
             }
             Object result = super.construct(node);
             currentPath.setLength(parentPath.length());
