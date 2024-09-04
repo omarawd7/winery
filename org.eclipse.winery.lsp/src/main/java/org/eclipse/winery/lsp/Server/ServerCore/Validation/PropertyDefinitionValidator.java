@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.*;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
@@ -76,7 +74,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
              try {
                  handelInvalidPropertyDefinitionKeyword(YamlContent, lines, key, propertyPath); 
              } catch (Exception e) {
-                 context.getClient().logMessage(new MessageParams(MessageType.Error,"the error message: " + e.getMessage()));
+                 Logger.error("the error message: ", e);
              }
             } else if (key.equals("default")) {
                 validateDefaultValue(YamlContent, lines, propertyPath, key, (Map<?, ?>) propertyDefinition);
@@ -208,8 +206,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 }
             }    
         } catch (Exception e) {
-            context.getClient().logMessage(new MessageParams(MessageType.Error, "" + e));
-            Logger.error("Could not parese the validation", e);
+            Logger.error("Could not parse the validation", e);
         }
     }
 
@@ -285,11 +282,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                     }
                     FunctionValues.put(function,result);
                 } catch (Exception e) {
-                    Mark mark = context.getContextDependentConstructorPositions().get(path + "." + "validation");
-                    int line = mark != null ? mark.getLine() + 1 : -1;
-                    int column = mark != null ? mark.getColumn() + 1 : -1;
-                    int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
-                    handleNotValidKeywords(e.getMessage() , line, column, endColumn);
+                    Logger.error("Could not parse the validation", e);
                 }
             }
             validation.pop(); // Remove the processed item
@@ -305,7 +298,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
             handleNotValidKeywords("Invalid property definition keyword: " + key, line, column, endColumn);    
         } catch (Exception e) {
-            context.getClient().logMessage(new MessageParams(MessageType.Info,"the error message: " + e.getMessage()));
+            Logger.error("the error message: ", e);
         }
     }
 
@@ -319,7 +312,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 diagnostics.addAll(SchemaDefinitionDiagnostics);
             }
         } catch (Exception e) {
-            context.getClient().logMessage(new MessageParams(MessageType.Error,"the error message: " + e.getMessage()));            
+            Logger.error("the error message: ", e);
         }
        
     }

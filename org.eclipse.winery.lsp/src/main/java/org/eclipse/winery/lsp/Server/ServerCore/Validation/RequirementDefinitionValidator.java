@@ -17,7 +17,6 @@ package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.RequirementDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
@@ -48,7 +47,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                     if (((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition) instanceof Map) {
                         String requirementDefinitionPathWithName = requirementPath + "." + requirementDefinition;
                         // check if this is a valid node template refinement 
-                        if (checkIfParentIsNodeTemplateThatItIsValidRefinment(yamlContent, lines, requirementPath, parent, requirementDefinition, requirementDefinitionPathWithName))
+                        if (checkIfParentIsNodeTemplateThatItIsValidRefinement(yamlContent, lines, requirementPath, parent, requirementDefinition, requirementDefinitionPathWithName))
                             continue;
                         validateRequiredKeys((Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition),yamlContent, lines, requirementDefinitionPathWithName);
                      
@@ -69,12 +68,13 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
                              if (requirementDefinitionPathWithName.contains("node_types")) {
                                  validateRelationshipFromNodeTypeParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPathWithName, parent, requirementDefinition);
                              } else if (requirementDefinitionPathWithName.contains("node_templates") && requirementDefinitionPathWithName.contains("service_template")) {
-                             //   TODO validateRelationshipFromNodeTemplateParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPathWithName, parent, requirementDefinition);
-
+                                 validateRelationshipFromNodeTemplateParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPathWithName, parent, requirementDefinition);
                              }
                          } else if (key.equals("node")) {
                              if (requirementDefinitionPathWithName.contains("node_types")) {
                                  validateNodeFromNodeTypeParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPathWithName, parent, requirementDefinition);
+                             } else if (requirementDefinitionPathWithName.contains("node_templates") && requirementDefinitionPathWithName.contains("service_template")) {
+                                 validateNodeFromNodeTemplateParent(yamlContent, lines, key, (Map<String, Object>) ((Map<String, Object>) requirementDefinitionElement).get(requirementDefinition), requirementDefinitionPathWithName, parent, requirementDefinition);
                              }
                          }
                      }   
@@ -88,7 +88,7 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
         return diagnostics;
     }
 
-    private boolean checkIfParentIsNodeTemplateThatItIsValidRefinment(String yamlContent, String[] lines, String requirementDefinitionPath, String parent, String requirementDefinition, String requirementDefinitionPathWithName) {
+    private boolean checkIfParentIsNodeTemplateThatItIsValidRefinement(String yamlContent, String[] lines, String requirementDefinitionPath, String parent, String requirementDefinition, String requirementDefinitionPathWithName) {
         try {
         if (requirementDefinitionPath.contains("node_templates") && requirementDefinitionPath.contains("service_template")) {
             if (context.getCurrentToscaFile() != null && context.getCurrentToscaFile().serviceTemplate().isPresent() && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates() != null && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).type().requirements() != null) {
@@ -159,6 +159,58 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
         }
         } catch (Exception e) {
             context.getClient().logMessage(new MessageParams(MessageType.Error, "The Error is: " + e.getMessage()));
+        }
+    }
+    
+    private void validateNodeFromNodeTemplateParent(String yamlContent, String[] lines, String key, Map<String, Object> requirementDefinition, String requirementDefinitionPathWithName, String parent, String requirementDefinitionsKey) {
+        try {
+            if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey((requirementDefinition).get(key))) {
+                //TODO set the found node type for the requirement
+                return;
+            }
+            if ( !context.getCurrentToscaFile().imports().isEmpty()) {
+                Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                    for (TOSCAFile file : mapOfImportedFiles.values()) {
+                        if (file != null && file.nodeTypes() != null && file.nodeTypes().getValue().containsKey((requirementDefinition).get(key))) {
+                            //TODO set the found node type for the requirement
+                            return;
+                        }
+                    }
+                }
+                Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
+                    for (String namespacesKey : mapOfNamespaces.keySet()) {
+                        if ( (requirementDefinition).get(key) instanceof String) {
+                            String[] parts = ((String) (requirementDefinition).get(key)).split(":");
+                            if (parts.length == 2) {
+                                String typeWithoutNamespace = parts[1].trim();
+                                String namespace = parts[0].trim();
+                                if (namespacesKey.equals(namespace)) {
+                                    TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
+                                    if (file != null && file.nodeTypes() != null && file.nodeTypes().getValue().containsKey(typeWithoutNamespace)) {
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+            Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPathWithName + "." + ((Map<?, ?>) requirementDefinition).get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+            handleNotValidKeywords("Invalid node type value, \"" + ((Map<?, ?>) requirementDefinition).get(key) + "\" is not exist.", line, column,endColumn);
+        } catch (Exception e) {
+            Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPathWithName + "." + ((Map<?, ?>) requirementDefinition).get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+            handleNotValidKeywords(e.getMessage(), line, column,endColumn);
         }
     }
 
@@ -372,21 +424,46 @@ public class RequirementDefinitionValidator implements DiagnosesHandler {
     
     private void validateCapabilityFromNodeTemplateParent(String yamlContent, String[] lines, String key, Map<String, Object> requirementDefinition, String requirementDefinitionPathWithName, String parent, String requirementDefinitionsKey) {
         try {
-            if (context.getCurrentToscaFile().serviceTemplate().isPresent() && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates() != null && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().containsKey(parent) && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).type() != null) {
-                NodeType nodeType = context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).type();
-
-                if (nodeType.capabilities().getValue().containsKey(((Map<?, ?>) requirementDefinition).get(key))) {
-                    return;
-                    //TODO set the found capability type for the requirement
-                } else {
-                    Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPathWithName + "." + ((Map<?, ?>) requirementDefinition).get(key));
-                    int line = mark != null ? mark.getLine() + 1 : -1;
-                    int column = mark != null ? mark.getColumn() + 1 : -1;
-                    int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-
-                    handleNotValidKeywords("Invalid capability type value, \"" + ((Map<?, ?>) requirementDefinition).get(key) + "\" is not exist.", line, column,endColumn);       
-                }
+            if (context.getCurrentToscaFile().capabilityTypes() != null && context.getCurrentToscaFile().capabilityTypes().containsKey((requirementDefinition).get(key))) {
+                //TODO set the found capability type for the requirement
+                return;
             }
+            if ( !context.getCurrentToscaFile().imports().isEmpty()) {
+                Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                    for (TOSCAFile file : mapOfImportedFiles.values()) {
+                        if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().containsKey((requirementDefinition).get(key))) {
+                            //TODO set the found capability type for the requirement
+                            return;
+                        }
+                    }
+                }
+                Collection<Map<String, TOSCAFile>> namespaces = context.getNamespaceDefinitions().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfNamespaces : namespaces) {
+                    for (String namespacesKey : mapOfNamespaces.keySet()) {
+                        if ( (requirementDefinition).get(key) instanceof String) {
+                            String[] parts = ((String) (requirementDefinition).get(key)).split(":");
+                            if (parts.length == 2) {
+                                String typeWithoutNamespace = parts[1].trim();
+                                String namespace = parts[0].trim();
+                                if (namespacesKey.equals(namespace)) {
+                                    TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
+                                    if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().containsKey(typeWithoutNamespace)) {
+                                        return;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+            }
+            Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPathWithName + "." + ((Map<?, ?>) requirementDefinition).get(key));
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+
+            handleNotValidKeywords("Invalid capability type value, \"" + ((Map<?, ?>) requirementDefinition).get(key) + "\" is not exist.", line, column,endColumn);
         } catch (Exception e) {
             Mark mark = context.getContextDependentConstructorPositions().get(requirementDefinitionPathWithName + "." + ((Map<?, ?>) requirementDefinition).get(key));
             int line = mark != null ? mark.getLine() + 1 : -1;
