@@ -74,7 +74,7 @@ public class PropertyDefinitionParser {
         if (propertyDefinitionMap.get("value") != null) {
             value = Optional.ofNullable(propertyDefinitionMap.get("value"));
         }
-        
+        // TODO construct the stack here
         Optional<Stack<Map<String, List<String>>>> validation = Optional.empty(); //Constructed in the PropertyDefinition validation
         
         Optional<SchemaDefinition> keySchema = Optional.empty();

@@ -14,6 +14,8 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeTemplate;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
@@ -85,15 +87,19 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
 
     private void validateType(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName, String nodeTemplateKey) {
             // checks if it exists in the same file or not
-            if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
-                return;
+        if (context.getCurrentToscaFile().nodeTypes() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(((Map<String, Object>) nodeTemplate).get(key))) {
+            NodeTemplate nodeTemplateObject;
+            nodeTemplateObject = context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(nodeTemplateKey).withType(context.getCurrentToscaFile().nodeTypes().getValue().get(((Map<String, Object>) nodeTemplate).get(key)));
+            context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().put(nodeTemplateKey,nodeTemplateObject);
+
+            return;
             }
         validateTypeInImportedFiles(yamlContent, lines, key, nodeTemplate, nodeTemplatePathWithName, nodeTemplateKey);
     }
 
     private void validateTypeInImportedFiles(String yamlContent, String[] lines, String key, Object nodeTemplate, String nodeTemplatePathWithName, String nodeTemplateKey) {
         try {
-            if (!context.getCurrentToscaFile().imports().isEmpty()) {
+            if (context.getCurrentToscaFile().imports().isPresent()) {
                 Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
                 for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {

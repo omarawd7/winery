@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.*;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
@@ -93,7 +95,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
     private void validateFixedValue(String yamlContent, String[] lines, String path, String key, Map<?,?> propertyDefinition) {
         if (propertyDefinition.containsKey("type")) {
             String type = (String) propertyDefinition.get("type");
-            String valueText =   context.getContextDependentConstructorPositions().get(path + "." + key).get_snippet().trim();
+            String valueText = context.getContextDependentConstructorPositions().get(path + "." + key).get_snippet().trim();
             int ind = valueText.lastIndexOf(":");
             Object fixedValue =  valueText.substring(ind + 1, valueText.length() - 1).trim();
             if (!CommonUtils.isTypeMatch(type, fixedValue)) {
@@ -134,9 +136,20 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 if (derivedProperty != null && derivedProperty.value().isEmpty()) {
                     PropertyDefinition newProperty = new PropertyDefinition(derivedProperty.type(), derivedProperty.description(),derivedProperty.metadata(), derivedProperty.required(), derivedProperty.Default(), Optional.ofNullable(propertyValue),derivedProperty.validation(), derivedProperty.keySchema(), derivedProperty.entrySchema());
                     context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).properties().put(PropertyDefinitionKey,newProperty);
-                    if (!newProperty.type().equals("")) {
-                        //TODO validate the value
-                    } else {
+                    if (!newProperty.type().equals("") && newProperty.validation().isPresent()) {
+                        try {
+                        if (isNotValidPropertyDefinitionsValue( newProperty.validation().get(), propertyValue, newProperty.type().getValue())) {
+                            Mark mark = context.getContextDependentConstructorPositions().get(path);
+                            int line = mark != null ? mark.getLine() + 1 : -1;
+                            int column = mark != null ? mark.getColumn() + 1 : -1;
+                            int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
+                            handleNotValidKeywords("The value " + propertyValue + " did not pass the validation ", line, column, endColumn);
+                        }
+                        }
+                        catch (Exception e) {
+                            Logger.error("The error message: " + e.getMessage(), e);
+                        }
+                    } else if (newProperty.type().getValue().equals("") || newProperty.type().getValue().isEmpty()) {
                         Mark mark = context.getContextDependentConstructorPositions().get(path);
                         int line = mark != null ? mark.getLine() + 1 : -1;
                         int column = mark != null ? mark.getColumn() + 1 : -1;
@@ -206,12 +219,12 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 }
             }    
         } catch (Exception e) {
-            Logger.error("Could not parse the validation", e);
+            Logger.error("The error message: " + e.getMessage(), e);
         }
     }
 
     private void validateValueBasedOnValidationStack(Map<String, Mark> positions, String YamlContent, String[] lines, String parent, String PropertyDefinitionKey, Map<?, ?> propertyValue, String path, FunctionParser functionParser) {
-        if (isValidPropertyDefinitionsValue(functionParser.getFunctionStack(), propertyValue.get("value"), (String) propertyValue.get("type"), positions, YamlContent, lines, parent, PropertyDefinitionKey, path)) {
+        if (isNotValidPropertyDefinitionsValue(functionParser.getFunctionStack(), propertyValue.get("value"), (String) propertyValue.get("type"))) {
             Mark mark = context.getContextDependentConstructorPositions().get(path + "."  + "value");
             int line = mark != null ? mark.getLine() + 1 : -1;
             int column = mark != null ? mark.getColumn() + 1 : -1;
@@ -254,7 +267,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
         }
     }
     
-    public boolean isValidPropertyDefinitionsValue(Stack<Map<String,List<String>>> TheValidation, Object value, String type, Map<String, Mark> positions, String yamlContent, String[] lines, String parentArtifactType, String PropertyDefinitionKey, String path) {
+    public boolean isNotValidPropertyDefinitionsValue(Stack<Map<String,List<String>>> TheValidation, Object value, String type) {
         Object result = null;
         Stack<Map<String,List<String>>> validation = (Stack<Map<String, List<String>>>) TheValidation.clone();
         if (validation.isEmpty()) {
@@ -278,16 +291,19 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                     if (function.equals("$value")) {
                         result = value;
                     } else {
-                        result = ValidatingUtils.callBooleanFunction(function,parameters,(String) type, context );
+                        result = ValidatingUtils.callBooleanFunction(function,parameters, type, context );
                     }
                     FunctionValues.put(function,result);
                 } catch (Exception e) {
-                    Logger.error("Could not parse the validation", e);
+                    Logger.error("The error message: " + e.getMessage(), e);
                 }
             }
             validation.pop(); // Remove the processed item
         }
-        return !((boolean) result);    
+        if (result instanceof Boolean) {
+            return !((boolean) result);
+        }
+        return false;    
     }
     
     private void handelInvalidPropertyDefinitionKeyword(String YamlContent, String[] lines, String key, String  propertyPath) {
@@ -298,7 +314,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
             int endColumn = CommonUtils.getEndColumnForValueError(YamlContent, line, column, lines);
             handleNotValidKeywords("Invalid property definition keyword: " + key, line, column, endColumn);    
         } catch (Exception e) {
-            Logger.error("the error message: ", e);
+            Logger.error("the error message: " + e.getMessage(), e);
         }
     }
 
@@ -312,9 +328,8 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 diagnostics.addAll(SchemaDefinitionDiagnostics);
             }
         } catch (Exception e) {
-            Logger.error("the error message: ", e);
+            Logger.error("the error message: " + e.getMessage(), e);
         }
-       
     }
 
     public void ValidateEntrySchema(String YamlContent, String[] lines, String PropertyDefinitionKey, String path) {

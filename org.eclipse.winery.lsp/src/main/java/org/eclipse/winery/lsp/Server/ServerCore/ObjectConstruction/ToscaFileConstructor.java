@@ -22,8 +22,10 @@ import java.util.*;
 
 public class ToscaFileConstructor {
     public static TOSCAFile ConstructToscaFile(Map<String, Object> yamlMap) {
-        ToscaString toscaDefinitionsVersion = new ToscaString (yamlMap.get("tosca_definitions_version").toString());
-       
+        ToscaString toscaDefinitionsVersion = new ToscaString("");
+        if (yamlMap.get("tosca_definitions_version") != null && yamlMap.get("tosca_definitions_version") instanceof String) {
+             toscaDefinitionsVersion = new ToscaString ((String) yamlMap.get("tosca_definitions_version"));
+        }
         Optional<ToscaString> description = Optional.empty();
         if (yamlMap.get("description") != null && yamlMap.get("description") instanceof String) {
             description = Optional.of(new ToscaString( (String) yamlMap.get("description")));

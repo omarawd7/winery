@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Utils;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParser;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.BooleanLogicFunctions;
@@ -21,10 +23,7 @@ import org.yaml.snakeyaml.error.Mark;
 
 import java.lang.reflect.Method;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 public class ValidatingUtils {
     
@@ -63,6 +62,11 @@ public class ValidatingUtils {
             Object[] convertedParameters = new Object[parameters.size()];
 
             for (int i = 0; i < parameters.size(); i++) {
+                if (parameters.get(i) instanceof String && parameters.get(i).startsWith("[")) {
+                    parameters.set(i,parameters.get(i).substring(1));
+                } else if (parameters.get(i) instanceof String && parameters.get(i).endsWith("]")) {
+                    parameters.set(i,parameters.get(i).substring(0, parameters.get(i).length() - 1));
+                }
                 switch (type) {
                     case "string" -> convertedParameters[i] = parameters.get(i);
                     case "integer" -> convertedParameters[i] = Integer.parseInt(parameters.get(i).trim());
@@ -71,10 +75,19 @@ public class ValidatingUtils {
                     default -> throw new IllegalArgumentException("Unsupported type: " + type);
                 }
             }
+            
+            if ("valid_values".equals(functionName)) {
+                // The first parameter is the value, the second is a list
+                Object value = convertedParameters[0];
+                context.getClient().logMessage(new MessageParams(MessageType.Info, " convertedParameters: " + Arrays.toString(convertedParameters)));
 
+                List<?> list = List.of(Arrays.copyOfRange(convertedParameters, 1, convertedParameters.length));
+                return BooleanLogicFunctions.valid_values(value,  list);
+            }
+            
             // Invoke the target method with the converted parameters
             return targetMethod.invoke(null, convertedParameters);
-
+            
         } catch (Exception e) {
             throw new RuntimeException("Error invoking function: " + e.getMessage());
         }

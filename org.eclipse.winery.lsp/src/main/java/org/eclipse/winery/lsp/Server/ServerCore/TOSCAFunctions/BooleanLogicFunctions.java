@@ -66,7 +66,8 @@ public class BooleanLogicFunctions {
         return arg1.compareTo(arg2) <= 0;
     }
 
-    public static <T> boolean valid_values(T arg1, List<T> arg2) {
+    public static <T> boolean valid_values(Object arg1, List<?> arg2) {
+        
         return arg2.contains(arg1);
     }
 
