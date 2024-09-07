@@ -19,6 +19,7 @@ import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
+import org.tinylog.Logger;
 import org.yaml.snakeyaml.error.Mark;
 
 import java.io.IOException;
@@ -60,8 +61,13 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
                     //Check if the type keyword exists, and contains existing capability type
                     else if (key.equals("type")) {
                         if (CapabilityDefinitionPath.contains("node_types")) {
-                            validateTypeFromNodeTypeParent(yamlContent, lines, key, capabilityDefinition, capabilityDefinitionPathWithName, parent, capabilityDefinitionsKey);
-                        }
+                            try {
+                                validateTypeFromNodeTypeParent(yamlContent, lines, key, capabilityDefinition, capabilityDefinitionPathWithName, parent, capabilityDefinitionsKey);
+                            }
+                            catch (Exception e) {
+                                Logger.error("The error message: " + e.getMessage(), e);
+                            }
+                            }
                     }
                 }
             }

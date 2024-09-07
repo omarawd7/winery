@@ -79,8 +79,6 @@ public class ValidatingUtils {
             if ("valid_values".equals(functionName)) {
                 // The first parameter is the value, the second is a list
                 Object value = convertedParameters[0];
-                context.getClient().logMessage(new MessageParams(MessageType.Info, " convertedParameters: " + Arrays.toString(convertedParameters)));
-
                 List<?> list = List.of(Arrays.copyOfRange(convertedParameters, 1, convertedParameters.length));
                 return BooleanLogicFunctions.valid_values(value,  list);
             }

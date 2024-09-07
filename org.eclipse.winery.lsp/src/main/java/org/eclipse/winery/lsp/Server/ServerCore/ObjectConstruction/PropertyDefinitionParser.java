@@ -16,6 +16,8 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.SchemaDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.*;
+import org.tinylog.Logger;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -74,8 +76,19 @@ public class PropertyDefinitionParser {
         if (propertyDefinitionMap.get("value") != null) {
             value = Optional.ofNullable(propertyDefinitionMap.get("value"));
         }
-        // TODO construct the stack here
-        Optional<Stack<Map<String, List<String>>>> validation = Optional.empty(); //Constructed in the PropertyDefinition validation
+
+        Optional<Stack<Map<String, List<String>>>> validation = Optional.empty();
+        if ((propertyDefinitionMap.get("validation") != null && propertyDefinitionMap.get("validation") instanceof String)) {
+            Logger.warn("the validation: " + propertyDefinitionMap.get("validation"));
+            validation = ValidationParser.parseValidation((String) propertyDefinitionMap.get("validation"));
+            Logger.warn("the validation: " + propertyDefinitionMap.get("validation"));
+        } else if (propertyDefinitionMap.get("validation") != null) {
+            try {
+            validation = ValidationParser.parseValidation((propertyDefinitionMap.get("validation").toString()));
+            } catch (Exception e) {
+                 Logger.error("The error message, " + e,e);
+            }     
+        }
         
         Optional<SchemaDefinition> keySchema = Optional.empty();
         if (propertyDefinitionMap.get("keySchema") != null && propertyDefinitionMap.get("keySchema") instanceof Map) {
@@ -85,7 +98,6 @@ public class PropertyDefinitionParser {
         Optional<SchemaDefinition> entrySchema = Optional.empty();
         if (propertyDefinitionMap.get("entrySchema") != null && propertyDefinitionMap.get("entrySchema") instanceof Map) {
             entrySchema = Optional.ofNullable(SchemaDefinitionParser.parseSchemaDefinition((Map<String, Object>) propertyDefinitionMap.getOrDefault("entrySchema",Optional.empty())));
-
         }
    
         return new PropertyDefinition (

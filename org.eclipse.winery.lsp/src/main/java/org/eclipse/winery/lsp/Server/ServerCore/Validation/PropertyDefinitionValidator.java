@@ -138,7 +138,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                     context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).properties().put(PropertyDefinitionKey,newProperty);
                     if (!newProperty.type().equals("") && newProperty.validation().isPresent()) {
                         try {
-                        if (isNotValidPropertyDefinitionsValue( newProperty.validation().get(), propertyValue, newProperty.type().getValue())) {
+                        if (isNotValidPropertyDefinitionsValue(newProperty.validation().get(), propertyValue, newProperty.type().getValue())) {
                             Mark mark = context.getContextDependentConstructorPositions().get(path);
                             int line = mark != null ? mark.getLine() + 1 : -1;
                             int column = mark != null ? mark.getColumn() + 1 : -1;

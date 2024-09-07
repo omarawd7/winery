@@ -48,7 +48,7 @@ public class CapabilityDefinitionParser {
             return null;
         }
 
-        CapabilityType type = null; // will be handled in the validation
+        CapabilityType type = new CapabilityType(Optional.empty(),Optional.empty(),Optional.empty(), Optional.empty(),Optional.empty(),Optional.empty(), new HashMap<>(), new ToscaMap<>(new HashMap<>())); // will be handled in the validation
         
         Optional<ToscaMap<String, String>> metadata = Optional.empty();
         if (capabilityDefinitionMap.get("metadata") != null && capabilityDefinitionMap.get("metadata") instanceof String) {

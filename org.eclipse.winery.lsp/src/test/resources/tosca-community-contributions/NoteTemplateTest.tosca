@@ -3,18 +3,6 @@ imports:
 - url: NodeTypeTest.yml
 - url: cloud_native_deployment_DeploymentOptions/types/node_types.yaml
 
-node_types:
-  cna-modeling.entities.Infrastructure:
-    derived_from: Abstract.Compute
-    description: Node Type to model Infrastructure entities
-    properties:
-      kind:
-        type: string
-        description: The kind of infrastructure. Possible kinds are "physical hardware", "virtual hardware", "software platform", or "cloud service".
-        required: true
-        validation: { $valid_values: [ $value, [ "physical-hardware", "virtual-hardware", "software-platform", "cloud-service"]]}
-        default: virtual-hardware
-        
 service_template:
   node_templates:
     aws_fargate:
