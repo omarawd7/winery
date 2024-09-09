@@ -14,8 +14,6 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
@@ -59,9 +57,9 @@ public class CapabilityTypeValidator implements DiagnosesHandler {
                             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
                             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
                             if (((Map<?, ?>) capabilityType).containsKey("derived_from")) {
-                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, capabilityTypeKey, "capability_types", (String) ((Map<?, ?>) capabilityType).get("derived_from"));
+                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions,YamlContent, lines, capabilityTypeKey, "capability_types", (String) ((Map<?, ?>) capabilityType).get("derived_from"));
                             } else {
-                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, YamlContent, lines, capabilityTypeKey, "capability_types",null);
+                                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, YamlContent, lines, capabilityTypeKey, "capability_types",null);
                             }
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }

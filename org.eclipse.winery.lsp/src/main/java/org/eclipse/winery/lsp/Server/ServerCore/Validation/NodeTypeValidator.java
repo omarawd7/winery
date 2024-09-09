@@ -14,16 +14,12 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityType;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.RequirementDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -158,9 +154,9 @@ public class NodeTypeValidator implements DiagnosesHandler {
             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
             if (nodeType.containsKey("derived_from")) {
-                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, nodeTypeKey, "node_types", (String) nodeType.get("derived_from"));
+                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, yamlContent, lines, nodeTypeKey, "node_types", (String) nodeType.get("derived_from"));
             } else {
-                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, nodeTypeKey, "node_types", null);
+                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, yamlContent, lines, nodeTypeKey, "node_types", null);
             }
             diagnostics.addAll(PropertyDefinitionDiagnostics);
         }

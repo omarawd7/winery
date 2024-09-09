@@ -14,7 +14,6 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
-import com.google.common.collect.ImmutableMap;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PolicyDefinition;
 import java.util.List;
 import java.util.Map;

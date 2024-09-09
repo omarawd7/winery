@@ -14,9 +14,7 @@
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactType;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeType;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.PropertyDefinition;
-import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaBoolean;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaList;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaString;

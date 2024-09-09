@@ -16,8 +16,6 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.WorkflowDefinitions;
-import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.ToscaMap;
-
 import java.util.Map;
 
 public class WorkflowsDefinitionParser {

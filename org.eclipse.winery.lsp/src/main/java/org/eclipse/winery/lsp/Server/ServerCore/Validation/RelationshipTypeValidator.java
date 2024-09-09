@@ -123,9 +123,9 @@ public class RelationshipTypeValidator implements DiagnosesHandler {
             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
             if (relationshipType.containsKey("derived_from")) {
-                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, relationshipTypeKey, "relationship_types", (String) relationshipType.get("derived_from"));
+                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions,yamlContent, lines, relationshipTypeKey, "relationship_types", (String) relationshipType.get("derived_from"));
             } else {
-                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, relationshipTypeKey, "relationship_types", null);
+                PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, yamlContent, lines, relationshipTypeKey, "relationship_types", null);
             }
             diagnostics.addAll(PropertyDefinitionDiagnostics);
         }

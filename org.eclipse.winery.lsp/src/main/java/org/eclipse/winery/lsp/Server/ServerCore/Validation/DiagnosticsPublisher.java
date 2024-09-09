@@ -17,7 +17,6 @@ import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParser;
-import org.tinylog.Logger;
 import org.yaml.snakeyaml.error.YAMLException;
 
 import java.io.IOException;

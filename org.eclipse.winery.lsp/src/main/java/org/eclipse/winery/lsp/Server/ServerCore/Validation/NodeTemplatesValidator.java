@@ -14,14 +14,11 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeTemplate;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -63,7 +60,7 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                         if (PropertyDefinitions instanceof Map) {
                             PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
                             ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
-                            PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, positions, yamlContent, lines, nodeTemplateKey, nodeTemplatePath, null);
+                            PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, yamlContent, lines, nodeTemplateKey, nodeTemplatePath, null);
                             diagnostics.addAll(PropertyDefinitionDiagnostics);
                         }
                     } else if (key.equals("requirements")) {

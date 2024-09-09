@@ -103,6 +103,12 @@ node_types:
     capabilities:
       proxy:
         type: cna-modeling.capabilities.Proxy
+        properties:
+          name:
+            description: >-
+              Name of this software image.
+            type: string
+            required: true           
         valid_source_node_types:
           - cna-modeling.entities.Component
           - cna-modeling.entities.Service

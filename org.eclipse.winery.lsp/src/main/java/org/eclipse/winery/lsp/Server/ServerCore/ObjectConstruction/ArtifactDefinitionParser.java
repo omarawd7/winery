@@ -16,8 +16,6 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.ArtifactDefinition;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.InterfaceAssignment;
-
 import java.util.Map;
 
 public class ArtifactDefinitionParser {

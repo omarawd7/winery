@@ -13,8 +13,6 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.yaml.snakeyaml.error.Mark;
@@ -33,7 +31,7 @@ public class SchemaDefinitionValidator implements DiagnosesHandler  {
     this.context = context;
     }
 
-    public ArrayList<DiagnosticsSetter> validateSchemaDefinitions(Map<String, Object> SchemaDefinitionMap, Map<String, Mark> positions, String yamlContent, String[] lines, String schemaPath) {
+    public ArrayList<DiagnosticsSetter> validateSchemaDefinitions(Map<String, Object> SchemaDefinitionMap, String yamlContent, String[] lines, String schemaPath) {
         Set<String> validPropertyDefinitionKeywords = Set.of(
             "type", "description","validation", "key_schema", "entry_schema"
         );
@@ -47,13 +45,13 @@ public class SchemaDefinitionValidator implements DiagnosesHandler  {
                 handleNotValidKeywords("Invalid Schema definition keyword: " + SchemaDefinitionKey, line, column, endColumn);
             }
             if ((SchemaDefinitionMap).containsKey("type") && (((Map<?, ?>) SchemaDefinitionMap).get("type").equals("list") || ((Map<?, ?>) SchemaDefinitionMap).get("type").equals("map"))) {
-                ValidateEntrySchema(positions, yamlContent, lines, SchemaDefinitionMap, schemaPath );
+                ValidateEntrySchema(yamlContent, lines, SchemaDefinitionMap, schemaPath );
             }
         }
         if ((SchemaDefinitionMap).containsKey("entry_schema")) {
             Object entrySchema = SchemaDefinitionMap.get("entry_schema");
             if (entrySchema instanceof Map) {
-                validateSchemaDefinitions((Map<String, Object>) entrySchema, positions, yamlContent, lines, schemaPath + "." + "entry_schema" );
+                validateSchemaDefinitions((Map<String, Object>) entrySchema, yamlContent, lines, schemaPath + "." + "entry_schema" );
             } else {
                 Mark mark = context.getContextDependentConstructorPositions().get( schemaPath + "." + "entry_schema");
                 int line = mark != null ? mark.getLine() + 1 : -1;
@@ -65,7 +63,7 @@ public class SchemaDefinitionValidator implements DiagnosesHandler  {
         return diagnostics;
     }
     
-    public void ValidateEntrySchema(Map<String, Mark> positions, String YamlContent, String[] lines, Map<?, ?> schemaDefinition, String schemaPath) {
+    public void ValidateEntrySchema(String YamlContent, String[] lines, Map<?, ?> schemaDefinition, String schemaPath) {
         if (! schemaDefinition.containsKey("entry_schema")) {
             Mark mark = context.getContextDependentConstructorPositions().get(schemaPath);
             int line = mark != null ? mark.getLine() + 1 : -1;

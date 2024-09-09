@@ -14,10 +14,8 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
-import com.google.common.collect.ImmutableMap;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.*;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCADataTypes.*;
-
 import java.util.*;
 import java.util.stream.Collectors;
 

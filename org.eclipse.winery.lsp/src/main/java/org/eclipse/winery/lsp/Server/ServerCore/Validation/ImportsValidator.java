@@ -35,7 +35,7 @@ public class ImportsValidator implements DiagnosesHandler {
      this.context = context;
     }
 
-    public ArrayList<DiagnosticsSetter> validateImports(List<Object> importsList, Map<String, Mark> positions, String yamlContent, String[] lines) {
+    public ArrayList<DiagnosticsSetter> validateImports(List<Object> importsList, String yamlContent, String[] lines) {
         Set<String> validImportsKeywords = Set.of(
             "url", "profile", "repository", "namespace", "description", "metadata"  
         );
@@ -147,8 +147,7 @@ public class ImportsValidator implements DiagnosesHandler {
                     context.getToscaFilesPath().put(currentFilePath, toscaFileParser.getToscaFile());
                     context.getImportedToscaFiles().put(currentFilePath ,Map.of(url,toscaFileParser.getToscaFile()));
                     if (importElement.get("namespace") != null) {
-                    if (importElement.get("namespace") instanceof String) {
-                        String namespace = (String) importElement.get("namespace");
+                    if (importElement.get("namespace") instanceof String namespace) {
                         context.getNamespaceDefinitions().put(context.getCurrentToscaFilePath() ,Map.of(namespace, toscaFileParser.getToscaFile()));
                     }
                 }

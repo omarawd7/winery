@@ -14,9 +14,8 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.CapabilityDefinition;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.tinylog.Logger;
@@ -68,6 +67,9 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
                                 Logger.error("The error message: " + e.getMessage(), e);
                             }
                             }
+                    } else if (key.equals("properties")) {
+                        validateProperties(yamlContent, lines, capabilityDefinitionsKey, key, (Map<?, ?>) capabilityDefinition, parent, CapabilityDefinitionPath);
+
                     }
                 }
             }
@@ -75,11 +77,22 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
         return diagnostics;
     }
 
+    private void validateProperties(String yamlContent, String[] lines, String capabilityDefinitionKey, String key, Map<?, ?> capabilityDefinition, String parent, String CapabilityDefinitionPath) {
+        Object PropertyDefinitions = capabilityDefinition.get(key);
+        if (PropertyDefinitions instanceof Map) {
+            PropertyDefinitionValidator propertyDefinitionValidator = new PropertyDefinitionValidator(context);
+            ArrayList<DiagnosticsSetter> PropertyDefinitionDiagnostics;
+            PropertyDefinitionDiagnostics = propertyDefinitionValidator.validatePropertyDefinitions((Map<String, Object>) PropertyDefinitions, yamlContent, lines, capabilityDefinitionKey, CapabilityDefinitionPath, parent);
+            diagnostics.addAll(PropertyDefinitionDiagnostics);
+        }
+    }
+    
     private void validateTypeFromNodeTypeParent(String yamlContent, String[] lines, String key, Object capabilityDefinition, String capabilityDefinitionPathWithName, String parent, String capabilityDefinitionsKey) {
         try {
             if (!context.getCurrentToscaFile().capabilityTypes().isEmpty() && context.getCurrentToscaFile().capabilityTypes().containsKey(((Map<String, Object>) capabilityDefinition).get(key))) {
                 if (context.getCurrentToscaFile().nodeTypes().getValue().containsKey(parent) && context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().containsKey(capabilityDefinitionsKey)) {
-                    context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().get(capabilityDefinitionsKey).withType(context.getCurrentToscaFile().capabilityTypes().get(((Map<String, Object>) capabilityDefinition).get(key)));
+                    CapabilityDefinition newCapabilityDefinition = context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().get(capabilityDefinitionsKey).withType(context.getCurrentToscaFile().capabilityTypes().get(((Map<String, Object>) capabilityDefinition).get(key)));
+                    context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().put(capabilityDefinitionsKey, newCapabilityDefinition);
                 }
                 return;
             }
@@ -89,7 +102,8 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
                     for (TOSCAFile file : mapOfImportedFiles.values()) {
                         if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().containsKey(((Map<String, Object>) capabilityDefinition).get(key))) {
                             if (context.getCurrentToscaFile().nodeTypes().getValue().containsKey(parent) && context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().containsKey(capabilityDefinitionsKey)) {
-                                context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().get(capabilityDefinitionsKey).withType(file.capabilityTypes().get(((Map<String, Object>) capabilityDefinition).get(key)));
+                                CapabilityDefinition newCapabilityDefinition = context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().get(capabilityDefinitionsKey).withType(file.capabilityTypes().get(((Map<String, Object>) capabilityDefinition).get(key)));
+                                context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().put(capabilityDefinitionsKey, newCapabilityDefinition);
                             }
                             return;
                         }
@@ -107,7 +121,7 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
                                     TOSCAFile file = mapOfNamespaces.getOrDefault(namespace, null);
                                     if (file != null && !file.capabilityTypes().isEmpty() && file.capabilityTypes().containsKey(typeWithoutNamespace)) {
                                         if (context.getCurrentToscaFile().nodeTypes().getValue().containsKey(parent) && context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().containsKey(capabilityDefinitionsKey)) {
-                                            context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().get(capabilityDefinitionsKey).withType(file.capabilityTypes().get(typeWithoutNamespace));    
+                                            CapabilityDefinition newCapabilityDefinition = context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().get(capabilityDefinitionsKey).withType(file.capabilityTypes().get(typeWithoutNamespace));context.getCurrentToscaFile().nodeTypes().getValue().get(parent).capabilities().getValue().put(capabilityDefinitionsKey, newCapabilityDefinition);
                                         }
                                         return;
                                     }

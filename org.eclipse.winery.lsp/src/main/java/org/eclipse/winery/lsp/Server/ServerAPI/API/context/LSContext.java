@@ -39,7 +39,9 @@ public interface LSContext {
     default void log(MessageType messageType, String message) {
         this.getClient().logMessage(new MessageParams(messageType,message));
     }
+    
     void setClient(LanguageClient client);
+    
     LanguageClient getClient();
 
     void setClientCapabilities(ClientCapabilities capabilities);

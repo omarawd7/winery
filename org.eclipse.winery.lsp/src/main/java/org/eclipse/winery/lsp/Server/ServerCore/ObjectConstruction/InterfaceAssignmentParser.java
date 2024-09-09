@@ -16,9 +16,6 @@ package org.eclipse.winery.lsp.Server.ServerCore.ObjectConstruction;
 
 import com.google.common.collect.ImmutableMap;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.InterfaceAssignment;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.RequirementAssignment;
-
-import java.util.List;
 import java.util.Map;
 
 public class InterfaceAssignmentParser {
