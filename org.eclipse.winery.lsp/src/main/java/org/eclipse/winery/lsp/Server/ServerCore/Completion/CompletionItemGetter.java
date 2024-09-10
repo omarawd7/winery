@@ -209,10 +209,13 @@ public class CompletionItemGetter {
 
     public List<CompletionItem> getAvailableRelationshipTypes(LSContext lsContext) {
         List<String> relationshipTypes = new ArrayList<>();
-        if (lsContext.getCurrentToscaFile() != null && lsContext.getCurrentToscaFile().relationshipTypes() != null && lsContext.getCurrentToscaFile().relationshipTypes() != null) {
-            for (String key : lsContext.getCurrentToscaFile().relationshipTypes().getValue().keySet()) {
-                relationshipTypes.add(" " + key);
+        if (lsContext.getCurrentToscaFile() != null) {
+            if (lsContext.getCurrentToscaFile().relationshipTypes() != null) {
+                for (String key : lsContext.getCurrentToscaFile().relationshipTypes().getValue().keySet()) {
+                    relationshipTypes.add(" " + key);
+                }   
             }
+            relationshipTypes.addAll(getRelationshipTypesInImportedFiles(lsContext));
             return relationshipTypes.stream()
                 .map(type -> {
                     CompletionItem item = new CompletionItem(type);
@@ -223,7 +226,22 @@ public class CompletionItemGetter {
         }
         return new ArrayList<>();
     }
-
+    private List<String> getRelationshipTypesInImportedFiles(LSContext context) {
+        List<String> RelationshipTypes = new ArrayList<>();
+        if (context.getCurrentToscaFile().imports().isPresent()) {
+            Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+            for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                for (TOSCAFile file : mapOfImportedFiles.values()) {
+                    if (file != null && file.relationshipTypes() != null) {
+                        for (String key : file.relationshipTypes().getValue().keySet()) {
+                            RelationshipTypes.add(" " + key);
+                        }
+                    }
+                }
+            }
+        }
+        return RelationshipTypes;
+    }
     public List<CompletionItem> getRelationshipTypesKeyWords(Position position) {
         List<String> keywords = List.of(
             "derived_from", "version", "metadata", "description", "properties", "attributes", "interfaces", "valid_capability_types","valid_target_node_types", "valid_source_node_types"
