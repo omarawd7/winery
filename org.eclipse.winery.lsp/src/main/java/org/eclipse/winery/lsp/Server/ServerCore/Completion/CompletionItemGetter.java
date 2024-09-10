@@ -16,26 +16,24 @@ package org.eclipse.winery.lsp.Server.ServerCore.Completion;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
-import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeTemplate;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
-import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
-import org.yaml.snakeyaml.error.Mark;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-
 import static java.util.stream.Collectors.toList;
 
 public class CompletionItemGetter {
     public List<CompletionItem> getAvailableArtifactTypes(LSContext lsContext) {
         List<String> artifactTypes = new ArrayList<>();
-        
-        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().artifactTypes().isEmpty() && !lsContext.getCurrentToscaFile().artifactTypes().isEmpty() ) {
-            for (String key : lsContext.getCurrentToscaFile().artifactTypes().keySet()) {
-                artifactTypes.add(" " + key);
+        if (lsContext.getCurrentToscaFile() != null) {
+            if (!lsContext.getCurrentToscaFile().artifactTypes().isEmpty()) {
+                for (String key : lsContext.getCurrentToscaFile().artifactTypes().keySet()) {
+                    artifactTypes.add(" " + key);
+                }
             }
+            artifactTypes.addAll(getArtifactTypesInImportedFiles(lsContext));
+
             return artifactTypes.stream()
                 .map(type -> {
                     CompletionItem item = new CompletionItem(type);
@@ -46,7 +44,24 @@ public class CompletionItemGetter {
         }
         return new ArrayList<>();
     }
-    
+
+    private Collection<String> getArtifactTypesInImportedFiles(LSContext context) {
+        List<String> artifactTypes = new ArrayList<>();
+        if (context.getCurrentToscaFile().imports().isPresent()) {
+            Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+            for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                for (TOSCAFile file : mapOfImportedFiles.values()) {
+                    if (file != null && file.artifactTypes() != null) {
+                        for (String key : file.artifactTypes().keySet()) {
+                            artifactTypes.add(" " + key);
+                        }
+                    }
+                }
+            }
+        }
+        return artifactTypes;
+    }
+
     public List<CompletionItem> getAvailableCapabilityTypes(LSContext lsContext) {
         List<String> capabilityTypes = new ArrayList<>();
         if (lsContext.getCurrentToscaFile() != null) {

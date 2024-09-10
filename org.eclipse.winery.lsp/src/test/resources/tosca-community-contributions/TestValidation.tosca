@@ -30,8 +30,6 @@ artifact_types:
       to have its associated file simply treated as a file without any
       special handling.
     derived_from: Root
-    properties:
-      testProperty: 50
 
   File1:
     description: >-
@@ -39,5 +37,3 @@ artifact_types:
       to have its associated file simply treated as a file without any
       special handling.
     derived_from: Root
-    properties:
-      testProperty: 5
