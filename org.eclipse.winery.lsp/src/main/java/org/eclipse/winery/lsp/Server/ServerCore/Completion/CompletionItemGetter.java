@@ -49,10 +49,11 @@ public class CompletionItemGetter {
     
     public List<CompletionItem> getAvailableCapabilityTypes(LSContext lsContext) {
         List<String> capabilityTypes = new ArrayList<>();
-        if (lsContext.getCurrentToscaFile() != null && !lsContext.getCurrentToscaFile().capabilityTypes().isEmpty() && !lsContext.getCurrentToscaFile().capabilityTypes().isEmpty()) {
+        if (lsContext.getCurrentToscaFile() != null) {
             for (String key : lsContext.getCurrentToscaFile().capabilityTypes().keySet()) {
                 capabilityTypes.add(" " + key);
             }
+            capabilityTypes.addAll(getCapabilityTypesInImportedFiles(lsContext));
             return capabilityTypes.stream()
                 .map(type -> {
                     CompletionItem item = new CompletionItem(type);
@@ -62,7 +63,6 @@ public class CompletionItemGetter {
                 .collect(toList()); 
         }
         return new ArrayList<>();
-
     }
 
     public List<CompletionItem> getTOSCAFileKeywords(Position position) {
@@ -144,7 +144,24 @@ public class CompletionItemGetter {
         }
         return new ArrayList<>();
     }
-    
+
+    private List<String> getCapabilityTypesInImportedFiles(LSContext context) {
+        List<String> capabilityTypes = new ArrayList<>();
+        if (context.getCurrentToscaFile().imports().isPresent()) {
+            Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+            for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                for (TOSCAFile file : mapOfImportedFiles.values()) {
+                    if (file != null && file.capabilityTypes() != null) {
+                        for (String key : file.capabilityTypes().keySet()) {
+                            capabilityTypes.add(" " + key);
+                        }
+                    }
+                }
+            }
+        }
+        return capabilityTypes;
+    }
+
     private List<String> getNodeTypesInImportedFiles(LSContext context) {
         List<String> nodeTypes = new ArrayList<>();
             if (context.getCurrentToscaFile().imports().isPresent()) {
