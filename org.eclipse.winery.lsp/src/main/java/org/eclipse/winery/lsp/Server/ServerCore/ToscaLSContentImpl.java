@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 public class ToscaLSContentImpl implements LSContext {
+    public boolean isValidatedForImporting = false;
     private final Map<String, String> fileContents = new HashMap<>();
     private Map<LSContext.Key<?>, Object> props = new HashMap<>();
     private Map<Class<?>, Object> objects = new HashMap<>();
@@ -139,12 +140,33 @@ public class ToscaLSContentImpl implements LSContext {
     public void setImportedToscaFiles(Multimap<Path, Map<String, TOSCAFile>> importedToscaFiles) {
         this.importedToscaFiles = importedToscaFiles;
     }
-
+    
+    @Override
+    public boolean isValidatedForImporting() {
+        return isValidatedForImporting;
+    }
+    
+    @Override
+    public void setValidatedForImporting(boolean validatedForImporting) {
+        isValidatedForImporting = validatedForImporting;
+    }
+    
     public Map<Path, TOSCAFile> getToscaFilesPath() {
         return ToscaFilesPath;
     }
 
     public void setToscaFilesPath(Map<Path, TOSCAFile> toscaFilesPath) {
         ToscaFilesPath = toscaFilesPath;
+    }
+
+    @Override
+    public ToscaLSContentImpl clone() {
+        try {
+            ToscaLSContentImpl clone = (ToscaLSContentImpl) super.clone();
+            // TODO: copy mutable state here, so the clone can't change the internals of the original
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
     }
 }

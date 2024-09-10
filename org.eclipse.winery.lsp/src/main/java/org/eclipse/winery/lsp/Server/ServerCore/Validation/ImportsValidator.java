@@ -14,9 +14,13 @@
 
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import com.google.common.collect.LinkedHashMultimap;
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
+import org.tinylog.Logger;
 import org.yaml.snakeyaml.error.Mark;
 
 import java.io.IOException;
@@ -35,7 +39,7 @@ public class ImportsValidator implements DiagnosesHandler {
      this.context = context;
     }
 
-    public ArrayList<DiagnosticsSetter> validateImports(List<Object> importsList, String yamlContent, String[] lines) {
+    public ArrayList<DiagnosticsSetter> validateImports(List<Object> importsList, String yamlContent, Map<String, Object> yamlMap, Map<String, Mark> positions, String[] lines) {
         Set<String> validImportsKeywords = Set.of(
             "url", "profile", "repository", "namespace", "description", "metadata"  
         );
@@ -67,7 +71,7 @@ public class ImportsValidator implements DiagnosesHandler {
                         endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
                         handleNotValidKeywords("Import statement must include either a url or a profile, but not both.", line, column, endColumn);
                      } else if (((Map<?, ?>) importElement).get(importsKey) != null && importsKey.equals("url")) {
-                        validateURL(yamlContent, lines, (Map<?, ?>) importElement, importsKey, importsPath);
+                        validateURL(yamlContent, yamlMap, positions,lines, (Map<?, ?>) importElement, importsKey, importsPath);
                     } else if (((Map<?, ?>) importElement).get(importsKey) != null && importsKey.equals("profile")) {
                         validateProfile(yamlContent, lines, (Map<?, ?>) importElement, importsKey, importsPath);
                     }
@@ -98,9 +102,18 @@ public class ImportsValidator implements DiagnosesHandler {
                 Boolean isFileExist = false;
                 for (Path ToscaFilePath: context.getDirectoryFilePaths()) {
                     if (CommonUtils.isToscaFile(ToscaFilePath)) {
-                    toscaFileParser.ParseTOSCAFile(ToscaFilePath,context.getClient());
+                        Map<String, Object> newyamlMap =toscaFileParser.ParseTOSCAFile(ToscaFilePath,context.getClient());
+                    TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();
 
                     if ( toscaFileParser.getToscaFile() != null && toscaFileParser.getToscaFile().profile().isPresent() && toscaFileParser.getToscaFile().profile().get().getValue().equals(profileValue)) {
+                        if (!context.isValidatedForImporting()) {
+                            LSContext newContext = context.clone();
+                            newContext.setCotextDependentPositions(toscaFileParser.getContextDependentConstructorPositions());
+                            newContext.setCurrentToscaFile(toscaFileParser.getToscaFile());
+                            toscaFileValidator.validate(newyamlMap, newContext, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions());
+                            newContext.setImportedToscaFiles(LinkedHashMultimap.create());
+                            newContext.setNamespaceDefinitions(LinkedHashMultimap.create());
+                        }
                         context.getImportedToscaFiles().put(context.getCurrentToscaFilePath() ,Map.of(profileValue,toscaFileParser.getToscaFile()));
                         isFileExist = true;
                         if (importElement.get("namespace") != null) {
@@ -136,14 +149,23 @@ public class ImportsValidator implements DiagnosesHandler {
         }
     }
 
-    private void validateURL(String yamlContent, String[] lines, Map<?, ?> importElement, String importsKey, String importsPath) {
+    private void validateURL(String yamlContent, Map<String, Object> yamlMap, Map<String, Mark> positions, String[] lines, Map<?, ?> importElement, String importsKey, String importsPath) {
         if (importElement.get(importsKey) instanceof String url) {
             Path currentFilePath = context.getCurrentToscaFilePath();
             TOSCAFileParser toscaFileParser = new TOSCAFileParser();
+            TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();
             try {
                 Path ImportedToscaFilePath = currentFilePath.getParent().resolve(url);
                 if (CommonUtils.isToscaFile(ImportedToscaFilePath)) {
-                    toscaFileParser.ParseTOSCAFile(ImportedToscaFilePath,context.getClient());
+                    Map<String, Object> newyamlMap = toscaFileParser.ParseTOSCAFile(ImportedToscaFilePath,context.getClient());
+                    if (!context.isValidatedForImporting()) {
+                        LSContext newContext = context.clone();
+                        newContext.setCotextDependentPositions(toscaFileParser.getContextDependentConstructorPositions());
+                        newContext.setCurrentToscaFile(toscaFileParser.getToscaFile());
+                        toscaFileValidator.validate(newyamlMap, newContext, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions());
+                        newContext.setImportedToscaFiles(LinkedHashMultimap.create());
+                        newContext.setNamespaceDefinitions(LinkedHashMultimap.create());
+                    }
                     context.getToscaFilesPath().put(currentFilePath, toscaFileParser.getToscaFile());
                     context.getImportedToscaFiles().put(currentFilePath ,Map.of(url,toscaFileParser.getToscaFile()));
                     if (importElement.get("namespace") != null) {

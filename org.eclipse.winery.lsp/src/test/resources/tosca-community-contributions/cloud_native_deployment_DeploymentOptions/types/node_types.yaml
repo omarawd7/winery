@@ -11,8 +11,17 @@ metadata:
 description: >-
   This TOSCA definitions document contains the CNA Modeling node types.
 
-node_types:
+capability_types:
+  Endpoint:
+    description: When included, the Node is able to act as a proxy. This covers all communication to the endpoints of the proxied component.
+    properties:
+      name:
+        description: >-
+          Name of this software image.
+        type: string
+        required: true
 
+node_types:
   cna-modeling.entities.Component:
     derived_from: SoftwareComponent
     description: Node Type to model Component entities

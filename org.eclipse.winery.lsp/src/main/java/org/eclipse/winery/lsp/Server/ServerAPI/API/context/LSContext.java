@@ -16,6 +16,7 @@ import org.eclipse.lsp4j.MessageParams;
 import org.eclipse.lsp4j.MessageType;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import org.eclipse.winery.lsp.Server.ServerCore.ToscaLSContentImpl;
 import org.yaml.snakeyaml.error.Mark;
 
 import java.nio.file.Path;
@@ -23,7 +24,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-public interface LSContext {
+public interface LSContext extends Cloneable {
     
     <V> void put(LSContext.Key<V> key, V value);
 
@@ -84,5 +85,11 @@ public interface LSContext {
 
     void setToscaFilesPath(Map<Path, TOSCAFile> toscaFilesPath);
     
-    class Key<K> { }
+    boolean isValidatedForImporting();
+    
+    void setValidatedForImporting(boolean validatedForImporting);
+    
+    ToscaLSContentImpl clone() ;
+
+        class Key<K> { }
 }

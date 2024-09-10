@@ -106,7 +106,7 @@ public class TOSCAFileValidator implements DiagnosesHandler {
     Object imports = yamlMap.get("imports");
     if (imports instanceof List) {
        ImportsValidator importsValidator = new ImportsValidator(context);
-       ArrayList<DiagnosticsSetter> ImportsDiagnostics = importsValidator.validateImports((List<Object>) imports, yamlContent, lines);
+       ArrayList<DiagnosticsSetter> ImportsDiagnostics = importsValidator.validateImports((List<Object>) imports, yamlContent, yamlMap, positions ,lines);
        diagnostics.addAll(ImportsDiagnostics);
     }
     }
