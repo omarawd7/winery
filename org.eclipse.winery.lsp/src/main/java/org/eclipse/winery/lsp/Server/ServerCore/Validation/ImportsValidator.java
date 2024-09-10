@@ -102,7 +102,7 @@ public class ImportsValidator implements DiagnosesHandler {
                 Boolean isFileExist = false;
                 for (Path ToscaFilePath: context.getDirectoryFilePaths()) {
                     if (CommonUtils.isToscaFile(ToscaFilePath)) {
-                        Map<String, Object> newyamlMap =toscaFileParser.ParseTOSCAFile(ToscaFilePath,context.getClient());
+                        Map<String, Object> newyamlMap = toscaFileParser.ParseTOSCAFile(ToscaFilePath,context.getClient());
                     TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();
 
                     if ( toscaFileParser.getToscaFile() != null && toscaFileParser.getToscaFile().profile().isPresent() && toscaFileParser.getToscaFile().profile().get().getValue().equals(profileValue)) {

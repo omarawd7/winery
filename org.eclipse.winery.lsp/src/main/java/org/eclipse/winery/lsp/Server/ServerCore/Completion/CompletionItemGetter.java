@@ -16,8 +16,15 @@ package org.eclipse.winery.lsp.Server.ServerCore.Completion;
 import org.eclipse.lsp4j.*;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.NodeTemplate;
+import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
+import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
+import org.yaml.snakeyaml.error.Mark;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.stream.Collectors.toList;
 
@@ -126,6 +133,7 @@ public class CompletionItemGetter {
             for (String key : lsContext.getCurrentToscaFile().nodeTypes().getValue().keySet()) {
                 nodeTypes.add(" " + key);
             }
+            nodeTypes.addAll(getNodeTypesInImportedFiles(lsContext));
             return nodeTypes.stream()
                 .map(type -> {
                     CompletionItem item = new CompletionItem(type);
@@ -135,6 +143,23 @@ public class CompletionItemGetter {
                 .collect(toList());
         }
         return new ArrayList<>();
+    }
+    
+    private List<String> getNodeTypesInImportedFiles(LSContext context) {
+        List<String> nodeTypes = new ArrayList<>();
+            if (context.getCurrentToscaFile().imports().isPresent()) {
+                Collection<Map<String, TOSCAFile>> imports = context.getImportedToscaFiles().get(context.getCurrentToscaFilePath());
+                for (Map<String, TOSCAFile> mapOfImportedFiles : imports) {
+                    for (TOSCAFile file : mapOfImportedFiles.values()) {
+                        if (file != null && file.nodeTypes() != null && !file.nodeTypes().getValue().isEmpty()) {
+                            for (String key : file.nodeTypes().getValue().keySet()) {
+                                nodeTypes.add(" " + key);
+                            }
+                        }
+                    }
+                }
+            }
+         return nodeTypes;
     }
 
     public List<CompletionItem> getCapabilityDefinitionKeyWords(Position position) {
