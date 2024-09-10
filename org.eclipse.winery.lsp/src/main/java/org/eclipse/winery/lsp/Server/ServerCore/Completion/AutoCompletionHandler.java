@@ -18,6 +18,7 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.ToscaContext;
 import java.util.List;
+import java.util.Stack;
 
 public class AutoCompletionHandler {
     LSContext lsContext;
@@ -78,7 +79,9 @@ public class AutoCompletionHandler {
     }
 
     private List<CompletionItem> capabilityDefinitionCompletion(String line, Position position) {
-        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("capabilities")) {
+        Stack<String> stack = (Stack<String>) toscaContext.getContextStack().clone(); 
+        stack.pop();
+        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("capabilities") && !stack.peek().equals("node_templates")) { //checks if we are under a node_templates
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableCapabilityTypes(lsContext);
         } else if (line.startsWith("    ") && line.trim().isEmpty() && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("capabilities"))) {
@@ -89,7 +92,9 @@ public class AutoCompletionHandler {
     }
 
     private List<CompletionItem> nodeTemplateCompletion(String line, Position position) {
-        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("node_templates")) {
+        Stack<String> stack = (Stack<String>) toscaContext.getContextStack().clone();
+        stack.pop();
+        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("node_templates") || (toscaContext.getContextStack().peek().equals("capabilities") && stack.peek().equals("node_templates")))) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableNodeTypes(lsContext);
         } else if (line.startsWith("    ") && line.trim().isEmpty() && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("node_templates"))) {
