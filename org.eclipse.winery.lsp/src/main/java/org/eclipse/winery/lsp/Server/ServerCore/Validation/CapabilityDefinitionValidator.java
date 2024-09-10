@@ -37,7 +37,7 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
         this.context = context;
     }
     
-    public ArrayList<DiagnosticsSetter> validateCapabilityDefinitions(Map<String, Object> capabilityDefinitionsMap, String yamlContent, String[] lines, String CapabilityDefinitionPath, String parent) {
+    public ArrayList<DiagnosticsSetter> validateCapabilityDefinitions(Map<String, Object> capabilityDefinitionsMap, String yamlContent, String[] lines, String capabilityDefinitionPath, String parent) {
         
         Set<String> validNodeTypeKeywords = Set.of(
             "type", "description", "metadata", "properties", "attributes", "valid_source_node_types", "valid_relationship_types"
@@ -45,36 +45,60 @@ public class CapabilityDefinitionValidator implements DiagnosesHandler {
         for (String capabilityDefinitionsKey : capabilityDefinitionsMap.keySet()) {
             Object capabilityDefinition = capabilityDefinitionsMap.get(capabilityDefinitionsKey);
             if (capabilityDefinition instanceof Map) {
-                String capabilityDefinitionPathWithName = CapabilityDefinitionPath + "." + capabilityDefinitionsKey;
-                validateRequiredKeys((Map<String, Object>) capabilityDefinition,yamlContent, lines, capabilityDefinitionPathWithName);
-
-                for (String key : ((Map<String, Object>) capabilityDefinition).keySet()) {
-                    if (!validNodeTypeKeywords.contains(key)) {
-                        Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + key);
-                        int line = mark != null ? mark.getLine() + 1 : -1;
-                        int column = mark != null ? mark.getColumn() + 1 : -1;
-                        int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
-
-                        handleNotValidKeywords("Invalid capability definition keyword: " + key , line, column, endColumn);
-                    }
-                    //Check if the type keyword exists, and contains existing capability type
-                    else if (key.equals("type")) {
-                        if (CapabilityDefinitionPath.contains("node_types")) {
-                            try {
-                                validateTypeFromNodeTypeParent(yamlContent, lines, key, capabilityDefinition, capabilityDefinitionPathWithName, parent, capabilityDefinitionsKey);
-                            }
-                            catch (Exception e) {
-                                Logger.error("The error message: " + e.getMessage(), e);
-                            }
-                            }
-                    } else if (key.equals("properties")) {
-                        validateProperties(yamlContent, lines, capabilityDefinitionsKey, key, (Map<?, ?>) capabilityDefinition, parent, CapabilityDefinitionPath);
-
-                    }
+                String capabilityDefinitionPathWithName = capabilityDefinitionPath + "." + capabilityDefinitionsKey;
+                if (capabilityDefinitionPathWithName.contains("node_templates") && capabilityDefinitionPathWithName.contains("capabilities")) {
+                    if (validateCapabilitiesFromNodeTemplateParent(yamlContent, lines, parent, capabilityDefinitionsKey, capabilityDefinitionPathWithName))
+                        continue;
+                } else {
+                    validateRequiredKeys((Map<String, Object>) capabilityDefinition,yamlContent, lines, capabilityDefinitionPathWithName);
                 }
+                validateCapabilityDefinition(yamlContent, lines, capabilityDefinitionPath, parent, capabilityDefinitionsKey, capabilityDefinition, validNodeTypeKeywords, capabilityDefinitionPathWithName);
+            } else if (capabilityDefinition instanceof String) {
+                if (validateCapabilitiesFromNodeTemplateParent(yamlContent, lines, parent, capabilityDefinitionsKey, capabilityDefinitionPath + "." + capabilityDefinitionsKey))
+                    continue;
             }
         }
         return diagnostics;
+    }
+
+    private boolean validateCapabilitiesFromNodeTemplateParent(String yamlContent, String[] lines, String parent, String capabilityDefinitionsKey, String capabilityDefinitionPathWithName) {
+        if (context.getCurrentToscaFile() == null || context.getCurrentToscaFile().serviceTemplate().isEmpty() || context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue() == null || !context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().containsKey(parent) || context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).type() == null || !context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parent).type().capabilities().getValue().containsKey(capabilityDefinitionsKey)) {
+            Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
+            handleNotValidKeywords("Invalid capability definition" , line, column, endColumn);
+
+            return true;
+        }
+        return false;
+    }
+
+    private void validateCapabilityDefinition(String yamlContent, String[] lines, String capabilityDefinitionPath, String parent, String capabilityDefinitionsKey, Object capabilityDefinition, Set<String> validNodeTypeKeywords, String capabilityDefinitionPathWithName) {
+        for (String key : ((Map<String, Object>) capabilityDefinition).keySet()) {
+            if (!validNodeTypeKeywords.contains(key)) {
+                Mark mark = context.getContextDependentConstructorPositions().get(capabilityDefinitionPathWithName + "." + key);
+                int line = mark != null ? mark.getLine() + 1 : -1;
+                int column = mark != null ? mark.getColumn() + 1 : -1;
+                int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
+
+                handleNotValidKeywords("Invalid capability definition keyword: " + key , line, column, endColumn);
+            }
+            //Check if the type keyword exists, and contains existing capability type
+            else if (key.equals("type")) {
+                if (capabilityDefinitionPath.contains("node_types")) {
+                    try {
+                        validateTypeFromNodeTypeParent(yamlContent, lines, key, capabilityDefinition, capabilityDefinitionPathWithName, parent, capabilityDefinitionsKey);
+                    }
+                    catch (Exception e) {
+                        Logger.error("The error message: " + e.getMessage(), e);
+                    }
+                    }
+            } else if (key.equals("properties")) {
+                validateProperties(yamlContent, lines, capabilityDefinitionsKey, key, (Map<?, ?>) capabilityDefinition, parent, capabilityDefinitionPath);
+
+            }
+        }
     }
 
     private void validateProperties(String yamlContent, String[] lines, String capabilityDefinitionKey, String key, Map<?, ?> capabilityDefinition, String parent, String CapabilityDefinitionPath) {

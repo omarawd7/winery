@@ -68,11 +68,23 @@ public class NodeTemplatesValidator implements DiagnosesHandler {
                         if (requirementDefinitions instanceof List) {
                             validateRequirementDefinitions(yamlContent, lines, nodeTemplateKey, (List<?>) requirementDefinitions, nodeTemplatePathWithName + "." + "requirements");
                         }
+                    } else if ((key.equals("capabilities"))) {
+                        Object capabilityDefinitions = ((Map<?, ?>) nodeTemplate).get(key);
+                        if (capabilityDefinitions instanceof Map) {
+                            validateCapabilityDefinitions(yamlContent, lines, nodeTemplateKey, (Map<String, Object>) capabilityDefinitions, nodeTemplatePathWithName + "." + "capabilities");
+                        }
                     }
                 }
             }
         }
         return diagnostics;
+    }
+
+    private void validateCapabilityDefinitions(String yamlContent, String[] lines, String nodeTemplateKey, Map<String,Object> capabilityDefinitions, String nodeTemplatePath) {
+        CapabilityDefinitionValidator capabilityDefinitionValidator = new CapabilityDefinitionValidator(context);
+        ArrayList<DiagnosticsSetter> capabilityDefinitionDiagnostics;
+        capabilityDefinitionDiagnostics = capabilityDefinitionValidator.validateCapabilityDefinitions(capabilityDefinitions, yamlContent, lines, nodeTemplatePath, nodeTemplateKey);
+        diagnostics.addAll(capabilityDefinitionDiagnostics);
     }
 
     private void validateRequirementDefinitions(String yamlContent, String[] lines, String nodeTemplateKey, List<?> RequirementDefinitions, String nodeTemplatePath) {

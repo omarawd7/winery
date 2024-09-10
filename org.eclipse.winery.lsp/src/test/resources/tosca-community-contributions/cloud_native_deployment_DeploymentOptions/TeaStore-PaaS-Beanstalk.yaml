@@ -1,6 +1,8 @@
 tosca_definitions_version: tosca_2_0
 imports:
 - url: types/node_types.yaml
+- url: types/relationship_types.yaml
+- url: types/capability_types.yaml
 metadata:
   template_author: CNA modeling tool
   template_name: TeaStore-PaaS-Beanstalk
@@ -375,6 +377,7 @@ service_template:
             ports: {}
             rate_limiting: none
             idempotent: false
+            name: none
       requirements:
         - uses_data: order
         - uses_data: product
