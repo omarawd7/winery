@@ -226,6 +226,7 @@ public class CompletionItemGetter {
         }
         return new ArrayList<>();
     }
+    
     private List<String> getRelationshipTypesInImportedFiles(LSContext context) {
         List<String> RelationshipTypes = new ArrayList<>();
         if (context.getCurrentToscaFile().imports().isPresent()) {
@@ -242,6 +243,7 @@ public class CompletionItemGetter {
         }
         return RelationshipTypes;
     }
+    
     public List<CompletionItem> getRelationshipTypesKeyWords(Position position) {
         List<String> keywords = List.of(
             "derived_from", "version", "metadata", "description", "properties", "attributes", "interfaces", "valid_capability_types","valid_target_node_types", "valid_source_node_types"

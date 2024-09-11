@@ -20,7 +20,6 @@ import org.eclipse.winery.lsp.Server.ServerCore.DataModels.TOSCAFile;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
 import org.tinylog.Logger;
 import org.yaml.snakeyaml.error.Mark;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;

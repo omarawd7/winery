@@ -15,14 +15,10 @@
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
 import com.google.common.collect.LinkedHashMultimap;
-import org.eclipse.lsp4j.MessageParams;
-import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.Parsing.TOSCAFileParser;
 import org.eclipse.winery.lsp.Server.ServerCore.Utils.CommonUtils;
-import org.tinylog.Logger;
 import org.yaml.snakeyaml.error.Mark;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,6 +26,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ImportsValidator implements DiagnosesHandler {
     public ArrayList<DiagnosticsSetter> diagnostics = new ArrayList<>();
@@ -95,31 +93,44 @@ public class ImportsValidator implements DiagnosesHandler {
     }
 
     private void validateProfile(String yamlContent, String[] lines, Map<?, ?> importElement, String importsKey, String importsPath) {
-        if (importElement.get(importsKey) instanceof String) {
-            String profileValue = ((String) importElement.get(importsKey));
+        if (importElement.get(importsKey) instanceof String profileValue) {
             TOSCAFileParser toscaFileParser = new TOSCAFileParser();
             try {
-                Boolean isFileExist = false;
+                boolean isFileExist = false;
                 for (Path ToscaFilePath: context.getDirectoryFilePaths()) {
                     if (CommonUtils.isToscaFile(ToscaFilePath)) {
                         Map<String, Object> newyamlMap = toscaFileParser.ParseTOSCAFile(ToscaFilePath,context.getClient());
                     TOSCAFileValidator toscaFileValidator = new TOSCAFileValidator();
 
-                    if ( toscaFileParser.getToscaFile() != null && toscaFileParser.getToscaFile().profile().isPresent() && toscaFileParser.getToscaFile().profile().get().getValue().equals(profileValue)) {
-                        if (!context.isValidatedForImporting()) {
+                    if (toscaFileParser.getToscaFile() != null && toscaFileParser.getToscaFile().profile().isPresent() && toscaFileParser.getToscaFile().profile().get().getValue().equals(profileValue)) {
                             LSContext newContext = context.clone();
                             newContext.setCotextDependentPositions(toscaFileParser.getContextDependentConstructorPositions());
                             newContext.setCurrentToscaFile(toscaFileParser.getToscaFile());
-                            toscaFileValidator.validate(newyamlMap, newContext, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions());
                             newContext.setImportedToscaFiles(LinkedHashMultimap.create());
                             newContext.setNamespaceDefinitions(LinkedHashMultimap.create());
-                        }
-                        context.getImportedToscaFiles().put(context.getCurrentToscaFilePath() ,Map.of(profileValue,toscaFileParser.getToscaFile()));
+                            newContext.setCurrentToscaFilePath(ToscaFilePath);
+                           
+                            Path directoryPath = ToscaFilePath.getParent();
+                            // Determine all parent directories of all files
+                            Stream<Path> walk = Files.walk(directoryPath);
+                            Set<Path> filePaths = walk.filter(Files::isRegularFile)
+                                .flatMap(path -> {
+                                    List<Path> additions = new ArrayList<>();
+                                    do {
+                                        additions.add(path);
+                                        path = path.getParent();
+                                    } while (path != null);
+                                    return additions.stream();
+                                })
+                                .collect(Collectors.toSet());
+                            newContext.getDirectoryFilePaths().clear();
+                            newContext.setDirectoryFilePaths(filePaths);
+                            toscaFileValidator.validate(newyamlMap, newContext, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions());
+                        context.getImportedToscaFiles().put(context.getCurrentToscaFilePath() ,Map.of(profileValue,newContext.getCurrentToscaFile()));
                         isFileExist = true;
                         if (importElement.get("namespace") != null) {
-                            if (importElement.get("namespace") instanceof String) {
-                                String namespace = (String) importElement.get("namespace");
-                                context.getNamespaceDefinitions().put(context.getCurrentToscaFilePath() ,Map.of(namespace, toscaFileParser.getToscaFile()));
+                            if (importElement.get("namespace") instanceof String namespace) {
+                                context.getNamespaceDefinitions().put(context.getCurrentToscaFilePath() ,Map.of(namespace, newContext.getCurrentToscaFile()));
                             }
                         }
                         break;
@@ -158,19 +169,34 @@ public class ImportsValidator implements DiagnosesHandler {
                 Path ImportedToscaFilePath = currentFilePath.getParent().resolve(url);
                 if (CommonUtils.isToscaFile(ImportedToscaFilePath)) {
                     Map<String, Object> newyamlMap = toscaFileParser.ParseTOSCAFile(ImportedToscaFilePath,context.getClient());
-                    if (!context.isValidatedForImporting()) {
                         LSContext newContext = context.clone();
                         newContext.setCotextDependentPositions(toscaFileParser.getContextDependentConstructorPositions());
                         newContext.setCurrentToscaFile(toscaFileParser.getToscaFile());
-                        toscaFileValidator.validate(newyamlMap, newContext, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions());
                         newContext.setImportedToscaFiles(LinkedHashMultimap.create());
                         newContext.setNamespaceDefinitions(LinkedHashMultimap.create());
-                    }
-                    context.getToscaFilesPath().put(currentFilePath, toscaFileParser.getToscaFile());
-                    context.getImportedToscaFiles().put(currentFilePath ,Map.of(url,toscaFileParser.getToscaFile()));
+                        newContext.setCurrentToscaFilePath(ImportedToscaFilePath);
+
+                        Path directoryPath = ImportedToscaFilePath.getParent();
+                        // Determine all parent directories of all files
+                        Stream<Path> walk = Files.walk(directoryPath);
+                        Set<Path> filePaths = walk.filter(Files::isRegularFile)
+                            .flatMap(path -> {
+                                List<Path> additions = new ArrayList<>();
+                                do {
+                                    additions.add(path);
+                                    path = path.getParent();
+                                } while (path != null);
+                                return additions.stream();
+                            })
+                            .collect(Collectors.toSet());
+                        newContext.getDirectoryFilePaths().clear();
+                        newContext.setDirectoryFilePaths(filePaths);
+                        toscaFileValidator.validate(newyamlMap, newContext, toscaFileParser.getYamlContent(), toscaFileParser.getConstructorPositions());
+                    context.getToscaFilesPath().put(currentFilePath, newContext.getCurrentToscaFile());
+                    context.getImportedToscaFiles().put(currentFilePath ,Map.of(url,newContext.getCurrentToscaFile()));
                     if (importElement.get("namespace") != null) {
                     if (importElement.get("namespace") instanceof String namespace) {
-                        context.getNamespaceDefinitions().put(context.getCurrentToscaFilePath() ,Map.of(namespace, toscaFileParser.getToscaFile()));
+                        context.getNamespaceDefinitions().put(context.getCurrentToscaFilePath() ,Map.of(namespace,newContext.getCurrentToscaFile()));
                     }
                 }
                 }
@@ -179,7 +205,7 @@ public class ImportsValidator implements DiagnosesHandler {
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-                handleNotValidKeywords("File not found, " + e.getMessage(), line, column, endColumn);
+                handleNotValidKeywords("The error message, " + e.getMessage(), line, column, endColumn);
             }
         }
     }
