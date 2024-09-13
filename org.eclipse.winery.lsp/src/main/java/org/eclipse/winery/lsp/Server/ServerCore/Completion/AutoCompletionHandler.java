@@ -79,9 +79,15 @@ public class AutoCompletionHandler {
     }
 
     private List<CompletionItem> capabilityDefinitionCompletion(String line, Position position) {
-        Stack<String> stack = (Stack<String>) toscaContext.getContextStack().clone(); 
-        stack.pop();
-        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("capabilities") && !stack.peek().equals("node_templates")) { //checks if we are under a node_templates
+        Stack<String> stack = new Stack<>();
+        if (!toscaContext.getContextStack().isEmpty()) {
+            stack = (Stack<String>) toscaContext.getContextStack().clone();
+            while (!stack.isEmpty() && stack.peek().equals("capabilities")) {
+                stack.pop();
+            }
+        }
+
+        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("capabilities") && !(!stack.isEmpty() && stack.peek().equals("node_templates"))) { //checks if we are under a node_templates
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableCapabilityTypes(lsContext);
         } else if (line.startsWith("    ") && line.trim().isEmpty() && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("capabilities"))) {
@@ -92,9 +98,15 @@ public class AutoCompletionHandler {
     }
 
     private List<CompletionItem> nodeTemplateCompletion(String line, Position position) {
-        Stack<String> stack = (Stack<String>) toscaContext.getContextStack().clone();
-        stack.pop();
-        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("node_templates") || (toscaContext.getContextStack().peek().equals("capabilities") && stack.peek().equals("node_templates")))) {
+        Stack<String> stack = new Stack<>();
+        if (!toscaContext.getContextStack().isEmpty()) {
+            stack = (Stack<String>) toscaContext.getContextStack().clone();
+            while (!stack.isEmpty() && stack.peek().equals("capabilities")) {
+                stack.pop();
+            }
+        }   
+        
+        if (line.contains("type:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("node_templates") || (!stack.isEmpty()  && stack.peek().equals("node_templates")))) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableNodeTypes(lsContext);
         } else if (line.startsWith("    ") && line.trim().isEmpty() && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("node_templates"))) {
