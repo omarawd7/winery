@@ -67,7 +67,16 @@ public class AutoCompletionHandler {
         }
 
     private List<CompletionItem> relationshipTypeCompletion(String line, Position position) {
-        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("relationship_types")) {
+
+        Stack<String> stack = new Stack<>();
+        if (!toscaContext.getContextStack().isEmpty()) {
+            stack = (Stack<String>) toscaContext.getContextStack().clone();
+            while (!stack.isEmpty() && stack.peek().equals("capabilities")) {
+                stack.pop();
+            }
+        }
+        
+        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("relationship_types") || (!stack.isEmpty() && stack.peek().equals("relationship_types"))) ) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableRelationshipTypes(lsContext);
         }
@@ -117,7 +126,15 @@ public class AutoCompletionHandler {
     }
 
     private List<CompletionItem> artifactTypeCompletion(String line, Position position) {
-        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("artifact_types")) {
+        Stack<String> stack = new Stack<>();
+        if (!toscaContext.getContextStack().isEmpty()) {
+            stack = (Stack<String>) toscaContext.getContextStack().clone();
+            while (!stack.isEmpty() && stack.peek().equals("capabilities")) {
+                stack.pop();
+            }
+        }
+        
+        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("artifact_types") || (!stack.isEmpty() && stack.peek().equals("artifact_types")))) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableArtifactTypes(lsContext);
         } else if (line.startsWith("    ") && line.trim().isEmpty() && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("artifact_types"))) {
@@ -128,7 +145,16 @@ public class AutoCompletionHandler {
         }
 
         private List<CompletionItem> capabilityTypeCompletion(String line, Position position) {
-            if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("capability_types")) {
+
+            Stack<String> stack = new Stack<>();
+            if (!toscaContext.getContextStack().isEmpty()) {
+                stack = (Stack<String>) toscaContext.getContextStack().clone();
+                while (!stack.isEmpty() && stack.peek().equals("capabilities")) {
+                    stack.pop();
+                }
+            }
+
+            if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("capability_types") || (!stack.isEmpty() && stack.peek().equals("capability_types")))) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableCapabilityTypes(lsContext);
         }
@@ -140,7 +166,16 @@ public class AutoCompletionHandler {
         }
 
     private List<CompletionItem> nodeTypeCompletion(String line, Position position) {
-        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && toscaContext.getContextStack().peek().equals("node_types")) {
+
+        Stack<String> stack = new Stack<>();
+        if (!toscaContext.getContextStack().isEmpty()) {
+            stack = (Stack<String>) toscaContext.getContextStack().clone();
+            while (!stack.isEmpty() && stack.peek().equals("capabilities")) {
+                stack.pop();
+            }
+        }
+        
+        if (line.contains("derived_from:") && toscaContext.getContextStack() != null && !toscaContext.getContextStack().isEmpty() && (toscaContext.getContextStack().peek().equals("node_types") || (!stack.isEmpty() && stack.peek().equals("node_types"))) ) {
             CompletionItemGetter completionItemGetter = new CompletionItemGetter();
             return completionItemGetter.getAvailableNodeTypes(lsContext);
         }
