@@ -13,6 +13,8 @@
  *******************************************************************************/
 package org.eclipse.winery.lsp.Server.ServerCore.Validation;
 
+import org.eclipse.lsp4j.MessageParams;
+import org.eclipse.lsp4j.MessageType;
 import org.eclipse.winery.lsp.Server.ServerAPI.API.context.LSContext;
 import org.eclipse.winery.lsp.Server.ServerCore.DataModels.*;
 import org.eclipse.winery.lsp.Server.ServerCore.TOSCAFunctions.FunctionParser;
@@ -66,17 +68,49 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
 
     private void handlePropertyRefinement(String yamlContent, String[] lines, String parentName, String parentTypeName, String propertyDefinitionKey, Object propertyDefinition, String propertyPath) {
         if (propertyPath.contains("node_types")) {
-            if (context.getCurrentToscaFile() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(parentTypeName) && context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().containsKey(parentName) && context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().containsKey(parentName) &&  context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().get(parentName).type() != null && !context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().get(parentName).type().properties().isEmpty()) {
-                if (context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().get(parentName).type().properties().containsKey(propertyDefinitionKey)) {
-                    handleCapabilityDefinitionRefinement(yamlContent, lines, parentName, propertyDefinitionKey, propertyDefinition,propertyPath);
+            handlePropertyRefinementFromNodeTypeAndCapabilityParent(yamlContent, lines, parentName, parentTypeName, propertyDefinitionKey, propertyDefinition, propertyPath);
+        } else if (propertyPath.contains("node_templates")) {
+            handlePropertyAssignmentForNodeTemplateInCaseOfEmptyMap(yamlContent, lines, parentName, parentTypeName, propertyDefinitionKey, propertyPath);
+        }
+    }
+
+    private void handlePropertyAssignmentForNodeTemplateInCaseOfEmptyMap(String yamlContent, String[] lines, String parentName, String parentTypeName, String propertyDefinitionKey, String propertyPath) {
+        if (propertyPath.contains("node_templates") && propertyPath.contains("capabilities")) {
+            if (context.getCurrentToscaFile() != null && context.getCurrentToscaFile().serviceTemplate().isPresent() && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates() != null && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().containsKey(parentTypeName) && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parentTypeName).type() != null && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parentTypeName).type().capabilities() != null && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parentTypeName).type().capabilities().getValue().containsKey(parentName) && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parentTypeName).type().capabilities().getValue().get(parentName).type() != null && !context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parentTypeName).type().capabilities().getValue().get(parentName).type().properties().isEmpty()) {
+                if (context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parentTypeName).type().capabilities().getValue().get(parentName).type().properties().containsKey(propertyDefinitionKey)) {
                     return;
                 }
+            }
+            Mark mark = context.getContextDependentConstructorPositions().get(propertyPath);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+            handleNotValidKeywords("Invalid Assignment, The property " + propertyDefinitionKey + " is missing", line, column, endColumn);
+        }
+        else if (propertyPath.contains("node_templates")) {
+            if (context.getCurrentToscaFile() != null && context.getCurrentToscaFile().serviceTemplate().isPresent() && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates() != null && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().containsKey(parentName) && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parentName).type().properties().containsKey(propertyDefinitionKey)) {
+                return;
+            } else {
                 Mark mark = context.getContextDependentConstructorPositions().get(propertyPath);
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-                handleNotValidKeywords("Invalid Refinement, The property " +  propertyDefinitionKey + " is missing", line, column, endColumn);
+                handleNotValidKeywords("This property is not found" , line, column, endColumn);
             }
+        }
+    }
+
+    private void handlePropertyRefinementFromNodeTypeAndCapabilityParent(String yamlContent, String[] lines, String parentName, String parentTypeName, String propertyDefinitionKey, Object propertyDefinition, String propertyPath) {
+        if (context.getCurrentToscaFile() != null && context.getCurrentToscaFile().nodeTypes().getValue().containsKey(parentTypeName) && context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().containsKey(parentName) && context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().containsKey(parentName) &&  context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().get(parentName).type() != null && !context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().get(parentName).type().properties().isEmpty()) {
+            if (context.getCurrentToscaFile().nodeTypes().getValue().get(parentTypeName).capabilities().getValue().get(parentName).type().properties().containsKey(propertyDefinitionKey)) {
+                handleCapabilityDefinitionRefinement(yamlContent, lines, parentName, propertyDefinitionKey, propertyDefinition, propertyPath);
+                return;
+            }
+            Mark mark = context.getContextDependentConstructorPositions().get(propertyPath);
+            int line = mark != null ? mark.getLine() + 1 : -1;
+            int column = mark != null ? mark.getColumn() + 1 : -1;
+            int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
+            handleNotValidKeywords("Invalid Refinement, The property " + propertyDefinitionKey + " is missing", line, column, endColumn);
         }
     }
 
@@ -188,7 +222,7 @@ public class PropertyDefinitionValidator implements DiagnosesHandler {
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumnForValueError(yamlContent, line, column, lines);
-                handleNotValidKeywords("Invalid Refinement, The property " +  propertyDefinitionKey + " is missing", line, column, endColumn);
+                handleNotValidKeywords("Invalid Assignment, The property " +  propertyDefinitionKey + " is missing", line, column, endColumn);
         }
         else if (propertyPath.contains("node_templates")) {
             if (context.getCurrentToscaFile() != null && context.getCurrentToscaFile().serviceTemplate().isPresent() && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates() != null && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().containsKey(parentName) && context.getCurrentToscaFile().serviceTemplate().get().nodeTemplates().getValue().get(parentName).type().properties().containsKey(propertyDefinitionKey)) {
