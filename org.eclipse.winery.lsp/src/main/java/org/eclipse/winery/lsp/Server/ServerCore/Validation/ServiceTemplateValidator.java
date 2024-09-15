@@ -65,44 +65,44 @@ public class ServiceTemplateValidator implements DiagnosesHandler {
                 int line = mark != null ? mark.getLine() + 1 : -1;
                 int column = mark != null ? mark.getColumn() + 1 : -1;
                 int endColumn = CommonUtils.getEndColumn(yamlContent, line, column, lines);
-                handleNotValidKeywords("Schema Definition Missing required key: node_templates ", line, column, endColumn);
+                handleNotValidKeywords("Service template  Missing required key: node_templates ", line, column, endColumn);
             }
     }
 
     @Override
     public void handleNotValidKeywords(String message, int line, int column, int endColumn) {
-        DiagnosticsSetter capabilityTypeDiagnostic = new DiagnosticsSetter();
-        capabilityTypeDiagnostic.setErrorMessage(message);
-        capabilityTypeDiagnostic.setErrorContext("Not Valid Keywords");
-        capabilityTypeDiagnostic.setErrorColumn(column);
-        capabilityTypeDiagnostic.setErrorEndColumn(endColumn);
-        capabilityTypeDiagnostic.setErrorLine(line);
-        diagnostics.add(capabilityTypeDiagnostic);
+        DiagnosticsSetter serviceTemplateDiagnostic = new DiagnosticsSetter();
+        serviceTemplateDiagnostic.setErrorMessage(message);
+        serviceTemplateDiagnostic.setErrorContext("Not Valid Keywords");
+        serviceTemplateDiagnostic.setErrorColumn(column);
+        serviceTemplateDiagnostic.setErrorEndColumn(endColumn);
+        serviceTemplateDiagnostic.setErrorLine(line);
+        diagnostics.add(serviceTemplateDiagnostic);
     }
 
     @Override
     public void handleDiagnosticsError(String message, Path path) {
-        DiagnosticsSetter capabilityTypeDiagnostic = new DiagnosticsSetter();
-        capabilityTypeDiagnostic.setErrorMessage(message);
-        capabilityTypeDiagnostic.setErrorContext("Parsing Error");
+        DiagnosticsSetter serviceTemplateDiagnostic = new DiagnosticsSetter();
+        serviceTemplateDiagnostic.setErrorMessage(message);
+        serviceTemplateDiagnostic.setErrorContext("Parsing Error");
         try {
             long lineCount = Files.lines(path).count();
-            capabilityTypeDiagnostic.setErrorLine((int) lineCount);
+            serviceTemplateDiagnostic.setErrorLine((int) lineCount);
         } catch (IOException e) {
-            capabilityTypeDiagnostic.setErrorLine(-1);
+            serviceTemplateDiagnostic.setErrorLine(-1);
         }
-        capabilityTypeDiagnostic.setErrorColumn(1);
-        diagnostics.add(capabilityTypeDiagnostic);
+        serviceTemplateDiagnostic.setErrorColumn(1);
+        diagnostics.add(serviceTemplateDiagnostic);
     }
 
     @Override
     public void handleDiagnosticsError(String message, String content) {
-        DiagnosticsSetter capabilityTypeDiagnostic = new DiagnosticsSetter();
-        capabilityTypeDiagnostic.setErrorMessage(message);
-        capabilityTypeDiagnostic.setErrorContext("Parsing Error");
-        capabilityTypeDiagnostic.setErrorLine(countLines(content));
-        capabilityTypeDiagnostic.setErrorColumn(1);
-        diagnostics.add(capabilityTypeDiagnostic);
+        DiagnosticsSetter serviceTemplateDiagnostic = new DiagnosticsSetter();
+        serviceTemplateDiagnostic.setErrorMessage(message);
+        serviceTemplateDiagnostic.setErrorContext("Parsing Error");
+        serviceTemplateDiagnostic.setErrorLine(countLines(content));
+        serviceTemplateDiagnostic.setErrorColumn(1);
+        diagnostics.add(serviceTemplateDiagnostic);
     }
 
     private int countLines(String content) {
